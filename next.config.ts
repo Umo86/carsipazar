@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // pg is a Node library; keep it out of the bundler.
+  serverExternalPackages: ["pg"],
+  experimental: {
+    // Listing photos are resized in the browser, then sent with the form.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   turbopack: {
     rules: {
       "*.css": {
