@@ -14,6 +14,20 @@ import { langOf, origin, slugify, str } from "./util";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// "myshop.co.uk" -> "https://myshop.co.uk". Anything that is not a web
+// address (for example a javascript: link) is dropped.
+function cleanWebsite(input: string): string | null {
+  if (!input) return null;
+  try {
+    const url = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (!url.hostname.includes(".")) return null;
+    return url.toString().slice(0, 200);
+  } catch {
+    return null;
+  }
+}
+
 // Seller application. A visitor without an account creates one in the same form.
 export async function applyToSell(fd: FormData) {
   const lang = langOf(fd);
@@ -32,6 +46,8 @@ export async function applyToSell(fd: FormData) {
     city: str(fd, "city"),
     postcode: str(fd, "postcode").toUpperCase(),
     instagram: str(fd, "instagram").replace(/^@/, ""),
+    vat: str(fd, "vat_number").slice(0, 20),
+    website: cleanWebsite(str(fd, "website")),
     bioTr: str(fd, "bio_tr").slice(0, 600),
     bioEn: str(fd, "bio_en").slice(0, 600),
   };
@@ -56,10 +72,10 @@ export async function applyToSell(fd: FormData) {
   await tx(async (c) => {
     await c.query(
       `insert into shops (owner_id, slug, name, seller_type, legal_name, company_number, phone,
-                          address, city, postcode, instagram, bio_tr, bio_en)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+                          address, city, postcode, instagram, bio_tr, bio_en, vat_number, website)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
       [user!.id, slug, shopName, sellerType, f.legal, f.company || null, f.phone, f.address,
-       f.city, f.postcode, f.instagram || null, f.bioTr, f.bioEn],
+       f.city, f.postcode, f.instagram || null, f.bioTr, f.bioEn, f.vat || null, f.website],
     );
     await c.query("update users set role = 'seller' where id = $1 and role = 'buyer'", [user!.id]);
   });
@@ -74,19 +90,49 @@ async function myShop(lang: string) {
   return { user, shop };
 }
 
+// The seller edits everything shown on their public shop page. Legal name,
+// company number and address are fixed here: they were checked at approval.
 export async function updateShop(fd: FormData) {
   const lang = langOf(fd);
   const { shop } = await myShop(lang);
-  await q(
-    "update shops set bio_tr = $2, bio_en = $3, instagram = $4, phone = $5 where id = $1",
-    [
-      shop.id,
-      str(fd, "bio_tr").slice(0, 600),
-      str(fd, "bio_en").slice(0, 600),
-      str(fd, "instagram").replace(/^@/, "") || null,
-      str(fd, "phone") || shop.phone,
-    ],
-  );
+  const email = str(fd, "public_email").toLowerCase();
+
+  await tx(async (c) => {
+    await c.query(
+      `update shops set bio_tr=$2, bio_en=$3, instagram=$4, phone=$5, website=$6, public_email=$7,
+              show_phone=$8, delivery_tr=$9, delivery_en=$10, returns_tr=$11, returns_en=$12
+        where id = $1`,
+      [
+        shop.id,
+        str(fd, "bio_tr").slice(0, 600),
+        str(fd, "bio_en").slice(0, 600),
+        str(fd, "instagram").replace(/^@/, "") || null,
+        str(fd, "phone") || shop.phone,
+        cleanWebsite(str(fd, "website")),
+        EMAIL.test(email) ? email : null,
+        fd.get("show_phone") === "on",
+        str(fd, "delivery_tr").slice(0, 800),
+        str(fd, "delivery_en").slice(0, 800),
+        str(fd, "returns_tr").slice(0, 800),
+        str(fd, "returns_en").slice(0, 800),
+      ],
+    );
+    // A new logo or cover replaces the old one.
+    for (const kind of ["logo", "cover"] as const) {
+      const file = fd.get(kind);
+      if (!(file instanceof File) || file.size === 0 || file.size > 1_500_000) continue;
+      const data = Buffer.from(await file.arrayBuffer());
+      const type = sniffImage(data);
+      if (!type) continue;
+      const old = kind === "logo" ? shop.logo_id : shop.cover_id;
+      const ins = await c.query(
+        "insert into shop_images (shop_id, content_type, data) values ($1, $2, $3) returning id",
+        [shop.id, type, data],
+      );
+      await c.query(`update shops set ${kind}_id = $2 where id = $1`, [shop.id, ins.rows[0].id]);
+      if (old) await c.query("delete from shop_images where id = $1", [old]);
+    }
+  });
   revalidatePath(`/${lang}/s/${shop.slug}`);
   redirect(`/${lang}/dashboard/shop?saved=1`);
 }

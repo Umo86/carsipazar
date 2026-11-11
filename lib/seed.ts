@@ -27,6 +27,11 @@ type DemoListing = {
 const DEMO_NOTE_TR = "Bu bir örnek dükkândır; ürünler gerçek değildir.";
 const DEMO_NOTE_EN = "This is a sample shop; the items are not real.";
 
+const SAMPLE_DELIVERY_TR = "Örnek metin: Siparişler 2 iş günü içinde takipli kargoyla gönderilir.";
+const SAMPLE_DELIVERY_EN = "Sample text: Orders are sent by tracked delivery within 2 working days.";
+const SAMPLE_RETURNS_TR = "Örnek metin: Teslimattan sonra 14 gün içinde iade kabul edilir.";
+const SAMPLE_RETURNS_EN = "Sample text: Returns are accepted within 14 days of delivery.";
+
 const SHOPS: {
   slug: string;
   name: string;
@@ -35,66 +40,9 @@ const SHOPS: {
   city: string;
   bioTr: string;
   bioEn: string;
+  cover?: { art: keyof typeof ART; palette: keyof typeof PALETTES };
   listings: DemoListing[];
 }[] = [
-  {
-    slug: "anadolu-kilim",
-    name: "Anadolu Kilim",
-    type: "sole_trader",
-    founding: true,
-    city: "London",
-    bioTr: `Uşak ve Kayseri'den el dokuması halı ve kilimler. ${DEMO_NOTE_TR}`,
-    bioEn: `Hand-woven rugs and kilims from Uşak and Kayseri. ${DEMO_NOTE_EN}`,
-    listings: [
-      {
-        category: "rugs", tr: "Uşak el dokuması halı, 200 × 300 cm", en: "Hand-woven Uşak rug, 200 × 300 cm",
-        dtr: "Yün üzerine yün, kök boya. Tek parça; her halı kendi desenini taşır.",
-        den: "Wool on wool with natural dyes. A single piece; every rug carries its own pattern.",
-        price: 1250, postage: 0, stock: 1, instalments: true, art: "kilim", palette: "madder", featured: true,
-      },
-      {
-        category: "rugs", tr: "Kayseri kilim, 120 × 180 cm", en: "Kayseri kilim, 120 × 180 cm",
-        dtr: "Düz dokuma, çift taraflı kullanılabilir.", den: "Flat-woven and reversible.",
-        price: 340, postage: 12, stock: 2, instalments: true, art: "kilim", palette: "cobalt",
-      },
-      {
-        category: "rugs", tr: "Yolluk kilim, 80 × 300 cm", en: "Kilim runner, 80 × 300 cm",
-        dtr: "Koridor ve mutfak için dar, uzun dokuma.", den: "A long, narrow weave for hallways and kitchens.",
-        price: 260, postage: 12, stock: 3, instalments: true, art: "kilim", palette: "night",
-      },
-    ],
-  },
-  {
-    slug: "lale-ceyiz",
-    name: "Lale Çeyiz Evi",
-    type: "business",
-    founding: true,
-    city: "London",
-    bioTr: `Çeyiz, nişan ve kına için özenle seçilmiş takımlar. ${DEMO_NOTE_TR}`,
-    bioEn: `Carefully chosen sets for çeyiz, engagements and henna nights. ${DEMO_NOTE_EN}`,
-    listings: [
-      {
-        category: "wedding", tr: "El işi bakır kahve seti, 6 kişilik", en: "Hand-worked copper coffee set for six",
-        dtr: "Altı fincan, cezve, tepsi ve lokumluk. Kalaylı bakır.", den: "Six cups, a cezve, tray and delight dish. Tinned copper.",
-        price: 145, postage: 8, stock: 5, instalments: true, art: "stars", palette: "brass", featured: true,
-      },
-      {
-        category: "wedding", tr: "Kadife nişan bohçası seti", en: "Velvet engagement bohça set",
-        dtr: "Dokuz parça, işlemeli kadife. Renk seçeneği için mesaj atın.", den: "Nine pieces in embroidered velvet. Message us for colour options.",
-        price: 220, postage: 10, stock: 4, instalments: true, art: "tulips", palette: "night",
-      },
-      {
-        category: "textiles", tr: "Bursa havlu takımı, 6 parça", en: "Bursa towel set, six pieces",
-        dtr: "%100 pamuk, 600 gr/m². İki banyo, iki el, iki yüz havlusu.", den: "100% cotton, 600 gsm. Two bath, two hand and two face towels.",
-        price: 95, postage: 6, stock: 12, instalments: true, art: "stripes", palette: "sea",
-      },
-      {
-        category: "textiles", tr: "El tezgâhı peştemal, 4'lü", en: "Hand-loomed peştemal, set of four",
-        dtr: "Hafif, çabuk kuruyan pamuk dokuma.", den: "Light cotton weave that dries quickly.",
-        price: 68, postage: 5, stock: 20, instalments: false, art: "stripes", palette: "cobalt",
-      },
-    ],
-  },
   {
     slug: "ceviz-atolye",
     name: "Ceviz Atölye",
@@ -103,6 +51,7 @@ const SHOPS: {
     city: "London",
     bioTr: `Ceviz ağacından el yapımı mobilya ve sedef kakma işleri. ${DEMO_NOTE_TR}`,
     bioEn: `Handmade walnut furniture and mother-of-pearl inlay. ${DEMO_NOTE_EN}`,
+    cover: { art: "stars", palette: "night" },
     listings: [
       {
         category: "furniture", tr: "Sedef kakmalı ceviz sehpa", en: "Walnut side table with mother-of-pearl inlay",
@@ -114,31 +63,94 @@ const SHOPS: {
         dtr: "Kemerli çerçeve, masif ceviz.", den: "Arched frame in solid walnut.",
         price: 310, postage: 20, stock: 3, instalments: true, art: "arches", palette: "brass",
       },
+      {
+        category: "furniture", tr: "Masif ceviz yemek masası, 8 kişilik", en: "Solid walnut dining table, seats eight",
+        dtr: "220 × 100 cm. Siparişe göre yapılır, tek parça tabla.", den: "220 × 100 cm. Made to order with a single-piece top.",
+        price: 1250, postage: 0, stock: 1, instalments: true, art: "arches", palette: "night",
+      },
     ],
   },
   {
-    slug: "pera-abiye",
-    name: "Pera Abiye",
+    slug: "hane-mobilya",
+    name: "Hane Mobilya",
+    type: "business",
+    founding: true,
+    city: "London",
+    bioTr: `Oturma odası için koltuk, sehpa ve puf. ${DEMO_NOTE_TR}`,
+    bioEn: `Armchairs, tables and pouffes for the living room. ${DEMO_NOTE_EN}`,
+    listings: [
+      {
+        category: "furniture", tr: "Kadife berjer koltuk", en: "Velvet wingback armchair",
+        dtr: "Kayın iskelet, petrol mavisi kadife.", den: "Beech frame in petrol-blue velvet.",
+        price: 420, postage: 30, stock: 4, instalments: true, art: "stripes", palette: "sea", featured: true,
+      },
+      {
+        category: "furniture", tr: "Kilim desenli puf", en: "Kilim-pattern pouffe",
+        dtr: "45 cm çap. Kılıfı çıkarılıp yıkanabilir.", den: "45 cm across. The cover comes off for washing.",
+        price: 95, postage: 6, stock: 12, instalments: true, art: "kilim", palette: "madder",
+      },
+      {
+        category: "furniture", tr: "Bakır tepsili orta sehpa", en: "Coffee table with copper tray",
+        dtr: "Dövme bakır tepsi, katlanır ahşap ayak.", den: "Hammered copper tray on folding wooden legs.",
+        price: 260, postage: 15, stock: 3, instalments: true, art: "stars", palette: "brass",
+      },
+    ],
+  },
+  {
+    slug: "pera-giyim",
+    name: "Pera Giyim",
     type: "business",
     founding: false,
     city: "London",
-    bioTr: `Nişan, kına ve düğün için abiye ve kaftanlar. ${DEMO_NOTE_TR}`,
-    bioEn: `Gowns and kaftans for engagements, henna nights and weddings. ${DEMO_NOTE_EN}`,
+    bioTr: `Özel gün kıyafetleri, kaban ve aksesuar. ${DEMO_NOTE_TR}`,
+    bioEn: `Occasion wear, coats and accessories. ${DEMO_NOTE_EN}`,
+    cover: { art: "tulips", palette: "cobalt" },
     listings: [
       {
-        category: "occasion", tr: "Lacivert kadife bindallı kaftan", en: "Bindallı kaftan in navy velvet",
+        category: "clothing", tr: "Lacivert kadife bindallı kaftan", en: "Bindallı kaftan in navy velvet",
         dtr: "Altın rengi sim işleme. 36-44 beden.", den: "Gold-thread embroidery. UK sizes 8 to 16.",
         price: 390, postage: 9, stock: 6, instalments: true, art: "tulips", palette: "cobalt", featured: true,
       },
       {
-        category: "occasion", tr: "Zümrüt yeşili abiye elbise", en: "Evening gown in emerald green",
+        category: "clothing", tr: "Zümrüt yeşili abiye elbise", en: "Evening gown in emerald green",
         dtr: "Saten, uzun kollu, tam boy.", den: "Satin, long-sleeved and full length.",
         price: 275, postage: 9, stock: 4, instalments: true, art: "arches", palette: "emerald",
       },
       {
-        category: "wedding", tr: "Kına gecesi tacı ve duvağı", en: "Henna night crown and veil",
-        dtr: "Kırmızı tül duvak ve metal taç.", den: "Red tulle veil with a metal crown.",
-        price: 85, postage: 5, stock: 8, instalments: true, art: "tulips", palette: "madder",
+        category: "clothing", tr: "Deve tüyü rengi yün kaban", en: "Wool coat in camel",
+        dtr: "%80 yün. Astarlı, diz boyu.", den: "80% wool. Lined and knee length.",
+        price: 180, postage: 8, stock: 5, instalments: true, art: "stripes", palette: "brass",
+      },
+      {
+        category: "clothing", tr: "Lale desenli ipek eşarp", en: "Silk scarf with tulip print",
+        dtr: "90 × 90 cm, el kesimi kenar.", den: "90 × 90 cm with hand-rolled edges.",
+        price: 45, postage: 3, stock: 20, instalments: false, art: "tulips", palette: "madder",
+      },
+    ],
+  },
+  {
+    slug: "telkari-atolye",
+    name: "Telkari Atölye",
+    type: "sole_trader",
+    founding: true,
+    city: "London",
+    bioTr: `El işi gümüş telkari takılar. ${DEMO_NOTE_TR}`,
+    bioEn: `Hand-made silver filigree jewellery. ${DEMO_NOTE_EN}`,
+    listings: [
+      {
+        category: "jewellery", tr: "Gümüş telkari kolye", en: "Silver filigree necklace",
+        dtr: "925 ayar gümüş, 45 cm zincir.", den: "925 silver on a 45 cm chain.",
+        price: 120, postage: 4, stock: 6, instalments: true, art: "beads", palette: "night", featured: true,
+      },
+      {
+        category: "jewellery", tr: "Gümüş telkari küpe", en: "Silver filigree earrings",
+        dtr: "925 ayar gümüş, 3 cm.", den: "925 silver, 3 cm drop.",
+        price: 65, postage: 4, stock: 10, instalments: true, art: "beads", palette: "brass",
+      },
+      {
+        category: "jewellery", tr: "Akik taşlı gümüş yüzük", en: "Silver ring with agate",
+        dtr: "Ayarlanabilir ölçü.", den: "Adjustable size.",
+        price: 85, postage: 4, stock: 7, instalments: true, art: "stars", palette: "cobalt",
       },
     ],
   },
@@ -184,10 +196,19 @@ export async function runSetup(opts: {
     );
     const shop = await one<{ id: string }>(
       `insert into shops (owner_id, slug, name, seller_type, legal_name, phone, address, city, postcode,
-                          bio_tr, bio_en, status, founding)
-       values ($1,$2,$3,$4,$5,'07000 000000','1 Demo Street',$6,'N1 1AA',$7,$8,'approved',$9) returning id`,
-      [owner!.id, s.slug, s.name, s.type, `${s.name} (demo)`, s.city, s.bioTr, s.bioEn, s.founding],
+                          bio_tr, bio_en, status, founding, delivery_tr, delivery_en, returns_tr, returns_en)
+       values ($1,$2,$3,$4,$5,'07000 000000','1 Demo Street',$6,'N1 1AA',$7,$8,'approved',$9,$10,$11,$12,$13)
+       returning id`,
+      [owner!.id, s.slug, s.name, s.type, `${s.name} (demo)`, s.city, s.bioTr, s.bioEn, s.founding,
+       SAMPLE_DELIVERY_TR, SAMPLE_DELIVERY_EN, SAMPLE_RETURNS_TR, SAMPLE_RETURNS_EN],
     );
+    if (s.cover) {
+      const cover = await one<{ id: string }>(
+        "insert into shop_images (shop_id, content_type, data) values ($1, 'image/svg+xml', $2) returning id",
+        [shop!.id, Buffer.from(ART[s.cover.art](PALETTES[s.cover.palette]), "utf8")],
+      );
+      await q("update shops set cover_id = $2 where id = $1", [shop!.id, cover!.id]);
+    }
     let first: { id: string; price: number; postage: number; title: string } | null = null;
     for (const l of s.listings) {
       const row = await one<{ id: string }>(

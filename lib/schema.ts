@@ -39,6 +39,26 @@ create table if not exists shops (
   created_at timestamptz not null default now()
 );
 
+-- Company details shown on the public shop page.
+alter table shops add column if not exists vat_number text;
+alter table shops add column if not exists website text;
+alter table shops add column if not exists public_email text;
+alter table shops add column if not exists show_phone boolean not null default true;
+alter table shops add column if not exists delivery_tr text not null default '';
+alter table shops add column if not exists delivery_en text not null default '';
+alter table shops add column if not exists returns_tr text not null default '';
+alter table shops add column if not exists returns_en text not null default '';
+alter table shops add column if not exists logo_id uuid;
+alter table shops add column if not exists cover_id uuid;
+
+create table if not exists shop_images (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  content_type text not null,
+  data bytea not null,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists listings (
   id uuid primary key default gen_random_uuid(),
   shop_id uuid not null references shops(id) on delete cascade,

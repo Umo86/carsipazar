@@ -106,6 +106,16 @@ export type Shop = {
   founding: boolean;
   stripe_account_id: string | null;
   created_at: Date;
+  vat_number: string | null;
+  website: string | null;
+  public_email: string | null;
+  show_phone: boolean;
+  delivery_tr: string;
+  delivery_en: string;
+  returns_tr: string;
+  returns_en: string;
+  logo_id: string | null;
+  cover_id: string | null;
 };
 
 export const getMyShop = cache(async (userId: string) =>

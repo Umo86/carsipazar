@@ -21,6 +21,11 @@ export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href={`/${lang}/shops`} className="hover:text-ink hover:underline underline-offset-4">
+                {t.nav.shops}
+              </Link>
+            </li>
           </ul>
         </div>
         <div>

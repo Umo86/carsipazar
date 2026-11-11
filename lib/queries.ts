@@ -67,13 +67,15 @@ export type ListingFull = {
   seller_type: "business" | "sole_trader";
   founding: boolean;
   shop_city: string;
+  shop_logo: string | null;
 };
 
 export const getListing = (id: string) =>
   /^[0-9a-f-]{36}$/i.test(id)
     ? one<ListingFull>(
         `select l.*, s.name as shop_name, s.slug as shop_slug, s.status as shop_status,
-                s.owner_id as shop_owner, s.seller_type, s.founding, s.city as shop_city
+                s.owner_id as shop_owner, s.seller_type, s.founding, s.city as shop_city,
+                s.logo_id as shop_logo
            from listings l join shops s on s.id = l.shop_id where l.id = $1`,
         [id],
       )
@@ -125,4 +127,30 @@ export const categoryCovers = () =>
        from listings l join shops s on s.id = l.shop_id
       where ${PUBLIC}
       order by l.category, l.featured desc, l.created_at desc`,
+  );
+
+export type ShopCard = {
+  id: string;
+  slug: string;
+  name: string;
+  city: string;
+  seller_type: "business" | "sole_trader";
+  founding: boolean;
+  logo_id: string | null;
+  bio_tr: string;
+  bio_en: string;
+  items: string;
+  avg: string | null;
+  reviews: string;
+};
+
+// Every approved shop, for the shops directory.
+export const approvedShops = () =>
+  q<ShopCard>(
+    `select s.id, s.slug, s.name, s.city, s.seller_type, s.founding, s.logo_id, s.bio_tr, s.bio_en,
+            (select count(*) from listings l where l.shop_id = s.id and l.status = 'active') as items,
+            (select avg(r.rating)::numeric(3,2) from reviews r where r.shop_id = s.id and r.status = 'published') as avg,
+            (select count(*) from reviews r where r.shop_id = s.id and r.status = 'published') as reviews
+       from shops s where s.status = 'approved'
+      order by s.founding desc, s.created_at`,
   );

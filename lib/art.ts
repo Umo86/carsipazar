@@ -119,4 +119,23 @@ export function arches(p: Palette) {
   return wrap(p, s);
 }
 
-export const ART = { kilim, stripes, stars, tulips, arches };
+// Beads: draped strands, for jewellery.
+export function beads(p: Palette) {
+  let s = "";
+  for (let row = 0; row < 4; row++) {
+    const y = 90 + row * 230;
+    const depth = 150;
+    s += `<path d="M40 ${y} Q${W / 2} ${y + depth * 2} ${W - 40} ${y}" fill="none" stroke="${p.a}" stroke-width="4"/>`;
+    for (let i = 1; i < 12; i++) {
+      const t = i / 12;
+      const x = 40 + (W - 80) * t;
+      const by = y + depth * 2 * 2 * t * (1 - t);
+      const big = i === 6;
+      s += `<circle cx="${x}" cy="${by}" r="${big ? 26 : 11}" fill="${big ? p.c : i % 2 ? p.b : p.a}"/>`;
+      if (big) s += `<circle cx="${x}" cy="${by}" r="10" fill="${p.ground}"/>`;
+    }
+  }
+  return wrap(p, s);
+}
+
+export const ART = { kilim, stripes, stars, tulips, arches, beads };

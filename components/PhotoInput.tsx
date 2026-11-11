@@ -15,7 +15,17 @@ async function shrink(file: File): Promise<File> {
   return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
 }
 
-export default function PhotoInput({ name, max, hint }: { name: string; max: number; hint: string }) {
+export default function PhotoInput({
+  name,
+  max,
+  hint,
+  wide = false,
+}: {
+  name: string;
+  max: number;
+  hint: string;
+  wide?: boolean; // preview shape: wide for covers, upright for everything else
+}) {
   const input = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -42,7 +52,7 @@ export default function PhotoInput({ name, max, hint }: { name: string; max: num
         type="file"
         name={name}
         accept="image/jpeg,image/png,image/webp"
-        multiple
+        multiple={max > 1}
         onChange={onChange}
         aria-busy={busy}
         className="block w-full text-sm file:mr-4 file:rounded-full file:border file:border-ink file:bg-paper file:px-4 file:py-2 file:text-sm file:font-medium file:cursor-pointer"
@@ -52,7 +62,7 @@ export default function PhotoInput({ name, max, hint }: { name: string; max: num
         <div className="flex flex-wrap gap-2">
           {previews.map((src) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} src={src} alt="" className="h-28 w-[5.6rem] object-cover bg-mist" />
+            <img key={src} src={src} alt="" className={`h-28 bg-mist object-cover ${wide ? "w-72" : "w-[5.6rem]"}`} />
           ))}
         </div>
       )}

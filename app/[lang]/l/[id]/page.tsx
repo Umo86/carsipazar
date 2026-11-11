@@ -3,11 +3,12 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getUser } from "@/lib/auth";
 import { categoryName, isLocale } from "@/lib/config";
-import { fmt, getDict, pick } from "@/lib/i18n";
+import { fmt, getDict, pick, reviewCount } from "@/lib/i18n";
 import { formatGBP, instalmentsAllowed } from "@/lib/money";
 import { getListing, listingImageIds, shopRating } from "@/lib/queries";
 import { getSettings } from "@/lib/settings";
 import Rating from "@/components/Rating";
+import ShopMark from "@/components/ShopMark";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/l/[id]">): Promise<Metadata> {
   const { lang, id } = await params;
@@ -108,7 +109,10 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
             </div>
           )}
 
-          <div className="mt-6 border-t border-line pt-5">
+          <div className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 border-t border-line pt-5">
+            <Link href={`/${lang}/s/${l.shop_slug}`} className="row-span-4" aria-hidden="true" tabIndex={-1}>
+              <ShopMark name={l.shop_name} logoId={l.shop_logo} className="w-16 text-sm" />
+            </Link>
             <p className="text-sm text-soft">{t.listing.soldBy}</p>
             <p className="mt-1 font-display text-2xl">
               <Link href={`/${lang}/s/${l.shop_slug}`} className="hover:text-cobalt">
@@ -120,7 +124,7 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
               {rating.avg !== null ? (
                 <span className="flex items-center gap-2">
                   <Rating value={rating.avg} />
-                  {fmt(t.shop.reviews, { n: rating.count })}
+                  {reviewCount(t, rating.count)}
                 </span>
               ) : (
                 <span>{t.shop.noReviewsYet}</span>

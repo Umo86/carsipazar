@@ -101,6 +101,7 @@ export default async function SellPage({ params, searchParams }: PageProps<"/[la
             <label className="field">
               <span>{t.sell.address}</span>
               <input className="input" name="address" autoComplete="street-address" required />
+              <span className="hint font-normal">{t.sell.addressHint}</span>
             </label>
             <div className="grid gap-5 sm:grid-cols-3">
               <label className="field">
@@ -116,10 +117,20 @@ export default async function SellPage({ params, searchParams }: PageProps<"/[la
                 <input className="input" type="tel" name="phone" required />
               </label>
             </div>
-            <label className="field">
-              <span>{t.sell.instagram}</span>
-              <input className="input" name="instagram" />
-            </label>
+            <div className="grid gap-5 sm:grid-cols-3">
+              <label className="field">
+                <span>{t.sell.vatNumber}</span>
+                <input className="input" name="vat_number" maxLength={20} />
+              </label>
+              <label className="field">
+                <span>{t.sell.website}</span>
+                <input className="input" name="website" inputMode="url" />
+              </label>
+              <label className="field">
+                <span>{t.sell.instagram}</span>
+                <input className="input" name="instagram" />
+              </label>
+            </div>
             <label className="field">
               <span>{t.sell.bioTr}</span>
               <textarea className="input" name="bio_tr" maxLength={600} lang="tr" />

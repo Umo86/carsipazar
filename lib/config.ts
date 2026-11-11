@@ -9,13 +9,11 @@ export const DEFAULT_LOCALE: Locale = "tr";
 export const isLocale = (v: string): v is Locale =>
   (LOCALES as readonly string[]).includes(v);
 
-// Launch categories: higher-priced goods, where paying in instalments matters.
+// What the marketplace sells. Add a line here to open another category.
 export const CATEGORIES = [
-  { slug: "wedding", tr: "Düğün ve Çeyiz", en: "Wedding and Çeyiz" },
-  { slug: "rugs", tr: "Halı ve Kilim", en: "Rugs and Kilims" },
   { slug: "furniture", tr: "Mobilya", en: "Furniture" },
-  { slug: "textiles", tr: "Ev Tekstili", en: "Home Textiles" },
-  { slug: "occasion", tr: "Abiye ve Özel Gün", en: "Occasion Wear" },
+  { slug: "clothing", tr: "Giyim", en: "Clothing" },
+  { slug: "jewellery", tr: "Takı", en: "Jewellery" },
 ] as const;
 
 export type CategorySlug = (typeof CATEGORIES)[number]["slug"];

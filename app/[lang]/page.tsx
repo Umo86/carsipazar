@@ -67,9 +67,9 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           <h2 className="text-4xl md:text-5xl">{t.home.streets}</h2>
           <p className="max-w-md text-soft">{t.home.streetsSub}</p>
         </div>
-        <ul className="mt-8 flex gap-5 overflow-x-auto pb-2 md:grid md:grid-cols-5 md:gap-6 md:overflow-visible">
+        <ul className="mt-8 flex gap-5 overflow-x-auto pb-2 md:grid md:grid-cols-3 md:gap-10 md:overflow-visible">
           {CATEGORIES.map((c) => (
-            <li key={c.slug} className="w-40 shrink-0 md:w-auto">
+            <li key={c.slug} className="w-52 shrink-0 md:w-auto">
               <Link href={`/${lang}/c/${c.slug}`} className="group block text-center">
                 <div className="arch aspect-[5/7] bg-mist">
                   {coverOf(c.slug) && (
@@ -82,7 +82,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                     />
                   )}
                 </div>
-                <span className="mt-3 block font-display text-xl leading-tight group-hover:text-cobalt">
+                <span className="mt-4 block font-display text-2xl leading-tight group-hover:text-cobalt md:text-3xl">
                   {c[lang]}
                 </span>
               </Link>

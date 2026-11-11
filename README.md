@@ -1,8 +1,8 @@
 # CarsiPazar
 
 A bilingual (Turkish/English) marketplace where verified Turkish-community traders
-sell higher-priced goods, buyers can pay by card or in three instalments, and the
-payment is held until the item arrives.
+sell furniture, clothing and jewellery, buyers can pay by card or in three
+instalments, and the payment is held until the item arrives.
 
 This is the first, deliberately small version: website only, traders only,
 buyer-to-seller reviews. Payments run in **demo mode** until Stripe keys are added.
@@ -11,8 +11,9 @@ buyer-to-seller reviews. Payments run in **demo mode** until Stripe keys are add
 
 | Area | What it does |
 | --- | --- |
-| Storefront | Home, five category "streets", item pages, in `/tr` and `/en` |
-| Shop page | `/s/shop-name`: the seller's link for Instagram and WhatsApp |
+| Storefront | Home, three category "streets" (furniture, clothing, jewellery), item pages, in `/tr` and `/en` |
+| Shop page | `/s/shop-name`: one per company, with logo, cover, about text, company details (legal name, company and VAT numbers, address, phone, email, website, Instagram), delivery and returns information, items and reviews. Also the seller's link for Instagram and WhatsApp |
+| Shops directory | `/shops`: every approved company |
 | Checkout | One item per order, card or 3 instalments, delivery address |
 | Protected payment | Money is held; released to the seller 2 days after delivery |
 | Reviews | One per completed order; seller can reply; admin can hide |

@@ -64,6 +64,7 @@ export default function Header({
             {c[lang]}
           </Link>
         ))}
+        <Link href={`/${lang}/shops`} className={link}>{t.nav.shops}</Link>
       </nav>
     </header>
   );
