@@ -35,7 +35,7 @@ export default async function AdminListings({ params }: PageProps<"/[lang]/admin
     <ul>
       {rows.map((l) => (
         <li key={l.id} className="grid grid-cols-[4rem_1fr] gap-4 border-t border-line py-4 md:grid-cols-[4rem_1fr_auto] md:items-center">
-          <div className="aspect-[4/5] bg-mist">
+          <div className="aspect-[4/5] overflow-hidden rounded-xl bg-mist">
             {l.image_id && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`/img/${l.image_id}`} alt="" className="h-full w-full object-cover" />

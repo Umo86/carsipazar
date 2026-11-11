@@ -98,10 +98,16 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
   return (
     <>
       {shop.cover_id && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/img/${shop.cover_id}`} alt="" className="h-44 w-full bg-mist object-cover md:h-72" />
+        <div className="wrap pt-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/img/${shop.cover_id}?w=1600`}
+            alt=""
+            className="h-44 w-full rounded-3xl bg-mist object-cover md:h-80"
+          />
+        </div>
       )}
-      <div className="wrap pt-10">
+      <div className="wrap pt-8">
         {shop.status !== "approved" && <p className="notice mb-8">{t.shop.pendingNotice}</p>}
 
         <header className="flex flex-wrap items-end gap-x-8 gap-y-6">
@@ -111,7 +117,7 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
             className="w-28 text-2xl md:w-36"
           />
           <div className="min-w-0 flex-1 basis-80">
-            <h1 className="text-5xl md:text-7xl">{shop.name}</h1>
+            <h1 className="text-5xl md:text-6xl">{shop.name}</h1>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {shop.status === "approved" && <span className="tag">{t.shop.verified}</span>}
               <span className="tag">{t.shop[shop.seller_type]}</span>
@@ -158,7 +164,7 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
             )}
           </div>
 
-          <aside className="h-fit bg-mist p-6">
+          <aside className="h-fit rounded-3xl bg-mist p-7">
             <h2 className="text-3xl">{t.shop.details}</h2>
             <dl className="mt-4">
               {details.map((d) => (
@@ -199,14 +205,14 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
           )}
         </section>
 
-        <section id="reviews" className="mt-20 max-w-3xl scroll-mt-6">
+        <section id="reviews" className="mt-20 max-w-3xl scroll-mt-32">
           <h2 className="text-4xl">{t.shop.reviewsTitle}</h2>
           {reviews.length === 0 ? (
             <p className="mt-6 text-soft">{t.shop.noReviewsYet}</p>
           ) : (
-            <ul className="mt-6">
+            <ul className="mt-6 grid gap-4">
               {reviews.map((r) => (
-                <li key={r.id} className="border-t border-line py-6">
+                <li key={r.id} className="panel p-6">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <Rating value={r.rating} />
                     <span className="font-medium">{r.buyer_name}</span>
@@ -215,7 +221,7 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
                   <p className="mt-1 text-sm text-soft">{r.title}</p>
                   {r.comment && <p className="mt-3">{r.comment}</p>}
                   {r.reply && (
-                    <div className="mt-4 border-l-2 border-brass pl-4">
+                    <div className="mt-4 rounded-xl bg-sand px-4 py-3">
                       <p className="text-sm font-medium">{t.shop.reply}</p>
                       <p className="text-soft">{r.reply}</p>
                     </div>

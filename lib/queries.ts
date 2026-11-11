@@ -13,12 +13,17 @@ export type ListingCard = {
   image_id: string | null;
   shop_name: string;
   shop_slug: string;
+  shop_logo: string | null;
+  shop_avg: string | null;
+  shop_reviews: string;
   status: string;
 };
 
 const CARD_SELECT = `
   select l.id, l.title_tr, l.title_en, l.price_pence, l.postage_pence, l.instalments, l.stock,
-         l.category, l.status, s.name as shop_name, s.slug as shop_slug,
+         l.category, l.status, s.name as shop_name, s.slug as shop_slug, s.logo_id as shop_logo,
+         (select avg(r.rating)::numeric(3,2) from reviews r where r.shop_id = s.id and r.status = 'published') as shop_avg,
+         (select count(*) from reviews r where r.shop_id = s.id and r.status = 'published') as shop_reviews,
          (select i.id from listing_images i where i.listing_id = l.id order by i.position limit 1) as image_id
     from listings l join shops s on s.id = l.shop_id`;
 
@@ -37,6 +42,37 @@ export const listingsByCategory = (category: string, instalmentsOnly: boolean) =
       order by l.created_at desc limit 120`,
     [category, instalmentsOnly],
   );
+
+export const newestListings = (limit = 8) =>
+  q<ListingCard>(`${CARD_SELECT} where ${PUBLIC} order by l.created_at desc limit $1`, [limit]);
+
+// Search ignores case and Turkish letters, so "sandik" finds "sandık" and
+// "Gumus" finds "gümüş". Every word typed has to appear somewhere in the
+// item's titles, descriptions or shop name.
+const FOLD_FROM = "İIÇĞÖŞÜçğıöşüâîû";
+const FOLD_TO = "iicgosucgiosuaiu";
+const foldSql = (expr: string) => `lower(translate(${expr}, '${FOLD_FROM}', '${FOLD_TO}'))`;
+const foldText = (v: string) =>
+  [...v].map((ch) => { const i = FOLD_FROM.indexOf(ch); return i < 0 ? ch : FOLD_TO[i]; }).join("").toLowerCase();
+
+export function searchListings(opts: { text: string; category: string | null; instalmentsOnly: boolean }) {
+  const words = foldText(opts.text)
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 6)
+    .map((w) => `%${w.replace(/[\\%_]/g, "\\$&")}%`);
+  const haystack = foldSql(
+    "l.title_tr || ' ' || l.title_en || ' ' || s.name || ' ' || l.description_tr || ' ' || l.description_en",
+  );
+  return q<ListingCard>(
+    `${CARD_SELECT} where ${PUBLIC}
+       and ($1::text is null or l.category = $1)
+       and ($2::boolean = false or l.instalments)
+       and (cardinality($3::text[]) = 0 or ${haystack} like all($3::text[]))
+     order by l.featured desc, l.created_at desc limit 120`,
+    [opts.category, opts.instalmentsOnly, words],
+  );
+}
 
 // A shop's own listings. The seller sees paused items too; the public does not.
 export const listingsByShop = (shopId: string, includePaused = false) =>
@@ -121,8 +157,10 @@ export const isUuid = (v: string) => /^[0-9a-f-]{36}$/i.test(v);
 
 // One cover image per category, for the "streets" row on the home page.
 export const categoryCovers = () =>
-  q<{ category: string; image_id: string | null }>(
+  q<{ category: string; image_id: string | null; items: string }>(
     `select distinct on (l.category) l.category,
+            (select count(*) from listings l2 join shops s2 on s2.id = l2.shop_id
+              where l2.category = l.category and l2.status = 'active' and s2.status = 'approved') as items,
             (select i.id from listing_images i where i.listing_id = l.id order by i.position limit 1) as image_id
        from listings l join shops s on s.id = l.shop_id
       where ${PUBLIC}
@@ -137,6 +175,7 @@ export type ShopCard = {
   seller_type: "business" | "sole_trader";
   founding: boolean;
   logo_id: string | null;
+  cover_id: string | null;
   bio_tr: string;
   bio_en: string;
   items: string;
@@ -147,7 +186,7 @@ export type ShopCard = {
 // Every approved shop, for the shops directory.
 export const approvedShops = () =>
   q<ShopCard>(
-    `select s.id, s.slug, s.name, s.city, s.seller_type, s.founding, s.logo_id, s.bio_tr, s.bio_en,
+    `select s.id, s.slug, s.name, s.city, s.seller_type, s.founding, s.logo_id, s.cover_id, s.bio_tr, s.bio_en,
             (select count(*) from listings l where l.shop_id = s.id and l.status = 'active') as items,
             (select avg(r.rating)::numeric(3,2) from reviews r where r.shop_id = s.id and r.status = 'published') as avg,
             (select count(*) from reviews r where r.shop_id = s.id and r.status = 'published') as reviews

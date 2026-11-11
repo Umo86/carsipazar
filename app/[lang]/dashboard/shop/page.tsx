@@ -93,7 +93,7 @@ export default async function DashboardShop({ params, searchParams }: PageProps<
         </label>
 
         {/* Checked at approval, so shown here but not editable. */}
-        <div className="bg-mist p-5">
+        <div className="rounded-2xl bg-mist p-5">
           <p className="font-medium">{t.shop.details}</p>
           <p className="mt-2 text-sm">
             {shop.legal_name}

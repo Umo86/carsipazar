@@ -39,7 +39,7 @@ export default async function SellPage({ params, searchParams }: PageProps<"/[la
                 [t.sell.b3Title, t.sell.b3Body],
               ] as const
             ).map(([title, body]) => (
-              <li key={title} className="border-t border-ink pt-4">
+              <li key={title} className="rounded-2xl bg-mist p-6">
                 <p className="font-display text-2xl">{title}</p>
                 <p className="mt-1 text-soft">{body}</p>
               </li>

@@ -34,7 +34,7 @@ export default async function DashboardHome({ params }: PageProps<"/[lang]/dashb
     <div className="grid gap-12">
       <dl className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
         {tiles.map((tile) => (
-          <div key={tile.label} className="border-t border-ink pt-3">
+          <div key={tile.label} className="rounded-2xl bg-mist p-5">
             <dt className="text-sm text-soft">{tile.label}</dt>
             <dd className="mt-1 font-display text-4xl">
               {tile.href ? <Link href={tile.href} className="hover:text-cobalt">{tile.value}</Link> : tile.value}

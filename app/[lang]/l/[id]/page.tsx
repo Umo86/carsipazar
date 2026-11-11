@@ -9,6 +9,7 @@ import { getListing, listingImageIds, shopRating } from "@/lib/queries";
 import { getSettings } from "@/lib/settings";
 import Rating from "@/components/Rating";
 import ShopMark from "@/components/ShopMark";
+import Icon from "@/components/Icon";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/l/[id]">): Promise<Metadata> {
   const { lang, id } = await params;
@@ -42,7 +43,7 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
   const canBuy = isPublic && l.stock > 0 && !isOwner;
 
   return (
-    <div className="wrap grid gap-10 pt-10 md:grid-cols-12">
+    <div className="wrap grid gap-10 pt-6 md:grid-cols-12">
       <div className="grid gap-4 md:col-span-7">
         {images.map((img, i) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -50,14 +51,14 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
             key={img.id}
             src={`/img/${img.id}`}
             alt={i === 0 ? title.text : ""}
-            className="aspect-[4/5] w-full bg-mist object-cover"
+            className="aspect-[4/5] w-full rounded-3xl bg-mist object-cover"
             loading={i === 0 ? "eager" : "lazy"}
           />
         ))}
       </div>
 
       <div className="md:col-span-5 md:col-start-8">
-        <div className="md:sticky md:top-8">
+        <div className="md:sticky md:top-28">
           <p className="text-sm text-soft">
             <Link href={`/${lang}/c/${l.category}`} className="hover:underline underline-offset-4">
               {categoryName(l.category, lang)}
@@ -96,9 +97,12 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
           )}
           {canBuy && <p className="mt-2 text-sm text-soft">{fmt(t.listing.inStock, { n: l.stock })}</p>}
 
-          <div className="mt-8 border-t border-line pt-5">
-            <p className="font-medium">{t.listing.protectedTitle}</p>
-            <p className="text-soft">{t.listing.protectedBody}</p>
+          <div className="mt-8 flex gap-4 rounded-2xl bg-sky p-5">
+            <Icon name="shield" size={24} className="mt-0.5 shrink-0 text-cobalt" />
+            <div>
+              <p className="font-medium">{t.listing.protectedTitle}</p>
+              <p className="text-[0.9375rem] text-soft">{t.listing.protectedBody}</p>
+            </div>
           </div>
 
           {description.text && (
@@ -109,7 +113,7 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 border-t border-line pt-5">
+          <div className="panel mt-6 grid grid-cols-[auto_1fr] gap-x-4 p-5">
             <Link href={`/${lang}/s/${l.shop_slug}`} className="row-span-4" aria-hidden="true" tabIndex={-1}>
               <ShopMark name={l.shop_name} logoId={l.shop_logo} className="w-16 text-sm" />
             </Link>

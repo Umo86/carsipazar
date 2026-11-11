@@ -62,7 +62,7 @@ export default function PhotoInput({
         <div className="flex flex-wrap gap-2">
           {previews.map((src) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} src={src} alt="" className={`h-28 bg-mist object-cover ${wide ? "w-72" : "w-[5.6rem]"}`} />
+            <img key={src} src={src} alt="" className={`h-28 rounded-lg bg-mist object-cover ${wide ? "w-72" : "w-[5.6rem]"}`} />
           ))}
         </div>
       )}

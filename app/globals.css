@@ -1,16 +1,19 @@
 @import "tailwindcss";
 @import "@fontsource-variable/bodoni-moda/wght.css";
 @import "@fontsource-variable/bodoni-moda/wght-italic.css";
-@import "@fontsource-variable/hanken-grotesk/wght.css";
+@import "@fontsource-variable/outfit/wght.css";
 
-/* Palette: magazine white and black, with three colours borrowed from
-   Iznik tiles and the brass of the Grand Bazaar's lanterns. */
+/* Palette: clean white and a soft slate ink, three quiet tinted surfaces for
+   banners, and the colours kept from Iznik tiles and bazaar brass. */
 @theme {
   --color-paper: #ffffff;
-  --color-ink: #000000;
-  --color-soft: #5c5a55;
-  --color-line: #e3ded3;
-  --color-mist: #f5f2ec;
+  --color-ink: #1d2128;
+  --color-soft: #646973;
+  --color-line: #e7e8ec;
+  --color-mist: #f5f5f7;
+  --color-sky: #edf1fa;
+  --color-sand: #f6f0e6;
+  --color-rose: #fbeeed;
   --color-cobalt: #1b3b8b;
   --color-cobalt-deep: #14285f;
   --color-turq: #1f7f7a;
@@ -18,11 +21,19 @@
   --color-tulip: #b40e29;
 
   --font-display: "Bodoni Moda Variable", "Bodoni MT", Didot, serif;
-  --font-sans: "Hanken Grotesk Variable", system-ui, sans-serif;
+  --font-sans: "Outfit Variable", system-ui, sans-serif;
+
+  --shadow-lift: 0 14px 34px -18px rgb(29 33 40 / 0.28);
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -38,8 +49,8 @@ h2,
 h3 {
   font-family: var(--font-display);
   font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  line-height: 1.08;
+  letter-spacing: -0.012em;
 }
 
 :focus-visible {
@@ -83,11 +94,16 @@ h3 {
     font-size: 0.95rem;
     line-height: 1.2;
     cursor: pointer;
-    transition: background-color 0.15s, color 0.15s;
+    transition:
+      background-color 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease,
+      box-shadow 0.25s ease;
   }
   .btn:hover {
     background: var(--color-cobalt);
     border-color: var(--color-cobalt);
+    box-shadow: var(--shadow-lift);
   }
   .btn[disabled] {
     opacity: 0.45;
@@ -141,8 +157,9 @@ h3 {
     width: 100%;
     min-height: 2.75rem;
     padding: 0.55rem 0.8rem;
-    border: 1px solid #b9b4a8;
-    border-radius: 6px;
+    border: 1px solid #c9ccd3;
+    border-radius: 10px;
+    transition: border-color 0.2s ease;
     background: var(--color-paper);
     font: inherit;
   }
@@ -160,25 +177,71 @@ h3 {
     color: var(--color-soft);
   }
   .notice {
-    padding: 0.8rem 1rem;
-    border-left: 3px solid var(--color-brass);
-    background: var(--color-mist);
+    padding: 0.85rem 1.1rem;
+    border-radius: 12px;
+    background: var(--color-sand);
     font-size: 0.9375rem;
   }
   .notice-error {
-    border-left-color: var(--color-tulip);
+    background: var(--color-rose);
+    color: #7d0a1d;
   }
   .tag {
     display: inline-flex;
     align-items: center;
-    padding: 0.15rem 0.6rem;
-    border: 1px solid var(--color-brass);
+    padding: 0.2rem 0.65rem;
     border-radius: 999px;
-    color: var(--color-brass);
+    background: var(--color-sand);
+    color: #6f5527;
     font-size: 0.75rem;
     font-weight: 500;
     white-space: nowrap;
   }
+  /* Rounded surfaces shared by cards, banners and panels. */
+  .panel {
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: var(--color-paper);
+  }
+  .media {
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--color-mist);
+  }
+  .media img {
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+  .group:hover .media img {
+    transform: scale(1.045);
+  }
+  .round-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    cursor: pointer;
+    box-shadow: var(--shadow-lift);
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease,
+      border-color 0.25s ease;
+  }
+  .round-btn:hover {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   .table {
     width: 100%;
     border-collapse: collapse;
@@ -189,7 +252,7 @@ h3 {
     font-weight: 500;
     color: var(--color-soft);
     padding: 0.6rem 0.75rem 0.6rem 0;
-    border-bottom: 1px solid var(--color-ink);
+    border-bottom: 1px solid #c9ccd3;
     white-space: nowrap;
   }
   .table td {
@@ -216,5 +279,13 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   .arch-rise {
     animation: none;
+  }
+  .media img,
+  .btn,
+  .round-btn {
+    transition: none;
+  }
+  .group:hover .media img {
+    transform: none;
   }
 }

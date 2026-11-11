@@ -105,7 +105,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
           </fieldset>
         </div>
 
-        <aside className="h-fit bg-mist p-6 md:sticky md:top-8">
+        <aside className="h-fit rounded-3xl bg-mist p-7 md:sticky md:top-28">
           <h2 className="text-3xl">{t.checkout.summary}</h2>
           <div className="mt-5 flex gap-4">
             {images[0] && (
@@ -125,8 +125,8 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
             <dd>{formatGBP(item)}</dd>
             <dt className="text-soft">{t.checkout.postage}</dt>
             <dd>{l.postage_pence === 0 ? t.listing.freePostage : formatGBP(l.postage_pence)}</dd>
-            <dt className="mt-2 border-t border-ink pt-3 font-medium">{t.checkout.total}</dt>
-            <dd className="mt-2 border-t border-ink pt-3 font-medium">{formatGBP(total)}</dd>
+            <dt className="mt-2 border-t border-line pt-3 font-medium">{t.checkout.total}</dt>
+            <dd className="mt-2 border-t border-line pt-3 font-medium">{formatGBP(total)}</dd>
           </dl>
           <SubmitButton className="btn mt-6 w-full">{fmt(t.checkout.pay, { amount: formatGBP(total) })}</SubmitButton>
           <p className="hint mt-3">{t.checkout.protectedNote}</p>

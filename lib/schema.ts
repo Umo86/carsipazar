@@ -59,6 +59,9 @@ create table if not exists shop_images (
   created_at timestamptz not null default now()
 );
 
+-- A sample image may live on another server; real uploads are stored here.
+alter table shop_images add column if not exists url text;
+
 create table if not exists listings (
   id uuid primary key default gen_random_uuid(),
   shop_id uuid not null references shops(id) on delete cascade,
@@ -87,6 +90,7 @@ create table if not exists listing_images (
   created_at timestamptz not null default now()
 );
 create index if not exists listing_images_listing_idx on listing_images(listing_id, position);
+alter table listing_images add column if not exists url text;
 
 create sequence if not exists order_number_seq start 1001;
 
