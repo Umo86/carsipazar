@@ -199,7 +199,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
                     <ShopMark name={s.name} logoId={s.logo_id} className="-mt-9 w-14 text-[0.6rem] ring-4 ring-paper" />
                     <div className="min-w-0 pt-3">
                       <p className="truncate font-medium transition-colors duration-200 group-hover:text-cobalt">{s.name}</p>
-                      <p className="mt-0.5 flex items-center gap-2 text-[0.8125rem] text-soft">
+                      <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[0.8125rem] whitespace-nowrap text-soft">
                         {s.avg ? (
                           <>
                             <Rating value={Number(s.avg)} size={12} />
