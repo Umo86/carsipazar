@@ -20,7 +20,6 @@ export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
                 <Link href={`/${lang}/c/${c.slug}`} className={link}>{c[lang]}</Link>
               </li>
             ))}
-            <li><Link href={`/${lang}/search?i=1`} className={link}>{t.nav.instalments}</Link></li>
           </ul>
         </div>
         <div>

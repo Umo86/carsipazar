@@ -21,16 +21,14 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
   const text = first(sp.q).trim().slice(0, 80);
   const c = first(sp.c);
   const category = isCategory(c) ? c : null;
-  const instalmentsOnly = first(sp.i) === "1";
-  const items = await searchListings({ text, category, instalmentsOnly });
+  const items = await searchListings({ text, category });
 
   // Links keep whatever else is already chosen.
-  const href = (next: { c?: string | null; i?: boolean }) => {
+  const href = (next: { c?: string | null }) => {
     const p = new URLSearchParams();
     if (text) p.set("q", text);
     const cat = next.c === undefined ? category : next.c;
     if (cat) p.set("c", cat);
-    if (next.i === undefined ? instalmentsOnly : next.i) p.set("i", "1");
     const qs = p.toString();
     return `/${lang}/search${qs ? `?${qs}` : ""}`;
   };
@@ -39,9 +37,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
     ? fmt(t.search.resultsFor, { q: text })
     : category
       ? categoryName(category, lang)
-      : instalmentsOnly
-        ? t.nav.instalments
-        : t.listing.all;
+      : t.listing.all;
 
   return (
     <div className="wrap pt-10">
@@ -61,13 +57,6 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
             {cat[lang]}
           </Link>
         ))}
-        <Link
-          href={href({ i: !instalmentsOnly })}
-          className={`${pill(instalmentsOnly)} sm:ml-auto`}
-          aria-pressed={instalmentsOnly}
-        >
-          {t.listing.filterInstalments}
-        </Link>
       </div>
       {items.length === 0 ? (
         <div className="mt-10 rounded-3xl bg-mist px-8 py-14 text-center">

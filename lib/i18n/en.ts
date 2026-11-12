@@ -12,7 +12,6 @@ const en: Dict = {
     otherLang: "Türkçe",
     tagline: "Furniture, clothing and jewellery from Turkish businesses",
     account: "Account",
-    instalments: "Items with instalments",
   },
   search: {
     category: "Category",
@@ -34,7 +33,7 @@ const en: Dict = {
     credit: "Sample photos and video: Pixabay and Unsplash",
   },
   home: {
-    coverLine: "The best of the bazaar, now in instalments.",
+    coverLine: "The best of the bazaar, in one place.",
     coverSub:
       "Furniture, clothing and jewellery. From verified Turkish sellers, with protected payment.",
     shopNew: "See what's new",
@@ -45,17 +44,17 @@ const en: Dict = {
     promise1Title: "Your money is safe",
     promise1Body:
       "We hold your payment until the item reaches you. If something goes wrong, you get it back.",
-    promise2Title: "Three instalments",
-    promise2Body: "Split the cost in three on selected items over £30. The seller is paid straight away.",
+    promise2Title: "Know the shop",
+    promise2Body: "Every shop has its own page with its company details, delivery and returns terms.",
     promise3Title: "Verified sellers",
     promise3Body: "Every shop is checked before it opens. Reviews come from real orders only.",
     sellTitle: "Selling on Instagram?",
     sellBody:
-      "Open your shop page and put the link in your profile. Customers pay by card or in instalments; you get on with the orders.",
+      "Open your shop page and put the link in your profile. Customers pay securely by card; you get on with the orders.",
     sellCta: "Open a shop for free",
     empty: "No items yet. The first shops are opening soon.",
-    strip: "You can split the cost in three on selected items.",
-    stripLink: "See items with instalments",
+    strip: "Your payment stays with us until your order arrives.",
+    stripLink: "See the verified shops",
     pickTitle: "Piece of the week",
     featured: "Featured",
     prev: "Previous items",
@@ -69,7 +68,6 @@ const en: Dict = {
   listing: {
     instalments: "Instalments available",
     view: "View item",
-    payIn3: "or 3 instalments of {amount}",
     postage: "Postage {amount}",
     freePostage: "Free postage",
     inStock: "{n} in stock",
@@ -83,7 +81,6 @@ const en: Dict = {
     description: "About this item",
     otherLangNote: "This listing was written in Turkish.",
     notFound: "This item is no longer for sale.",
-    filterInstalments: "Only items with instalments",
     all: "All items",
     noneInCategory: "Nothing on this street yet.",
     ownListing: "This is your own listing.",
@@ -136,7 +133,7 @@ const en: Dict = {
     card: "Pay by card",
     cardHint: "The full amount is taken now.",
     klarna: "Pay in 3 instalments",
-    klarnaHint: "{first} today, then two monthly instalments. No interest.",
+    klarnaHint: "{first} today, then two monthly instalments.",
     klarnaOff: "Instalments are not available on this item.",
     summary: "Order summary",
     item: "Item",
@@ -209,11 +206,11 @@ const en: Dict = {
     intro: "Opening a shop and listing items is free. You pay commission only when you sell.",
     b1Title: "Your own shop page",
     b1Body: "One link. Put it in your Instagram profile, share it on WhatsApp.",
-    b2Title: "Card and instalment payments",
-    b2Body: "Your customer pays in three; you receive the full amount.",
+    b2Title: "Secure card payments",
+    b2Body: "Your customer pays by card. You are paid once the item is delivered.",
     b3Title: "Real reviews",
     b3Body: "Every review comes from a completed order. Trust builds up.",
-    fees: "Commission: {card}% on card payments, {klarna}% on instalment payments. No other fees.",
+    fees: "Commission: {card}% on card payments. No other fees.",
     account: "Your account",
     shopDetails: "Shop details",
     shopName: "Shop name",
@@ -477,7 +474,6 @@ const en: Dict = {
     downloadAria: "Download the {format} ({ratio}) image in {language}",
     caption: "Caption",
     captionShop: "See the shop: {url}",
-    pill: "Pay in 3 instalments",
     tags: {
       furniture: "#furniture #mobilya #carsipazar #london",
       clothing: "#fashion #giyim #carsipazar #london",
@@ -487,15 +483,15 @@ const en: Dict = {
     brandTitle: "CarsiPazar's own posts",
     brandIntro: "The site's own promotional images. Post them on any account you like.",
     brandCaption: "{head}\n{sub}\n\n{url}\n\n#carsipazar #furniture #fashion #jewellery #london",
-    brandNames: { welcome: "Welcome", instalments: "Instalments", sell: "Seller invitation" },
+    brandNames: { welcome: "Welcome", protected: "Protected payment", sell: "Seller invitation" },
     brand: {
       welcome: {
-        head: "The best of the bazaar, now in instalments.",
+        head: "The best of the bazaar, in one place.",
         sub: "Furniture, clothing and jewellery. From verified Turkish sellers.",
       },
-      instalments: {
-        head: "Love it? Split it in three.",
-        sub: "Three instalments on selected items. The seller is paid straight away.",
+      protected: {
+        head: "Your money is safe.",
+        sub: "We hold your payment until your order arrives.",
       },
       sell: {
         head: "Selling on Instagram?",

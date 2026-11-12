@@ -135,7 +135,6 @@ export default function Header({
           ))}
           <Link href={`/${lang}/search`} className={street}>{t.listing.all}</Link>
           <Link href={`/${lang}/shops`} className={street}>{t.nav.shops}</Link>
-          <Link href={`/${lang}/search?i=1`} className={`${street} md:ml-auto`}>{t.nav.instalments}</Link>
         </div>
       </nav>
     </>

@@ -3,7 +3,6 @@ import { BRAND_KEYS } from "@/lib/social";
 import type { Locale } from "@/lib/config";
 import { getDict, pick } from "@/lib/i18n";
 import { featuredListings } from "@/lib/queries";
-import { getSettings } from "@/lib/settings";
 import { brandCaption, itemCaption } from "@/lib/social-caption";
 import { origin } from "@/lib/actions/util";
 import SocialCard from "@/components/SocialCard";
@@ -12,7 +11,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
   const lang = (await params).lang as Locale;
   const t = getDict(lang);
   await requireAdmin(lang);
-  const [items, settings, base] = await Promise.all([featuredListings(8), getSettings(), origin()]);
+  const [items, base] = await Promise.all([featuredListings(8), origin()]);
 
   return (
     <div className="grid gap-12">
@@ -48,7 +47,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
                 title={pick(lang, item.title_tr, item.title_en).text}
                 lang={lang}
                 t={t}
-                caption={itemCaption({ item, lang, t, settings, shopUrl: `${base}/${lang}/s/${item.shop_slug}` })}
+                caption={itemCaption({ item, lang, t, shopUrl: `${base}/${lang}/s/${item.shop_slug}` })}
               />
             ))}
           </ul>

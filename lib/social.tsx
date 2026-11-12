@@ -6,8 +6,7 @@ import type { ReactElement } from "react";
 import { SITE_NAME, type Locale } from "./config";
 import { one } from "./db";
 import { getDict, pick } from "./i18n";
-import { formatGBP, instalmentsAllowed } from "./money";
-import { getSettings } from "./settings";
+import { formatGBP } from "./money";
 import { slugify, origin } from "./actions/util";
 
 // Ready-to-post images for Instagram and WhatsApp, drawn with ImageResponse
@@ -19,7 +18,7 @@ export const FORMATS = {
   square: { width: 1080, height: 1080 },
 } as const;
 export type Format = keyof typeof FORMATS;
-export const BRAND_KEYS = ["welcome", "instalments", "sell"] as const;
+export const BRAND_KEYS = ["welcome", "protected", "sell"] as const;
 export type BrandKey = (typeof BRAND_KEYS)[number];
 
 export const isBrandKey = (v: string): v is BrandKey => (BRAND_KEYS as readonly string[]).includes(v);
@@ -81,7 +80,6 @@ type SocialItem = {
   title_en: string;
   price_pence: number;
   postage_pence: number;
-  instalments: boolean;
   shop_name: string;
   shop_slug: string;
   photo_type: string | null;
@@ -91,7 +89,7 @@ type SocialItem = {
 // Public items only: live listing, approved shop.
 const socialItem = (id: string) =>
   one<SocialItem>(
-    `select l.id, l.title_tr, l.title_en, l.price_pence, l.postage_pence, l.instalments,
+    `select l.id, l.title_tr, l.title_en, l.price_pence, l.postage_pence,
             s.name as shop_name, s.slug as shop_slug, i.content_type as photo_type,
             ${USABLE("i.content_type", "i.data")} as photo
        from listings l
@@ -187,32 +185,12 @@ const clamp = (lines: number): Style => ({
   wordBreak: "break-word",
 });
 
-function Pill({ text, size }: { text: string; size: number }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        padding: `${Math.round(size * 0.4)}px ${Math.round(size * 1.0)}px`,
-        borderRadius: 999,
-        background: SKY,
-        color: COBALT,
-        fontFamily: SANS,
-        fontWeight: 500,
-        fontSize: size,
-      }}
-    >
-      {text}
-    </div>
-  );
-}
-
 // ------------------------------------------------------------ item layouts
 
 type ItemView = {
   name: string;
   price: string;
   shop: string;
-  pill: string | null;
   address: string;
   photo: string | null;
 };
@@ -269,11 +247,6 @@ function ItemPost({ v, format }: { v: ItemView; format: "post" | "story" }) {
             {v.shop}
           </div>
         </div>
-        {v.pill && (
-          <div style={{ display: "flex", marginTop: 18 }}>
-            <Pill text={v.pill} size={26} />
-          </div>
-        )}
       </div>
       <div style={{ display: "flex", fontFamily: SANS, fontSize: 26, color: SOFT }}>{v.address}</div>
     </div>
@@ -317,11 +290,6 @@ function ItemSquare({ v }: { v: ItemView }) {
         >
           {v.shop}
         </div>
-        {v.pill && (
-          <div style={{ display: "flex", marginTop: 24 }}>
-            <Pill text={v.pill} size={24} />
-          </div>
-        )}
         <div style={{ display: "flex", marginTop: 40, width: 440, fontFamily: SANS, fontSize: 21, color: SOFT, wordBreak: "break-all" }}>
           {v.address}
         </div>
@@ -334,7 +302,7 @@ function ItemSquare({ v }: { v: ItemView }) {
 
 const BRAND_LOOK: Record<BrandKey, { bg: string; ink: string; soft: string; mark: string; line: string; tint: string }> = {
   welcome: { bg: SAND, ink: INK, soft: SOFT, mark: INK, line: BRASS, tint: PANEL },
-  instalments: { bg: SKY, ink: INK, soft: SOFT, mark: COBALT, line: BRASS, tint: "#dbe3f4" },
+  protected: { bg: SKY, ink: INK, soft: SOFT, mark: COBALT, line: BRASS, tint: "#dbe3f4" },
   sell: { bg: DEEP, ink: "#ffffff", soft: "rgba(255,255,255,0.78)", mark: "#ffffff", line: "#c9a96a", tint: "rgba(255,255,255,0.08)" },
 };
 
@@ -442,13 +410,11 @@ export async function itemImage(id: string, o: Opts): Promise<Response | null> {
   if (!isItemId(id)) return null;
   const item = await socialItem(id);
   if (!item) return null;
-  const [settings, base] = await Promise.all([getSettings(), origin()]);
-  const t = getDict(o.lang);
+  const base = await origin();
   const view: Omit<ItemView, "photo"> = {
     name: pick(o.lang, item.title_tr, item.title_en).text,
     price: formatGBP(item.price_pence),
     shop: item.shop_name,
-    pill: instalmentsAllowed(item, item.price_pence + item.postage_pence, settings) ? t.social.pill : null,
     address: bare(`${base}/${o.lang}/s/${item.shop_slug}`),
   };
   const uri = dataUri(asPhoto(item.photo_type, item.photo));

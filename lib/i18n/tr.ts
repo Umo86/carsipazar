@@ -11,7 +11,6 @@ const tr = {
     otherLang: "English",
     tagline: "Türk işletmelerinden mobilya, giyim ve takı",
     account: "Hesap",
-    instalments: "Taksitli ürünler",
   },
   search: {
     category: "Kategori",
@@ -33,7 +32,7 @@ const tr = {
     credit: "Örnek fotoğraflar ve video: Pixabay ve Unsplash",
   },
   home: {
-    coverLine: "Çarşının en güzeli, şimdi taksitle.",
+    coverLine: "Çarşının en güzeli, tek adreste.",
     coverSub:
       "Mobilya, giyim ve takı. Onaylı Türk satıcılardan, korumalı ödemeyle.",
     shopNew: "Yeni gelenlere bak",
@@ -44,17 +43,17 @@ const tr = {
     promise1Title: "Paran güvende",
     promise1Body:
       "Ödemen, ürün eline ulaşana kadar bizde bekler. Sorun çıkarsa paran sana döner.",
-    promise2Title: "Üç taksit",
-    promise2Body: "30 £ üzeri seçili ürünlerde ödemeyi üçe böl. Satıcı parasını hemen alır.",
+    promise2Title: "Dükkânı tanı",
+    promise2Body: "Her dükkânın kendi sayfası var: şirket bilgileri, teslimat ve iade koşulları tek yerde.",
     promise3Title: "Onaylı satıcılar",
     promise3Body: "Her dükkân açılmadan önce tek tek kontrol edilir. Yorumlar gerçek siparişlerden gelir.",
     sellTitle: "Instagram'dan mı satıyorsun?",
     sellBody:
-      "Dükkân sayfanı aç, linkini profiline koy. Müşterin kartla ya da taksitle ödesin, sen siparişe odaklan.",
+      "Dükkân sayfanı aç, linkini profiline koy. Müşterin güvenle kartla ödesin, sen siparişe odaklan.",
     sellCta: "Ücretsiz dükkân aç",
     empty: "Henüz ürün yok. İlk dükkânlar çok yakında.",
-    strip: "Seçili ürünlerde ödemeyi üç taksite bölebilirsin.",
-    stripLink: "Taksitli ürünlere bak",
+    strip: "Ödemen, ürün eline ulaşana kadar bizde güvende.",
+    stripLink: "Onaylı dükkânları gör",
     pickTitle: "Haftanın parçası",
     featured: "Öne çıkanlar",
     prev: "Önceki ürünler",
@@ -68,7 +67,6 @@ const tr = {
   listing: {
     instalments: "Taksit imkânı",
     view: "Ürünü incele",
-    payIn3: "ya da 3 taksitle, taksit başına {amount}",
     postage: "Kargo {amount}",
     freePostage: "Ücretsiz kargo",
     inStock: "Stokta {n} adet",
@@ -82,7 +80,6 @@ const tr = {
     description: "Ürün hakkında",
     otherLangNote: "Bu ürün sayfası İngilizce yazıldı.",
     notFound: "Bu ürün artık satışta değil.",
-    filterInstalments: "Yalnızca taksitli ürünler",
     all: "Tüm ürünler",
     noneInCategory: "Bu sokakta henüz ürün yok.",
     ownListing: "Bu senin ürünün.",
@@ -135,7 +132,7 @@ const tr = {
     card: "Kart ile öde",
     cardHint: "Tutarın tamamı şimdi çekilir.",
     klarna: "3 taksitle öde",
-    klarnaHint: "Bugün {first}, sonra iki aylık taksit. Faiz yok.",
+    klarnaHint: "Bugün {first}, sonra iki aylık taksit.",
     klarnaOff: "Bu üründe taksit seçeneği yok.",
     summary: "Sipariş özeti",
     item: "Ürün",
@@ -209,11 +206,11 @@ const tr = {
       "Dükkân açmak ve ürün listelemek ücretsiz. Yalnızca satış yaptığında komisyon ödersin.",
     b1Title: "Kendi dükkân sayfan",
     b1Body: "Tek bir link. Instagram profiline koy, WhatsApp'tan paylaş.",
-    b2Title: "Kart ve taksitle ödeme",
-    b2Body: "Müşterin üç taksitle ödesin, sen paranın tamamını al.",
+    b2Title: "Güvenli kart ödemesi",
+    b2Body: "Müşterin kartla öder. Ürün teslim edilince paran hesabına geçer.",
     b3Title: "Gerçek yorumlar",
     b3Body: "Her yorum tamamlanmış bir siparişten gelir. Güven birikir.",
-    fees: "Komisyon: kartla ödemede %{card}, taksitli ödemede %{klarna}. Başka ücret yok.",
+    fees: "Komisyon: kartla ödemede %{card}. Başka ücret yok.",
     account: "Hesap bilgilerin",
     shopDetails: "Dükkân bilgileri",
     shopName: "Dükkân adı",
@@ -477,7 +474,6 @@ const tr = {
     downloadAria: "{format} ({ratio}) görselini {language} indir",
     caption: "Paylaşım metni",
     captionShop: "Dükkânıma bak: {url}",
-    pill: "3 taksit imkânı",
     tags: {
       furniture: "#mobilya #furniture #carsipazar #londra",
       clothing: "#giyim #fashion #carsipazar #londra",
@@ -487,15 +483,15 @@ const tr = {
     brandTitle: "CarsiPazar'ın kendi paylaşımları",
     brandIntro: "Sitenin kendi tanıtım görselleri. Dilediğin hesapta paylaşabilirsin.",
     brandCaption: "{head}\n{sub}\n\n{url}\n\n#carsipazar #mobilya #giyim #taki #londra",
-    brandNames: { welcome: "Hoş geldin", instalments: "Taksit", sell: "Satıcı daveti" },
+    brandNames: { welcome: "Hoş geldin", protected: "Korumalı ödeme", sell: "Satıcı daveti" },
     brand: {
       welcome: {
-        head: "Çarşının en güzeli, şimdi taksitle.",
+        head: "Çarşının en güzeli, tek adreste.",
         sub: "Mobilya, giyim ve takı. Onaylı Türk satıcılardan.",
       },
-      instalments: {
-        head: "Beğendin mi? Üçe böl.",
-        sub: "Seçili ürünlerde üç taksit. Satıcı parasını hemen alır.",
+      protected: {
+        head: "Ödemen güvende.",
+        sub: "Ürün eline ulaşana kadar ödemeni biz tutarız.",
       },
       sell: {
         head: "Instagram'dan mı satıyorsun?",

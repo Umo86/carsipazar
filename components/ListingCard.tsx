@@ -28,16 +28,10 @@ export default function ListingCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/img/${item.image_id}`} alt={title} loading="lazy" className="h-full w-full object-cover" />
         )}
-        {item.stock === 0 ? (
+        {item.stock === 0 && (
           <span className="absolute top-3 left-3 rounded-full bg-ink px-2.5 py-1 text-xs font-medium text-paper">
             {t.listing.soldOut}
           </span>
-        ) : (
-          item.instalments && (
-            <span className="absolute top-3 left-3 rounded-full bg-paper px-2.5 py-1 text-xs font-medium shadow-sm">
-              {t.listing.instalments}
-            </span>
-          )
         )}
         {item.sponsored && (
           <span className="absolute top-3 right-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-medium text-paper">

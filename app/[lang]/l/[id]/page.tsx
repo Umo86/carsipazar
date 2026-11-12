@@ -4,10 +4,9 @@ import type { Metadata } from "next";
 import { getUser } from "@/lib/auth";
 import { categoryName, isLocale } from "@/lib/config";
 import { fmt, getDict, pick, reviewCount } from "@/lib/i18n";
-import { formatGBP, instalmentsAllowed } from "@/lib/money";
+import { formatGBP } from "@/lib/money";
 import { getListing, isFavourite, listingImageIds, shopRating } from "@/lib/queries";
 import { toggleFavourite } from "@/lib/actions/account";
-import { getSettings } from "@/lib/settings";
 import Rating from "@/components/Rating";
 import ShopMark from "@/components/ShopMark";
 import Icon from "@/components/Icon";
@@ -32,16 +31,13 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
   const isPublic = l.status === "active" && l.shop_status === "approved";
   if (!isPublic && !isOwner && user?.role !== "admin") notFound();
 
-  const [images, rating, settings, saved] = await Promise.all([
+  const [images, rating, saved] = await Promise.all([
     listingImageIds(l.id),
     shopRating(l.shop_id),
-    getSettings(),
     user ? isFavourite(user.id, l.id) : false,
   ]);
   const title = pick(lang, l.title_tr, l.title_en);
   const description = pick(lang, l.description_tr, l.description_en);
-  const total = l.price_pence + l.postage_pence;
-  const instalments = instalmentsAllowed(l, total, settings);
   const canBuy = isPublic && l.stock > 0 && !isOwner;
 
   return (
@@ -69,11 +65,6 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
           <h1 className="mt-2 text-4xl md:text-5xl">{title.text}</h1>
 
           <p className="mt-6 text-3xl font-medium">{formatGBP(l.price_pence)}</p>
-          {instalments && (
-            <p className="mt-1 text-turq">
-              {fmt(t.listing.payIn3, { amount: formatGBP(Math.ceil(total / 3)) })}
-            </p>
-          )}
           <p className="mt-1 text-sm text-soft">
             {l.postage_pence === 0
               ? t.listing.freePostage

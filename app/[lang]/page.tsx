@@ -41,7 +41,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <div className="wrap mt-5">
         <p className="rounded-2xl bg-rose px-5 py-3 text-center text-[0.9375rem]">
           {t.home.strip}{" "}
-          <Link href={`/${lang}/search?i=1`} className="font-medium underline underline-offset-4 hover:text-cobalt">
+          <Link href={`/${lang}/shops`} className="font-medium underline underline-offset-4 hover:text-cobalt">
             {t.home.stripLink}
           </Link>
         </p>
@@ -248,7 +248,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
           {(
             [
               ["shield", t.home.promise1Title, t.home.promise1Body],
-              ["split", t.home.promise2Title, t.home.promise2Body],
+              ["shop", t.home.promise2Title, t.home.promise2Body],
               ["check", t.home.promise3Title, t.home.promise3Body],
             ] as const
           ).map(([icon, title, body]) => (

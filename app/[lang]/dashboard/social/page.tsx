@@ -2,7 +2,6 @@ import { requireShop } from "@/lib/auth";
 import type { Locale } from "@/lib/config";
 import { getDict, pick } from "@/lib/i18n";
 import { listingsByShop } from "@/lib/queries";
-import { getSettings } from "@/lib/settings";
 import { itemCaption } from "@/lib/social-caption";
 import { origin } from "@/lib/actions/util";
 import SocialCard from "@/components/SocialCard";
@@ -12,9 +11,8 @@ export default async function SocialPage({ params }: PageProps<"/[lang]/dashboar
   const t = getDict(lang);
   const { shop } = await requireShop(lang);
   const approved = shop.status === "approved";
-  const [items, settings, base] = await Promise.all([
+  const [items, base] = await Promise.all([
     approved ? listingsByShop(shop.id) : Promise.resolve([]),
-    getSettings(),
     origin(),
   ]);
   const shopUrl = `${base}/${lang}/s/${shop.slug}`;
@@ -38,7 +36,7 @@ export default async function SocialPage({ params }: PageProps<"/[lang]/dashboar
               title={pick(lang, item.title_tr, item.title_en).text}
               lang={lang}
               t={t}
-              caption={itemCaption({ item, lang, t, settings, shopUrl })}
+              caption={itemCaption({ item, lang, t, shopUrl })}
             />
           ))}
         </ul>

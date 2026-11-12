@@ -60,11 +60,11 @@ export const favouriteListings = (userId: string) =>
 export const isFavourite = async (userId: string, listingId: string) =>
   Boolean(await one("select 1 from favourites where user_id = $1 and listing_id = $2", [userId, listingId]));
 
-export const listingsByCategory = (category: string, instalmentsOnly: boolean) =>
+export const listingsByCategory = (category: string) =>
   q<ListingCard>(
-    `${cardSelect("category_top")} where ${PUBLIC} and l.category = $1 and ($2::boolean = false or l.instalments)
+    `${cardSelect("category_top")} where ${PUBLIC} and l.category = $1
       order by sponsored desc, l.created_at desc limit 120`,
-    [category, instalmentsOnly],
+    [category],
   );
 
 export const newestListings = (limit = 8) =>
@@ -79,7 +79,7 @@ const foldSql = (expr: string) => `lower(translate(${expr}, '${FOLD_FROM}', '${F
 const foldText = (v: string) =>
   [...v].map((ch) => { const i = FOLD_FROM.indexOf(ch); return i < 0 ? ch : FOLD_TO[i]; }).join("").toLowerCase();
 
-export function searchListings(opts: { text: string; category: string | null; instalmentsOnly: boolean }) {
+export function searchListings(opts: { text: string; category: string | null }) {
   const words = foldText(opts.text)
     .split(/\s+/)
     .filter(Boolean)
@@ -91,10 +91,9 @@ export function searchListings(opts: { text: string; category: string | null; in
   return q<ListingCard>(
     `${CARD_SELECT} where ${PUBLIC}
        and ($1::text is null or l.category = $1)
-       and ($2::boolean = false or l.instalments)
-       and (cardinality($3::text[]) = 0 or ${haystack} like all($3::text[]))
+       and (cardinality($2::text[]) = 0 or ${haystack} like all($2::text[]))
      order by l.featured desc, l.created_at desc limit 120`,
-    [opts.category, opts.instalmentsOnly, words],
+    [opts.category, words],
   );
 }
 

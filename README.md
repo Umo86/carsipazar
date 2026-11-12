@@ -1,8 +1,10 @@
 # CarsiPazar
 
 A bilingual (Turkish/English) marketplace where verified Turkish-community traders
-sell furniture, clothing and jewellery, buyers can pay by card or in three
-instalments, and the payment is held until the item arrives.
+sell furniture, clothing and jewellery, buyers pay by card, and the payment is
+held until the item arrives. Where the seller allows it, a buyer can instead choose
+to pay in three instalments at checkout. Instalments are a payment choice at checkout
+only: the site does not advertise them anywhere else.
 
 This is the first, deliberately small version: website only, traders only,
 buyer-to-seller reviews. Payments run in **demo mode** until Stripe keys are added.
@@ -12,10 +14,10 @@ buyer-to-seller reviews. Payments run in **demo mode** until Stripe keys are add
 | Area | What it does |
 | --- | --- |
 | Storefront | Home, three category "streets" (furniture, clothing, jewellery), item pages, in `/tr` and `/en` |
-| Search | `/search`: by item or shop name, ignoring Turkish letters ("gumus" finds "gümüş"), with category and instalment filters |
+| Search | `/search`: by item or shop name, ignoring Turkish letters ("gumus" finds "gümüş"), with a category filter |
 | Shop page | `/s/shop-name`: one per company, with logo, cover, about text, company details (legal name, company and VAT numbers, address, phone, email, website, Instagram), delivery and returns information, items and reviews. Also the seller's link for Instagram and WhatsApp |
 | Shops directory | `/shops`: every approved company |
-| Checkout | One item per order, card or 3 instalments, delivery address |
+| Checkout | One item per order, card (or 3 instalments where the seller allows it), delivery address |
 | Protected payment | Money is held; released to the seller 2 days after delivery |
 | Reviews | One per completed order; seller can reply; admin can hide |
 | Seller panel | Apply, add items with photos, dispatch orders, see payouts |
@@ -29,6 +31,8 @@ buyer-to-seller reviews. Payments run in **demo mode** until Stripe keys are add
 - 9% commission when the buyer pays by card, 13% when they pay in instalments.
 - Founding sellers: 2% + 20p on card, 5% + 35p on instalments.
 - Instalments are offered on orders from £30 to £2,000 where the seller allows them.
+  They appear only as a choice on the checkout page, plus the seller's listing form and
+  the admin fee settings. No page before checkout, image or caption mentions them.
 - The whole fee model is one function: `computeFees` in `lib/money.ts`.
 
 ## Run it locally
@@ -99,9 +103,10 @@ photos too. Visitors never load anything from Pixabay or Unsplash.
 1. **Stripe.** The Stripe code (`lib/payments/stripe.ts`) follows Stripe's documented
    API but has not been run with real keys. Test card and Klarna payments, the
    webhook, seller onboarding, payout and refund in Stripe test mode.
-2. **Klarna wording.** The instalment text on item and checkout pages is placeholder
-   copy. In the UK only Klarna-approved wording may be used; swap in Stripe's
-   Payment Method Messaging Element.
+2. **Klarna wording.** The instalment option and its hint on the checkout page are
+   placeholder copy. In the UK only Klarna-approved wording may be used; swap that
+   text for Stripe's Payment Method Messaging Element. Nothing else on the site
+   advertises instalments.
 3. **Photos.** Item photos are stored in the database, which suits a pilot of a few
    hundred items. Move them to file storage (for example Vercel Blob) before growing.
 4. **Email.** There is no email yet: no order confirmations and no password reset.

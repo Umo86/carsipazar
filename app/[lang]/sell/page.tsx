@@ -46,7 +46,7 @@ export default async function SellPage({ params, searchParams }: PageProps<"/[la
             ))}
           </ul>
           <p className="notice mt-8">
-            {fmt(t.sell.fees, { card: s.card_bps / 100, klarna: s.klarna_bps / 100 })}
+            {fmt(t.sell.fees, { card: s.card_bps / 100 })}
           </p>
         </div>
 
