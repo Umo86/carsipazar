@@ -254,4 +254,11 @@ create table if not exists settings (
   key text primary key,
   value integer not null
 );
+
+-- The operator's own legal identity, shown on the legal pages. Text values,
+-- filled in by the admin; an empty or missing row means "not provided yet".
+create table if not exists site_details (
+  key text primary key,
+  value text not null
+);
 `;
