@@ -24,7 +24,10 @@ export async function placeOrder(fd: FormData) {
   if (!user) redirect(`/${lang}/login?next=${encodeURIComponent(here)}`);
 
   const listing = await getListing(listingId);
-  if (!listing) redirect(`/${lang}`);
+  if (!listing) redirect(`/${lang}/unavailable`);
+  // Your own item cannot be bought; an item that was removed or whose shop is paused is gone for good.
+  if (listing.shop_owner === user.id) redirect(`/${lang}/l/${listingId}`);
+  if (listing.status !== "active" || listing.shop_status !== "approved") redirect(`/${lang}/unavailable`);
 
   const shipping = {
     name: str(fd, "name"),
@@ -56,6 +59,7 @@ export async function placeOrder(fd: FormData) {
     });
   } catch (e) {
     if (e instanceof OrderError) {
+      if (e.code === "unavailable") redirect(`/${lang}/unavailable`);
       redirect(`${here}&error=${e.code === "stock" ? "stock" : e.code === "how" ? "how" : "unavailable"}`);
     }
     throw e;

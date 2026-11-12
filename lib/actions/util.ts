@@ -13,9 +13,21 @@ export const langOf = (fd: FormData): Locale => {
   return isLocale(v) ? v : DEFAULT_LOCALE;
 };
 
-// Only allow redirects back into this site.
-export const safeNext = (next: string, fallback: string) =>
-  next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : fallback;
+// Only allow redirects back into this site. Rejects control characters, whitespace and
+// backslashes (browsers strip tabs and newlines from URLs, so "/\t/evil" would become
+// "//evil"), then re-parses the value against a dummy origin and returns the parsed path.
+export const safeNext = (next: string, fallback: string) => {
+  if (typeof next !== "string" || !next.startsWith("/")) return fallback;
+  if (/[\u0000-\u0020\u007f-\u009f\\\s]/.test(next)) return fallback;
+  try {
+    const u = new URL(next, "http://internal.invalid");
+    if (u.origin !== "http://internal.invalid") return fallback;
+    if (!u.pathname.startsWith("/") || u.pathname.startsWith("//")) return fallback;
+    return u.pathname + u.search + u.hash;
+  } catch {
+    return fallback;
+  }
+};
 
 export async function origin() {
   const h = await headers();

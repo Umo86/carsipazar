@@ -6,6 +6,7 @@ import { formatGBP } from "@/lib/money";
 import { releaseDueOrders } from "@/lib/orders";
 import { PANEL_PAGE_SIZE, pageNo, pctBps, releaseDate, sellerPayouts } from "@/lib/panel-queries";
 import { getSettings } from "@/lib/settings";
+import { clampPage } from "@/lib/paging";
 import PanelPager from "@/components/PanelPager";
 
 export default async function DashboardPayouts({ params, searchParams }: PageProps<"/[lang]/dashboard/payouts">) {
@@ -16,6 +17,7 @@ export default async function DashboardPayouts({ params, searchParams }: PagePro
   await releaseDueOrders();
   const page = pageNo(sp.page);
   const [settings, p] = await Promise.all([getSettings(), sellerPayouts(shop.id, page)]);
+  clampPage(`/${lang}/dashboard/payouts`, {}, page, p.total, PANEL_PAGE_SIZE);
   const x = t.sellerx.pay;
   const base = `/${lang}/dashboard`;
   const date = (d: Date | string) => formatDate(new Date(d), lang);

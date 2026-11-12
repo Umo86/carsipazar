@@ -20,7 +20,7 @@ export const formatShortDay = (isoDay: string, lang: Locale) =>
 
 // Where a log row's target points, when there is somewhere useful to go.
 export function targetHref(kind: string, id: string, lang: Locale): string | null {
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return kind === "settings" ? `/${lang}/admin/settings` : kind === "site" ? `/${lang}/admin/site` : null;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return kind === "settings" ? `/${lang}/admin/settings` : kind === "site" ? `/${lang}/admin/site` : null;
   const a = `/${lang}/admin`;
   if (kind === "user") return `${a}/customers/${id}`;
   if (kind === "shop") return `${a}/sellers/${id}`;

@@ -32,7 +32,8 @@ export default async function CancellationPage({ params }: PageProps<"/[lang]/or
     .split(/(?<=\.)\s+/)
     .filter((sentence) => !/^(To|Kime):/.test(sentence) && !sentence.includes("{{email}}"))
     .join(" ");
-  const labels = form.fields.map((f) => f.replace(/\s*\[\*\]/g, ""));
+  // The first field is the "To" line, which is filled in above; the others line up with `values`.
+  const labels = form.fields.slice(1).map((f) => f.replace(/\s*\[\*\]/g, ""));
 
   const received = o.delivered_at ? new Date(o.delivered_at) : null;
   const late = received !== null && o.window_over;
@@ -54,7 +55,7 @@ export default async function CancellationPage({ params }: PageProps<"/[lang]/or
       received ? fmt(c.receivedOn, { date: formatDate(received, lang) }) : fmt(c.receivedOn, { date: c.blank })
     }`,
     o.ship_name || o.buyer_name,
-    buyerAddress || c.noAddress,
+    buyerAddress || "\u00a0",
     c.blank,
     c.blank,
   ];
@@ -70,7 +71,7 @@ export default async function CancellationPage({ params }: PageProps<"/[lang]/or
       <h1 className="text-4xl md:text-5xl">{c.title}</h1>
       <p className="mt-3 text-soft">{c.lead}</p>
       <p className="notice mt-5" data-no-cancel-notice>{c.notice}</p>
-      {late && <p className="notice notice-error mt-3" data-late role="alert">{c.late}</p>}
+      {late && <p className="notice notice-error no-print mt-3" data-late role="alert">{c.late}</p>}
       {!received && <p className="hint mt-3 no-print">{c.notYet}</p>}
 
       <section className="mt-8 rounded-2xl border border-line p-6" data-form>
@@ -81,7 +82,7 @@ export default async function CancellationPage({ params }: PageProps<"/[lang]/or
           {labels.map((label, i) => (
             <div key={i}>
               <dt className="text-sm text-soft">{label}</dt>
-              <dd className="mt-1 border-b border-line pb-1">{values[i] ?? c.blank}</dd>
+              <dd className="mt-1 min-h-6 border-b border-line pb-1">{values[i] ?? c.blank}</dd>
             </div>
           ))}
         </dl>

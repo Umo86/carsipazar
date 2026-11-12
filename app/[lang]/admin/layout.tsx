@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { navCounts } from "@/lib/admin-queries";
 import { getDict } from "@/lib/i18n";
+import { adminNavCounts } from "@/lib/actions/navcounts";
 import PanelShell from "@/components/PanelShell";
 
 export const metadata = { robots: { index: false } };
@@ -17,6 +18,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const n = t.panel.nav;
   return (
     <PanelShell
+      refreshBadges={adminNavCounts}
       title={t.panel.adminName}
       subtitle={t.panel.adminSub}
       groups={[
@@ -25,7 +27,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
           label: t.panel.groups.people,
           items: [
             { href: `${base}/customers`, label: n.users, icon: "users" },
-            { href: `${base}/sellers`, label: n.sellers, icon: "shop", badge: counts.shops },
+            { href: `${base}/sellers`, label: n.sellers, icon: "shop", badge: counts.shops, badgeKey: "sellers" },
           ],
         },
         {
@@ -33,7 +35,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
           items: [
             { href: `${base}/listings`, label: n.items, icon: "box" },
             { href: `${base}/reviews`, label: n.reviews, icon: "star" },
-            { href: `${base}/reports`, label: n.reports, icon: "flag", badge: counts.reports },
+            { href: `${base}/reports`, label: n.reports, icon: "flag", badge: counts.reports, badgeKey: "reports" },
           ],
         },
         {

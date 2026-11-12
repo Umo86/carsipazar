@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Icon, { type IconName } from "./Icon";
 
-export type PanelItem = { href: string; label: string; icon: IconName; badge?: number };
+export type PanelItem = { href: string; label: string; icon: IconName; badge?: number; badgeKey?: string };
 export type PanelGroup = { label?: string; items: PanelItem[] };
 
 // The layout shared by the admin panel and the seller panel (and later the buyer area).
@@ -16,15 +17,28 @@ export default function PanelShell({
   subtitle,
   groups,
   notice,
+  refreshBadges,
   children,
 }: {
   title: string;
   subtitle?: string;
   groups: PanelGroup[];
   notice?: React.ReactNode;
+  // Asks the server for fresh badge numbers (keyed by each item's badgeKey) after every navigation:
+  // the layout that renders this shell is not rendered again between sibling pages.
+  refreshBadges?: () => Promise<Record<string, number>>;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [live, setLive] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!refreshBadges) return;
+    let current = true;
+    refreshBadges().then((m) => current && setLive(m), () => {});
+    return () => {
+      current = false;
+    };
+  }, [pathname, refreshBadges]);
   const all = groups.flatMap((g) => g.items);
   // The first link is the panel's home and matches exactly; the others match their sub-pages too.
   const isActive = (it: PanelItem) =>
@@ -47,6 +61,7 @@ export default function PanelShell({
               )}
               {g.items.map((it) => {
                 const active = it === current;
+                const badge = it.badgeKey && it.badgeKey in live ? live[it.badgeKey] : it.badge;
                 return (
                   <Link
                     key={it.href}
@@ -58,13 +73,13 @@ export default function PanelShell({
                   >
                     <Icon name={it.icon} size={18} className="shrink-0" />
                     <span className="flex-1">{it.label}</span>
-                    {it.badge ? (
+                    {badge ? (
                       <span
                         className={`min-w-5 rounded-full px-1.5 text-center text-xs tabular-nums ${
                           active ? "bg-paper text-ink" : "bg-tulip text-paper"
                         }`}
                       >
-                        {it.badge}
+                        {badge}
                       </span>
                     ) : null}
                   </Link>

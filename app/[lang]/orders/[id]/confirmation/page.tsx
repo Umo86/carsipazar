@@ -7,6 +7,7 @@ import { formatGBP } from "@/lib/money";
 import { ownOrderForDocument } from "@/lib/panel-queries";
 import { isUuidStrict as isUuid } from "@/lib/admin-queries";
 import { getSiteDetails } from "@/lib/site-details";
+import { origin } from "@/lib/actions/util";
 import PrintButton from "@/components/PrintButton";
 import PrintStyle from "@/components/PrintStyle";
 
@@ -25,9 +26,19 @@ export default async function ConfirmationPage({ params }: PageProps<"/[lang]/or
   const t = getDict(lang);
   const c = t.my.conf;
   const site = await getSiteDetails();
+  const base = await origin();
+  const siteEmail = site.email.trim();
   const collection = o.fulfilment === "collection";
   const note = pick(lang, o.collection_note_tr, o.collection_note_en).text;
   const itemTotal = o.item_pence;
+  const upcoming = o.status === "paid" || o.status === "dispatched";
+  const stamp = (v: string | Date | null) => (v ? formatDate(new Date(v), lang) : "");
+  const outcome =
+    o.status === "refunded"
+      ? fmt(c.refundedOn, { date: stamp(o.refunded_at) })
+      : collection
+        ? fmt(c.collectedOn, { date: stamp(o.delivered_at) })
+        : fmt(c.deliveredOn, { date: stamp(o.delivered_at) });
   const by = new Date(new Date(o.created_at).getTime() + 30 * 86400_000);
   const shopAddress = [o.shop_address, `${o.shop_city} ${o.shop_postcode}`].filter((x) => x.trim()).join("\n");
   const row = (label: string, value: React.ReactNode) => (
@@ -70,8 +81,14 @@ export default async function ConfirmationPage({ params }: PageProps<"/[lang]/or
       <section className="mt-8 border-t border-line pt-6">
         <h2 className="text-2xl">{c.itemsTitle}</h2>
         <dl className="mt-3">
-          {row(c.item, `${o.title} × ${o.quantity}`)}
-          {row(c.itemPrice, <span className="tabular-nums">{formatGBP(itemTotal)}</span>)}
+          {row(c.item, o.title)}
+          {row(
+            c.itemPrice,
+            <span className="tabular-nums">
+              {formatGBP(Math.round(itemTotal / o.quantity))} × {o.quantity}
+            </span>,
+          )}
+          {row(c.itemsTotal, <span className="tabular-nums">{formatGBP(itemTotal)}</span>)}
           {row(
             c.delivery,
             collection ? c.collectionFree : <span className="tabular-nums">{o.postage_pence === 0 ? t.checkout.free : formatGBP(o.postage_pence)}</span>,
@@ -89,9 +106,9 @@ export default async function ConfirmationPage({ params }: PageProps<"/[lang]/or
             : [o.ship_name, o.ship_line1, o.ship_line2, `${o.ship_city} ${o.ship_postcode}`].filter((x) => x.trim()).join("\n")}
         </p>
         {collection && note && <p className="mt-3 whitespace-pre-line text-soft">{note}</p>}
-        <h3 className="mt-6 text-xl">{c.deliveryTime}</h3>
-        <p className="mt-1">
-          {collection ? c.collectTimeBody : fmt(c.deliveryTimeBody, { date: formatDate(by, lang) })}
+        <h3 className="mt-6 text-xl">{upcoming ? c.deliveryTime : c.outcomeTitle}</h3>
+        <p className="mt-1" data-delivery-note>
+          {upcoming ? (collection ? c.collectTimeBody : fmt(c.deliveryTimeBody, { date: formatDate(by, lang) })) : outcome}
         </p>
       </section>
 
@@ -103,7 +120,7 @@ export default async function ConfirmationPage({ params }: PageProps<"/[lang]/or
         <p className="mt-1">{c.faultyBody}</p>
         <p className="mt-4">
           <Link href={`/${lang}/help/returns`} className="underline underline-offset-4 hover:text-cobalt">{c.moreRights}</Link>
-          <span className="hidden print:inline"> /{lang}/help/returns</span>
+          <span className="hidden print:inline">{" "}{base}/{lang}/help/returns</span>
         </p>
       </section>
 
@@ -115,8 +132,9 @@ export default async function ConfirmationPage({ params }: PageProps<"/[lang]/or
           {row(
             c.contactUs,
             <>
-              {site.email.trim() && <span className="block">{site.email.trim()}</span>}
-              <Link href={`/${lang}/contact`} className="underline underline-offset-4 hover:text-cobalt">{c.contactPage}</Link>
+              {siteEmail && <span className="block">{siteEmail}</span>}
+              <Link href={`/${lang}/contact`} className={`underline underline-offset-4 hover:text-cobalt ${siteEmail ? "print:hidden" : "hidden"}`}>{c.contactPage}</Link>
+              {!siteEmail && <span className="hidden print:inline">{base}/{lang}/contact</span>}
             </>,
           )}
         </dl>

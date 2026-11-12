@@ -23,9 +23,8 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
 
   const l = await getListing(id);
   if (!l) notFound();
-  if (l.status !== "active" || l.shop_status !== "approved" || l.shop_owner === user.id) {
-    redirect(`/${lang}/l/${id}`);
-  }
+  if (l.shop_owner === user.id) redirect(`/${lang}/l/${id}`);
+  if (l.status !== "active" || l.shop_status !== "approved") redirect(`/${lang}/unavailable`);
   const [images, settings, saved] = await Promise.all([
     listingImageIds(l.id),
     getSettings(),

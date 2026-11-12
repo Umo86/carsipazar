@@ -4,6 +4,7 @@ import { getUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { getDict } from "@/lib/i18n";
 import { register } from "@/lib/actions/auth";
+import { safeNext } from "@/lib/actions/util";
 import SubmitButton from "@/components/SubmitButton";
 
 export default async function RegisterPage({ params, searchParams }: PageProps<"/[lang]/register">) {
@@ -11,7 +12,7 @@ export default async function RegisterPage({ params, searchParams }: PageProps<"
   if (!isLocale(lang)) notFound();
   const t = getDict(lang);
   const sp = await searchParams;
-  const next = typeof sp.next === "string" ? sp.next : `/${lang}`;
+  const next = safeNext(typeof sp.next === "string" ? sp.next : "", `/${lang}`);
   if (await getUser()) redirect(`/${lang}`);
   const error = sp.error === "exists" ? t.auth.errExists : sp.error ? t.auth.errFields : null;
 

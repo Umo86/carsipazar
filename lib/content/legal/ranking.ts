@@ -16,9 +16,9 @@ export const ranking: Bi<Doc> = {
             caption: "Ordering by page",
             head: ["Where", "Order"],
             rows: [
-              ["Home page, large picture at the top", "If we have uploaded a video, the video is shown. Otherwise it is the first furniture item in the “Featured” row (or the first item of the row if there is no furniture). It is picked in the same way as that row, so it can be an item whose seller pays for Featured promotion. The picture itself carries no label."],
+              ["Home page, large picture at the top", "If we have uploaded a video, the video is shown. Otherwise it is the first furniture item in the “Featured” row that is not there through paid promotion (or the first such item if there is no furniture). It never shows a paid item, because the picture carries no label. If there is no such item, no item picture is shown."],
               ["Home page, “Featured” row", "Up to 10 items. Items with paid Featured promotion running today first (labelled Sponsored). Then items we have marked as featured ourselves. Then the newest."],
-              ["Home page, “Piece of the week”", "If a seller has booked the Piece of the week, it is labelled Sponsored. If nobody has booked it, we choose one of the featured items ourselves and show it there without a label. An item that is in the Featured row because of paid promotion keeps its Sponsored label. The large picture at the top of the home page works in a similar way (see the first row)."],
+              ["Home page, “Piece of the week”", "If a seller has booked the Piece of the week for today, it is shown labelled Sponsored. If nobody has booked it, we choose one of our own unpaid picks from the Featured row and show it without a label. An item that is there through paid promotion is never shown without its Sponsored label."],
               ["Home page, “New in” row", "The 8 newest items. Paid promotion does not change this row."],
               ["Home page, the pictures of the streets", "One picture for each street (category): an item we have marked as featured if there is one, otherwise the newest."],
               ["Home page, “The shops”", "The first four shops of the shops directory, in the same order."],
@@ -57,9 +57,9 @@ export const ranking: Bi<Doc> = {
             caption: "Sayfaya göre sıralama",
             head: ["Nerede", "Sıralama"],
             rows: [
-              ["Ana sayfa, en üstteki büyük görsel", "Bir video yüklediysek video gösterilir. Yüklemediysek “Öne çıkanlar” sırasındaki ilk mobilya ürünü (mobilya yoksa o sıradaki ilk ürün) gösterilir. Bu görsel o sıra ile aynı yöntemle seçildiği için öne çıkanlar tanıtımına ödeme yapan bir satıcının ürünü de olabilir. Görselin kendisinde etiket yoktur."],
+              ["Ana sayfa, en üstteki büyük görsel", "Bir video yüklediysek video gösterilir. Yüklemediysek “Öne çıkanlar” sırasında ücretli tanıtım nedeniyle yer almayan ilk mobilya ürünü (mobilya yoksa bu koşula uyan ilk ürün) gösterilir. Görselin etiketi olmadığı için burada ücretli bir ürün hiçbir zaman gösterilmez. Uygun ürün yoksa ürün görseli gösterilmez."],
               ["Ana sayfa, “Öne çıkanlar” sırası", "En fazla 10 ürün. Önce bugün ücretli Öne çıkanlar tanıtımı süren ürünler (Sponsorlu etiketiyle). Sonra bizim öne çıkardıklarımız. Sonra en yeniler."],
-              ["Ana sayfa, “Haftanın parçası”", "Haftanın parçasını bir satıcı ayırtmışsa Sponsorlu etiketi taşır. Kimse ayırtmamışsa öne çıkan ürünlerden birini biz seçer ve etiketsiz gösteririz. Öne çıkanlar sırasında ücretli tanıtım nedeniyle yer alan bir ürün seçilirse Sponsorlu etiketini korur. Ana sayfanın en üstündeki büyük görsel için de benzer bir yöntem geçerlidir (ilk satıra bak)."],
+              ["Ana sayfa, “Haftanın parçası”", "Haftanın parçasını bugün için bir satıcı ayırtmışsa Sponsorlu etiketiyle gösterilir. Kimse ayırtmamışsa “Öne çıkanlar” sırasından ücretli olmayan kendi seçimlerimizden birini etiketsiz gösteririz. Ücretli tanıtım nedeniyle yer alan bir ürün Sponsorlu etiketi olmadan hiçbir zaman gösterilmez."],
               ["Ana sayfa, “Yeni gelenler” sırası", "En yeni 8 ürün. Ücretli tanıtım bu sırayı değiştirmez."],
               ["Ana sayfa, sokakların görselleri", "Her sokak (kategori) için bir görsel: varsa bizim öne çıkardığımız bir ürün, yoksa en yeni ürün."],
               ["Ana sayfa, “Dükkânlar”", "Dükkân listesinin ilk dört dükkânı, aynı sırayla."],

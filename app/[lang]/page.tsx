@@ -29,11 +29,13 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   ]);
   const video = media.find((m) => m.key === "hero-video");
   const poster = media.find((m) => m.key === "hero-poster");
-  // The banner shows a piece of furniture; the arch beside it shows something else.
-  const hero = featured.find((i) => i.category === "furniture" && i.image_id) ?? featured[0];
-  // A seller's booked "piece of the week" takes the arch; otherwise we pick one.
-  const piece =
-    booked ?? featured.find((i) => i.id !== hero?.id && i.category !== hero?.category && i.image_id);
+  // Neither picture may show a paid placement without its Sponsored label. The banner picture has no
+  // label, so it only ever shows an item that is not there through paid promotion (our own picks, or
+  // the newest), and no picture at all when there is none. The arch shows a seller's booked
+  // "piece of the week" with its label; an unbooked arch shows one of our own unpaid picks.
+  const unpaid = featured.filter((i) => !i.sponsored && i.id !== booked?.id && i.image_id);
+  const hero = unpaid.find((i) => i.category === "furniture") ?? unpaid[0];
+  const piece = booked ?? unpaid.find((i) => i.id !== hero?.id && i.category !== hero?.category);
   const name = (i: { title_tr: string; title_en: string }) => pick(lang, i.title_tr, i.title_en).text;
 
   return (

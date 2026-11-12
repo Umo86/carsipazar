@@ -133,7 +133,7 @@ export type ListingFull = {
 };
 
 export const getListing = (id: string) =>
-  /^[0-9a-f-]{36}$/i.test(id)
+  isUuid(id)
     ? one<ListingFull>(
         `select l.*, s.name as shop_name, s.slug as shop_slug, s.status as shop_status,
                 s.owner_id as shop_owner, s.seller_type, s.founding, s.city as shop_city,
@@ -180,7 +180,7 @@ export const shopReviews = (shopId: string, includeHidden = false) =>
     [shopId, includeHidden],
   );
 
-export const isUuid = (v: string) => /^[0-9a-f-]{36}$/i.test(v);
+export const isUuid = (v: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 
 // One cover image per category, for the "streets" row on the home page.
 export const categoryCovers = () =>

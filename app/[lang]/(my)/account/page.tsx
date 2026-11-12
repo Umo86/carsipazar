@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAddress, requireUser } from "@/lib/auth";
-import { isLocale } from "@/lib/config";
-import { fmt, formatDate, getDict, orderExplain, orderStatus } from "@/lib/i18n";
+import { COLLECTION_MAX_ATTEMPTS, isLocale } from "@/lib/config";
+import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import { buyerOverview } from "@/lib/panel-queries";
 import { changePassword, saveAddress, updateProfile } from "@/lib/actions/account";
@@ -57,7 +57,15 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
                     <span className="block text-sm text-soft">
                       {fmt(t.orders.order, { n: o.number })}, {o.shop_name}, {formatDate(new Date(o.created_at), lang)}
                     </span>
-                    <span className="mt-1 block text-sm">{orderExplain(t, o)}</span>
+                    <span className="mt-1 block text-sm" data-next-step>
+                      {o.status === "paid"
+                        ? m.nextPaid
+                        : o.fulfilment === "collection"
+                          ? o.collection_attempts >= COLLECTION_MAX_ATTEMPTS
+                            ? m.nextLocked
+                            : m.nextCollect
+                          : m.nextDelivery}
+                    </span>
                   </span>
                   <span className="sm:text-right">
                     <span className="block tabular-nums">{formatGBP(o.total_pence)}</span>

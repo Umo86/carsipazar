@@ -33,11 +33,10 @@ export default async function LabelPage({ params }: PageProps<"/[lang]/dashboard
 
   return (
     <div className="wrap py-10" data-label>
-      {/* A6 on paper; the site header, footer and the buttons are not printed. */}
+      {/* A6 on paper; what is left off the paper is set in app/globals.css. */}
       <style>{`
         @media print {
           @page { size: A6; margin: 0; }
-          body:has([data-label]) header, body:has([data-label]) footer, .no-print { display: none !important; }
           body:has([data-label]) main { padding: 0 !important; }
           [data-label] { padding: 0 !important; max-width: none !important; }
           [data-label] .label-card { border: 0 !important; margin: 0 !important; }

@@ -8,15 +8,22 @@ export default function PanelPager({
   page,
   total,
   pageSize,
+  params = {},
 }: {
   t: Dict;
   path: string;
   page: number;
   total: number;
   pageSize: number;
+  params?: Record<string, string>; // current filters, kept on every link
 }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
-  const href = (p: number) => (p > 1 ? `${path}?page=${p}` : path);
+  const href = (p: number) => {
+    const sp = new URLSearchParams(Object.entries(params).filter(([, v]) => v));
+    if (p > 1) sp.set("page", String(p));
+    const qs = sp.toString();
+    return qs ? `${path}?${qs}` : path;
+  };
   const count = total === 1 ? t.adminx.resultOne : fmt(t.adminx.results, { n: total });
   return (
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm text-soft">

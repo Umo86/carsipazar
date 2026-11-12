@@ -5,6 +5,8 @@ import { listReports, pageOf, pick1, REPORT_STATUSES, type ReportRow } from "@/l
 import { formatDateTime } from "@/lib/admin-format";
 import { fmt, getDict, pick, type Dict } from "@/lib/i18n";
 import { resolveReport } from "@/lib/actions/reports";
+import { PAGE_SIZE } from "@/lib/admin-queries";
+import { clampPage } from "@/lib/paging";
 import AdminPager from "@/components/AdminPager";
 import Rating from "@/components/Rating";
 
@@ -54,6 +56,7 @@ export default async function AdminReports({ params, searchParams }: PageProps<"
   const status = pick1(sp.status, REPORT_STATUSES) || "open";
   const page = pageOf(sp.page);
   const { rows, total } = await listReports({ status, page });
+  clampPage(`/${lang}/admin/reports`, { status }, page, total, PAGE_SIZE);
   const x = t.adminx;
   const path = `/${lang}/admin/reports`;
   const pill = (active: boolean) => `btn btn-sm ${active ? "" : "btn-ghost"}`;

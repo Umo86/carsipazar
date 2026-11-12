@@ -5,6 +5,8 @@ import { listLog, pageOf } from "@/lib/admin-queries";
 import { cleanText } from "@/lib/clean";
 import { getDict } from "@/lib/i18n";
 import ActivityLine from "@/components/ActivityLine";
+import { PAGE_SIZE } from "@/lib/admin-queries";
+import { clampPage } from "@/lib/paging";
 import AdminPager from "@/components/AdminPager";
 
 export default async function AdminActivity({ params, searchParams }: PageProps<"/[lang]/admin/activity">) {
@@ -19,6 +21,7 @@ export default async function AdminActivity({ params, searchParams }: PageProps<
   const action = actions.includes(wanted) ? wanted : "";
   const x = t.adminx;
   const path = `/${lang}/admin/activity`;
+  clampPage(path, { action }, page, total, PAGE_SIZE);
 
   return (
     <div className="max-w-4xl">

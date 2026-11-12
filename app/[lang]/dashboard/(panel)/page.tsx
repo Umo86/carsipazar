@@ -15,11 +15,9 @@ export default async function DashboardHome({ params }: PageProps<"/[lang]/dashb
   const { shop } = await requireShop(lang);
   await releaseDueOrders();
 
-  const stats = await one<{ held: string; paid_out: string; to_dispatch: string; live: string }>(
+  const stats = await one<{ paid_out: string; live: string }>(
     `select
-       coalesce((select sum(seller_payout_pence) from orders where shop_id = $1 and status in ('paid','dispatched','delivered')), 0) as held,
        coalesce((select sum(seller_payout_pence) from orders where shop_id = $1 and status = 'released'), 0) as paid_out,
-       (select count(*) from orders where shop_id = $1 and status = 'paid') as to_dispatch,
        (select count(*) from listings where shop_id = $1 and status = 'active') as live`,
     [shop.id],
   );
@@ -46,14 +44,13 @@ export default async function DashboardHome({ params }: PageProps<"/[lang]/dashb
     { label: x.toSend, n: n.toSend, href: `${base}/orders?status=send` },
     { label: x.toReady, n: n.toReady, href: `${base}/orders?status=ready` },
     { label: x.waiting, n: n.waiting, href: `${base}/orders?status=waiting` },
+    { label: x.locked, n: n.locked, href: `${base}/orders?status=waiting` },
     { label: x.lowStock, n: n.low, href: `${base}/listings?show=low` },
     { label: x.paused, n: n.paused, href: `${base}/listings?show=paused` },
     { label: x.unreplied, n: n.unreplied, href: `${base}/reviews` },
   ].filter((a) => a.n > 0);
   const url = `${await origin()}/s/${shop.slug}`;
   const tiles = [
-    { label: t.dash.toDispatch, value: stats!.to_dispatch, href: `/${lang}/dashboard/orders` },
-    { label: t.dash.held, value: formatGBP(Number(stats!.held)), hint: t.dash.heldHint },
     { label: t.dash.paidOut, value: formatGBP(Number(stats!.paid_out)) },
     { label: t.dash.live, value: stats!.live, href: `/${lang}/dashboard/listings` },
   ];
@@ -153,7 +150,6 @@ export default async function DashboardHome({ params }: PageProps<"/[lang]/dashb
             <dd className="mt-1 font-display text-4xl">
               {tile.href ? <Link href={tile.href} className="hover:text-cobalt">{tile.value}</Link> : tile.value}
             </dd>
-            {tile.hint && <dd className="hint mt-1">{tile.hint}</dd>}
           </div>
         ))}
       </dl>

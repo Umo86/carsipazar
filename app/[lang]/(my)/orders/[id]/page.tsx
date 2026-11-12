@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { isLocale } from "@/lib/config";
+import { COLLECTION_MAX_ATTEMPTS, isLocale } from "@/lib/config";
 import { one } from "@/lib/db";
 import { fmt, formatDate, getDict, orderExplain, orderStatus, pick } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
@@ -46,7 +46,8 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
   const collection = o.fulfilment === "collection";
   const shopNote = pick(lang, o.collection_note_tr, o.collection_note_en).text;
   // The handover code is for the buyer only: an admin who opens the order does not see it.
-  const showCode = collection && o.status === "dispatched" && o.buyer_id === user.id && Boolean(o.collection_code);
+  const locked = collection && o.status === "dispatched" && o.collection_attempts >= COLLECTION_MAX_ATTEMPTS;
+  const showCode = collection && o.status === "dispatched" && !locked && o.buyer_id === user.id && Boolean(o.collection_code);
   const canReview = (o.status === "delivered" || o.status === "released") && !review && o.buyer_id === user.id;
 
   return (
@@ -68,7 +69,17 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
           ))}
         </ol>
       )}
-      <p className="notice mt-6">{orderExplain(t, o)}</p>
+      {locked ? (
+        <section className="notice notice-error mt-6" role="alert" data-collection="locked">
+          <h2 className="text-xl">{t.orders.lockedTitle}</h2>
+          <p className="mt-2">{t.orders.lockedBody}</p>
+          <p className="mt-3">
+            <Link href={`/${lang}/contact`} className="underline underline-offset-4">{t.orders.lockedLink}</Link>
+          </p>
+        </section>
+      ) : (
+        <p className="notice mt-6">{orderExplain(t, o)}</p>
+      )}
 
       {collection && o.status === "paid" && <p className="mt-4" data-collection="wait">{t.orders.collectWait}</p>}
       {showCode && (

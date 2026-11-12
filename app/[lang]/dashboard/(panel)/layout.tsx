@@ -3,6 +3,7 @@ import { requireShop } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { getDict } from "@/lib/i18n";
 import { sellerOrdersToAct } from "@/lib/panel-queries";
+import { sellerNavCounts } from "@/lib/actions/navcounts";
 import PanelShell from "@/components/PanelShell";
 
 export const metadata = { robots: { index: false } };
@@ -18,6 +19,7 @@ export default async function DashboardLayout({ children, params }: LayoutProps<
 
   return (
     <PanelShell
+      refreshBadges={sellerNavCounts}
       title={shop.name}
       subtitle={t.dash.title}
       notice={
@@ -33,7 +35,7 @@ export default async function DashboardLayout({ children, params }: LayoutProps<
           label: g.selling,
           items: [
             { href: `${base}/listings`, label: t.dash.listings, icon: "box" },
-            { href: `${base}/orders`, label: t.dash.orders, icon: "receipt", badge: toAct },
+            { href: `${base}/orders`, label: t.dash.orders, icon: "receipt", badge: toAct, badgeKey: "orders" },
             { href: `${base}/reviews`, label: t.dash.reviews, icon: "star" },
           ],
         },

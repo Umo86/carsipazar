@@ -290,13 +290,19 @@ h3 {
   }
 }
 
-/* Printing: only the page content. The site header, its utility bar and the street navigation are
-   the first children of <body> (see components/Header.tsx), so they are hidden by position. */
+/* Printing: only the page content. The utility bar, the site header, the street navigation and the
+   footer are direct children of <body> (see components/Header.tsx and Footer.tsx), so they are hidden
+   by position. This is the one set of rules for every printed page (order documents, label, returns
+   page); the pages only add their own paper size and spacing. */
 @media print {
   body > header,
   body > nav,
   body > div.bg-mist,
+  body > footer,
   .no-print {
     display: none !important;
+  }
+  h1, h2, h3, h4 {
+    break-after: avoid;
   }
 }

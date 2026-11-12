@@ -4,6 +4,8 @@ import type { Locale } from "@/lib/config";
 import { cleanSearch, listShops, pageOf, pick1, SHOP_STATUSES } from "@/lib/admin-queries";
 import { formatDate, getDict } from "@/lib/i18n";
 import { setFounding, setShopStatus } from "@/lib/actions/admin";
+import { PAGE_SIZE } from "@/lib/admin-queries";
+import { clampPage } from "@/lib/paging";
 import AdminPager from "@/components/AdminPager";
 
 export default async function AdminSellers({ params, searchParams }: PageProps<"/[lang]/admin/sellers">) {
@@ -15,6 +17,7 @@ export default async function AdminSellers({ params, searchParams }: PageProps<"
   const status = pick1(sp.status, SHOP_STATUSES);
   const page = pageOf(sp.page);
   const { rows: shops, total } = await listShops({ text: find, status, page });
+  clampPage(`/${lang}/admin/sellers`, { q: find, status }, page, total, PAGE_SIZE);
   const x = t.adminx;
   const path = `/${lang}/admin/sellers`;
   const here = `${path}${new URLSearchParams(

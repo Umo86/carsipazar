@@ -4,7 +4,9 @@ import Link from "next/link";
 import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import { releaseDueOrders } from "@/lib/orders";
-import { isOrderFilter, ORDER_FILTERS, sellerHasOrders, sellerOrders } from "@/lib/panel-queries";
+import { isOrderFilter, ORDER_FILTERS, PANEL_PAGE_SIZE, pageNo, sellerHasOrders, sellerOrders } from "@/lib/panel-queries";
+import { clampPage } from "@/lib/paging";
+import PanelPager from "@/components/PanelPager";
 import { getSettings } from "@/lib/settings";
 import { confirmHandoverAction, createLabelAction, dispatchOrder, markReadyAction } from "@/lib/actions/shop";
 import SubmitButton from "@/components/SubmitButton";
@@ -18,12 +20,15 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
   await releaseDueOrders();
   const filter = isOrderFilter(sp.status) ? sp.status : "";
   const search = typeof sp.q === "string" ? sp.q.trim().slice(0, 20) : "";
-  const [orders, settings, any] = await Promise.all([
-    sellerOrders(shop.id, filter, search),
+  const page = pageNo(sp.page);
+  const [{ rows: orders, total }, settings, any] = await Promise.all([
+    sellerOrders(shop.id, filter, search, page),
     getSettings(),
     sellerHasOrders(shop.id),
   ]);
 
+  const listPath = `/${lang}/dashboard/orders`;
+  clampPage(listPath, { status: filter, q: search }, page, total, PANEL_PAGE_SIZE);
   if (!any) return <p className="text-soft">{o.empty}</p>;
   const f = t.sellerx.of;
   const href = (status: string) => {
@@ -222,6 +227,9 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
         );
       })}
     </ul>
+    {total > 0 && (
+      <PanelPager t={t} path={listPath} params={{ status: filter, q: search }} page={page} total={total} pageSize={PANEL_PAGE_SIZE} />
+    )}
     </>
   );
 }

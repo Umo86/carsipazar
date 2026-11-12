@@ -3,6 +3,8 @@ import { requireAdmin } from "@/lib/auth";
 import type { Locale } from "@/lib/config";
 import { cleanSearch, listUsers, pageOf, pick1, ROLES } from "@/lib/admin-queries";
 import { formatDate, getDict } from "@/lib/i18n";
+import { PAGE_SIZE } from "@/lib/admin-queries";
+import { clampPage } from "@/lib/paging";
 import AdminPager from "@/components/AdminPager";
 import ResetLinkForm from "@/components/ResetLinkForm";
 
@@ -16,6 +18,7 @@ export default async function AdminCustomers({ params, searchParams }: PageProps
   const blocked = sp.status === "blocked";
   const page = pageOf(sp.page);
   const { rows, total } = await listUsers({ text: find, role, blocked, page });
+  clampPage(`/${lang}/admin/customers`, { q: find, role, status: blocked ? "blocked" : "" }, page, total, PAGE_SIZE);
   const x = t.adminx;
   const path = `/${lang}/admin/customers`;
 

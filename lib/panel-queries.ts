@@ -1,6 +1,7 @@
 import "server-only";
 import { one, q } from "./db";
 import { ORDER_NO_CODE, type Order } from "./orders";
+import { COLLECTION_MAX_ATTEMPTS } from "./config";
 import { isUuidStrict as isUuid } from "./admin-queries";
 
 // SQL for the seller panel and the buyer "My account" panel. Every query is parameterised.
@@ -41,6 +42,7 @@ export type SellerNumbers = {
   toSend: number;
   toReady: number;
   waiting: number;
+  locked: number;
   orders: number;
   items: number;
   low: number;
@@ -59,7 +61,8 @@ export async function sellerNumbers(shopId: string): Promise<SellerNumbers> {
             coalesce(sum(seller_payout_pence) filter (where status = 'released' and released_at >= now() - interval '30 days'), 0) as paid30,
             count(*) filter (where status = 'paid' and fulfilment = 'delivery') as to_send,
             count(*) filter (where status = 'paid' and fulfilment = 'collection') as to_ready,
-            count(*) filter (where status = 'dispatched' and fulfilment = 'collection') as waiting,
+            count(*) filter (where status = 'dispatched' and fulfilment = 'collection' and collection_attempts < ${COLLECTION_MAX_ATTEMPTS}) as waiting,
+            count(*) filter (where status = 'dispatched' and fulfilment = 'collection' and collection_attempts >= ${COLLECTION_MAX_ATTEMPTS}) as locked,
             count(*) filter (where status <> 'pending') as orders
        from orders where shop_id = $1`,
     [shopId],
@@ -85,6 +88,7 @@ export async function sellerNumbers(shopId: string): Promise<SellerNumbers> {
     toSend: Number(o?.to_send ?? 0),
     toReady: Number(o?.to_ready ?? 0),
     waiting: Number(o?.waiting ?? 0),
+    locked: Number(o?.locked ?? 0),
     orders: Number(o?.orders ?? 0),
     items: Number(l?.items ?? 0),
     low: Number(l?.low ?? 0),
@@ -175,28 +179,32 @@ const FILTER_SQL: Record<OrderFilter, string> = {
   refunded: "status = 'refunded'",
 };
 
-// "1001" or "#1001" -> 1001; anything else -> null (matches nothing).
-export function parseOrderNumber(v: string): number | null {
+// "1001" or "#1001" -> "1001"; anything that is not only digits -> null (matches nothing).
+export function orderNumberDigits(v: string): string | null {
   const m = /^#?\s*(\d{1,9})$/.exec(v.trim());
-  return m ? parseInt(m[1], 10) : null;
+  return m ? m[1] : null;
 }
 
-export function sellerOrders(shopId: string, filter: OrderFilter | "", search: string) {
+// One page of the seller's orders. The search matches any part of the order number (digits only).
+export async function sellerOrders(shopId: string, filter: OrderFilter | "", search: string, page: number) {
   const args: unknown[] = [shopId];
   let where = "shop_id = $1 and status <> 'pending'";
   if (filter) where += ` and ${FILTER_SQL[filter]}`;
   if (search) {
-    const n = parseOrderNumber(search);
-    if (n === null) where += " and false";
+    const d = orderNumberDigits(search);
+    if (d === null) where += " and false";
     else {
-      args.push(n);
-      where += ` and number = $${args.length}`;
+      args.push(`%${d}%`);
+      where += ` and number::text like $${args.length}`;
     }
   }
-  return q<Order>(
-    `select *, ${ORDER_NO_CODE} from orders where ${where} order by (status = 'paid') desc, created_at desc limit 200`,
+  const c = await one<{ n: string }>(`select count(*) as n from orders where ${where}`, args);
+  const rows = await q<Order>(
+    `select *, ${ORDER_NO_CODE} from orders where ${where}
+      order by (status = 'paid') desc, created_at desc, id limit ${PANEL_PAGE_SIZE} offset ${(page - 1) * PANEL_PAGE_SIZE}`,
     args,
   );
+  return { rows, total: Number(c?.n ?? 0) };
 }
 
 export async function sellerHasOrders(shopId: string) {
@@ -216,9 +224,10 @@ export type BuyerOrderLine = {
   fulfilment: Order["fulfilment"];
   created_at: Date;
   shop_name: string;
+  collection_attempts: number;
 };
 
-const LINE_COLS = `o.id, o.number, o.title, o.quantity, o.total_pence, o.status, o.fulfilment, o.created_at, s.name as shop_name`;
+const LINE_COLS = `o.id, o.number, o.title, o.quantity, o.total_pence, o.status, o.fulfilment, o.created_at, o.collection_attempts, s.name as shop_name`;
 
 export async function buyerOverview(userId: string) {
   const [inProgress, toReview, c] = await Promise.all([
@@ -300,7 +309,7 @@ export async function ownOrderForDocument(orderId: string, userId: string) {
             s.address as shop_address, s.city as shop_city, s.postcode as shop_postcode,
             s.public_email as shop_public_email, s.phone as shop_phone, s.show_phone as shop_show_phone,
             s.collection_note_tr, s.collection_note_en,
-            coalesce(o.delivered_at < now() - interval '14 days', false) as window_over
+            coalesce((now() at time zone 'Europe/London')::date > (o.delivered_at at time zone 'Europe/London')::date + 14, false) as window_over
        from orders o join shops s on s.id = o.shop_id join users u on u.id = o.buyer_id
       where o.id = $1 and o.buyer_id = $2`,
     [orderId, userId],

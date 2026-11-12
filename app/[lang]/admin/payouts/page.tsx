@@ -5,6 +5,8 @@ import { listPayouts, pageOf } from "@/lib/admin-queries";
 import { fmt, getDict } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import { getSettings } from "@/lib/settings";
+import { PAGE_SIZE } from "@/lib/admin-queries";
+import { clampPage } from "@/lib/paging";
 import AdminPager from "@/components/AdminPager";
 
 export default async function AdminPayouts({ params, searchParams }: PageProps<"/[lang]/admin/payouts">) {
@@ -17,6 +19,7 @@ export default async function AdminPayouts({ params, searchParams }: PageProps<"
   const { rows, total, totals } = await listPayouts({ releaseDays: release_days, page });
   const x = t.adminx;
   const path = `/${lang}/admin/payouts`;
+  clampPage(path, {}, page, total, PAGE_SIZE);
   const tiles = [
     { label: x.pa.held, value: totals.held },
     { label: x.pa.due, value: totals.due, hint: fmt(x.pa.dueHint, { days: release_days }) },

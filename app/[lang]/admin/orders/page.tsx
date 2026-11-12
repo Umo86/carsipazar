@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import type { Locale } from "@/lib/config";
-import { cleanSearch, listOrders, ORDER_STATUSES, pageOf, pick1 } from "@/lib/admin-queries";
+import { cleanSearch, listOrders, ORDER_STATUSES, PAGE_SIZE, pageOf, pick1 } from "@/lib/admin-queries";
 import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import { releaseDueOrders, type Order } from "@/lib/orders";
 import { adminOrder } from "@/lib/actions/admin";
+import { clampPage } from "@/lib/paging";
 import AdminPager from "@/components/AdminPager";
 
 export default async function AdminOrders({ params, searchParams }: PageProps<"/[lang]/admin/orders">) {
@@ -23,6 +24,7 @@ export default async function AdminOrders({ params, searchParams }: PageProps<"/
   const orders = rows as (Order & { shop_name: string; buyer_email: string })[];
   const x = t.adminx;
   const path = `/${lang}/admin/orders`;
+  clampPage(path, { q: find, status, fulfilment, stuck: stuck ? "1" : "" }, page, total, PAGE_SIZE);
   const here = `${path}${new URLSearchParams(
     Object.entries({ q: find, status, fulfilment, stuck: stuck ? "1" : "", page: page > 1 ? String(page) : "" }).filter(([, v]) => v),
   ).toString().replace(/^(?=.)/, "?")}`;
