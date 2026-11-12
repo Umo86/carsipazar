@@ -1,9 +1,10 @@
 import { requireShop } from "@/lib/auth";
 import { COLLECTION_MAX_ATTEMPTS, type Locale } from "@/lib/config";
-import { q } from "@/lib/db";
+import Link from "next/link";
 import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
-import { ORDER_NO_CODE, releaseDueOrders, type Order } from "@/lib/orders";
+import { releaseDueOrders } from "@/lib/orders";
+import { isOrderFilter, ORDER_FILTERS, sellerHasOrders, sellerOrders } from "@/lib/panel-queries";
 import { getSettings } from "@/lib/settings";
 import { confirmHandoverAction, createLabelAction, dispatchOrder, markReadyAction } from "@/lib/actions/shop";
 import SubmitButton from "@/components/SubmitButton";
@@ -15,18 +16,52 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
   const { shop } = await requireShop(lang);
   const sp = await searchParams;
   await releaseDueOrders();
-  const [orders, settings] = await Promise.all([
-    q<Order>(
-      `select *, ${ORDER_NO_CODE} from orders where shop_id = $1 and status <> 'pending' order by (status = 'paid') desc, created_at desc limit 200`,
-      [shop.id],
-    ),
+  const filter = isOrderFilter(sp.status) ? sp.status : "";
+  const search = typeof sp.q === "string" ? sp.q.trim().slice(0, 20) : "";
+  const [orders, settings, any] = await Promise.all([
+    sellerOrders(shop.id, filter, search),
     getSettings(),
+    sellerHasOrders(shop.id),
   ]);
 
-  if (orders.length === 0) return <p className="text-soft">{o.empty}</p>;
+  if (!any) return <p className="text-soft">{o.empty}</p>;
+  const f = t.sellerx.of;
+  const href = (status: string) => {
+    const p = new URLSearchParams();
+    if (status) p.set("status", status);
+    if (search) p.set("q", search);
+    const qs = p.toString();
+    return `/${lang}/dashboard/orders${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <>
+    <div className="mb-8 grid gap-4" data-order-filters>
+      <nav aria-label={f.filter} className="flex flex-wrap gap-2">
+        {(["", ...ORDER_FILTERS] as const).map((k) => (
+          <Link
+            key={k || "all"}
+            href={href(k)}
+            aria-current={filter === k ? "true" : undefined}
+            className={`rounded-full px-3.5 py-1.5 text-sm transition-colors ${filter === k ? "bg-ink text-paper" : "bg-mist hover:bg-line"}`}
+          >
+            {k === "" ? f.all : f[k]}
+          </Link>
+        ))}
+      </nav>
+      <form action={`/${lang}/dashboard/orders`} role="search" className="flex flex-wrap items-end gap-3">
+        {filter && <input type="hidden" name="status" value={filter} />}
+        <label className="field w-48">
+          <span>{f.search}</span>
+          <input className="input" name="q" inputMode="numeric" defaultValue={search} maxLength={20} />
+        </label>
+        <button className="btn btn-ghost btn-sm">{f.searchBtn}</button>
+        {(search || filter) && (
+          <Link href={`/${lang}/dashboard/orders`} className="py-2 text-sm underline underline-offset-4 hover:text-cobalt">{f.clear}</Link>
+        )}
+      </form>
+    </div>
+    {orders.length === 0 && <p className="text-soft">{f.none}</p>}
     {(sp.error === "label" || sp.error === "tracking") && (
       <p className="notice notice-error mb-6" role="alert">
         {sp.error === "label" ? o.labelFirst : o.trackingRequired}

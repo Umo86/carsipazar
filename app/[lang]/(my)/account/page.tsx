@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAddress, requireUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
-import { getDict } from "@/lib/i18n";
+import { fmt, formatDate, getDict, orderExplain, orderStatus } from "@/lib/i18n";
+import { formatGBP } from "@/lib/money";
+import { buyerOverview } from "@/lib/panel-queries";
 import { changePassword, saveAddress, updateProfile } from "@/lib/actions/account";
 import SubmitButton from "@/components/SubmitButton";
 
@@ -15,6 +17,8 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
   const user = await requireUser(lang, `/${lang}/account`);
   const sp = await searchParams;
   const a = await getAddress(user.id);
+  const ov = await buyerOverview(user.id);
+  const m = t.my.ov;
   const note = (section: string) =>
     sp.saved === section && (
       <p className="notice mb-5" role="status">
@@ -23,14 +27,71 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
     );
 
   return (
-    <div className="wrap max-w-3xl pt-10">
-      <h1 className="text-5xl">{t.account.title}</h1>
-      <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-        <Link href={`/${lang}/orders`} className="underline underline-offset-4 hover:text-cobalt">{t.nav.orders}</Link>
-        <Link href={`/${lang}/favourites`} className="underline underline-offset-4 hover:text-cobalt">{t.account.favourites}</Link>
-      </p>
+    <div className="grid max-w-3xl gap-12">
+      <dl className="grid grid-cols-2 gap-6" data-account-counts>
+        <div className="rounded-2xl bg-mist p-5">
+          <dt className="text-sm text-soft">{m.ordersCount}</dt>
+          <dd className="mt-1 font-display text-4xl tabular-nums">
+            <Link href={`/${lang}/orders`} className="hover:text-cobalt">{ov.orders}</Link>
+          </dd>
+        </div>
+        <div className="rounded-2xl bg-mist p-5">
+          <dt className="text-sm text-soft">{m.favCount}</dt>
+          <dd className="mt-1 font-display text-4xl tabular-nums">
+            <Link href={`/${lang}/favourites`} className="hover:text-cobalt">{ov.favs}</Link>
+          </dd>
+        </div>
+      </dl>
 
-      <section className="panel mt-8 p-7">
+      <section data-in-progress>
+        <h2 className="text-3xl">{m.inProgress}</h2>
+        {ov.inProgress.length === 0 ? (
+          <p className="mt-3 text-soft">{m.inProgressNone}</p>
+        ) : (
+          <ul className="mt-3">
+            {ov.inProgress.map((o) => (
+              <li key={o.id} className="border-t border-line">
+                <Link href={`/${lang}/orders/${o.id}`} className="group grid gap-1 py-4 sm:grid-cols-[1fr_auto] sm:gap-6">
+                  <span>
+                    <span className="block font-medium group-hover:underline underline-offset-4">{o.title} × {o.quantity}</span>
+                    <span className="block text-sm text-soft">
+                      {fmt(t.orders.order, { n: o.number })}, {o.shop_name}, {formatDate(new Date(o.created_at), lang)}
+                    </span>
+                    <span className="mt-1 block text-sm">{orderExplain(t, o)}</span>
+                  </span>
+                  <span className="sm:text-right">
+                    <span className="block tabular-nums">{formatGBP(o.total_pence)}</span>
+                    <span className="block text-sm text-turq">{orderStatus(t, o)}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section data-to-review>
+        <h2 className="text-3xl">{m.toReview}</h2>
+        <p className="hint mt-1">{m.toReviewHint}</p>
+        {ov.toReview.length === 0 ? (
+          <p className="mt-3 text-soft">{m.toReviewNone}</p>
+        ) : (
+          <ul className="mt-3">
+            {ov.toReview.map((o) => (
+              <li key={o.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-line py-4">
+                <span>
+                  <span className="block font-medium">{o.title} × {o.quantity}</span>
+                  <span className="block text-sm text-soft">{fmt(t.orders.order, { n: o.number })}, {o.shop_name}</span>
+                </span>
+                <Link href={`/${lang}/orders/${o.id}#review`} className="btn btn-ghost btn-sm">{m.writeReview}</Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <div id="details" className="grid scroll-mt-28 gap-6">
+      <section className="panel p-7">
         <h2 className="mb-5 text-3xl">{t.account.profile}</h2>
         {note("profile")}
         {sp.error === "name" && <p className="notice notice-error mb-5" role="alert">{t.account.errName}</p>}
@@ -49,7 +110,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
         </form>
       </section>
 
-      <section className="panel mt-6 p-7">
+      <section className="panel p-7">
         <h2 className="text-3xl">{t.account.address}</h2>
         <p className="hint mt-1 mb-5">{t.account.addressHint}</p>
         {note("address")}
@@ -81,7 +142,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
         </form>
       </section>
 
-      <section className="panel mt-6 p-7">
+      <section className="panel p-7">
         <h2 className="mb-5 text-3xl">{t.account.password}</h2>
         {note("password")}
         {sp.error === "password" && <p className="notice notice-error mb-5" role="alert">{t.account.errPassword}</p>}
@@ -99,6 +160,7 @@ export default async function AccountPage({ params, searchParams }: PageProps<"/
           <div><SubmitButton>{t.account.changePassword}</SubmitButton></div>
         </form>
       </section>
+    </div>
     </div>
   );
 }
