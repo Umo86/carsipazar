@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { CATEGORIES, SITE_NAME, type Locale } from "@/lib/config";
 import type { Dict } from "@/lib/i18n";
-import { paymentsMode } from "@/lib/payments";
 
 export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
   const link = "transition-colors duration-200 hover:text-ink hover:underline underline-offset-4";
@@ -11,6 +10,9 @@ export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
         <div>
           <p className="font-display text-3xl uppercase tracking-[-0.02em]" lang="en">{SITE_NAME}</p>
           <p className="mt-3 max-w-sm text-soft">{t.footer.line}</p>
+          <p className="mt-4 text-soft">
+            <Link href={`/${lang}/about`} className={link}>{t.footer.about}</Link>
+          </p>
         </div>
         <div>
           <p className="font-medium">{t.footer.buyers}</p>
@@ -37,26 +39,6 @@ export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
           </ul>
         </div>
       </div>
-      {paymentsMode() === "demo" && (
-        <p className="border-t border-line py-4 text-center text-sm text-soft">
-          {t.footer.demo}{" "}
-          {t.footer.credit.split(/(Pixabay|Unsplash)/).map((part, i) =>
-            part === "Pixabay" || part === "Unsplash" ? (
-              <a
-                key={i}
-                href={`https://${part.toLowerCase()}.com`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-4 hover:text-ink"
-              >
-                {part}
-              </a>
-            ) : (
-              part
-            ),
-          )}
-        </p>
-      )}
     </footer>
   );
 }
