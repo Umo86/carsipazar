@@ -5,7 +5,8 @@ import { getUser } from "@/lib/auth";
 import { categoryName, isLocale } from "@/lib/config";
 import { fmt, getDict, pick, reviewCount } from "@/lib/i18n";
 import { formatGBP, instalmentsAllowed } from "@/lib/money";
-import { getListing, listingImageIds, shopRating } from "@/lib/queries";
+import { getListing, isFavourite, listingImageIds, shopRating } from "@/lib/queries";
+import { toggleFavourite } from "@/lib/actions/account";
 import { getSettings } from "@/lib/settings";
 import Rating from "@/components/Rating";
 import ShopMark from "@/components/ShopMark";
@@ -31,10 +32,11 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
   const isPublic = l.status === "active" && l.shop_status === "approved";
   if (!isPublic && !isOwner && user?.role !== "admin") notFound();
 
-  const [images, rating, settings] = await Promise.all([
+  const [images, rating, settings, saved] = await Promise.all([
     listingImageIds(l.id),
     shopRating(l.shop_id),
     getSettings(),
+    user ? isFavourite(user.id, l.id) : false,
   ]);
   const title = pick(lang, l.title_tr, l.title_en);
   const description = pick(lang, l.description_tr, l.description_en);
@@ -96,6 +98,20 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
             !isOwner && <p className="mt-6 font-medium">{l.stock === 0 ? t.listing.soldOut : t.listing.notFound}</p>
           )}
           {canBuy && <p className="mt-2 text-sm text-soft">{fmt(t.listing.inStock, { n: l.stock })}</p>}
+
+          {!isOwner && (
+            <form action={toggleFavourite} className="mt-4">
+              <input type="hidden" name="lang" value={lang} />
+              <input type="hidden" name="listing" value={l.id} />
+              <button
+                aria-pressed={saved}
+                className="inline-flex cursor-pointer items-center gap-2 text-[0.9375rem] underline-offset-4 hover:text-cobalt hover:underline"
+              >
+                <Icon name="heart" size={20} className={saved ? "fill-tulip text-tulip" : ""} />
+                {saved ? t.account.favOn : t.account.favAdd}
+              </button>
+            </form>
+          )}
 
           <div className="mt-8 flex gap-4 rounded-2xl bg-sky p-5">
             <Icon name="shield" size={24} className="mt-0.5 shrink-0 text-cobalt" />

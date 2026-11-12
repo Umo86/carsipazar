@@ -19,7 +19,10 @@ buyer-to-seller reviews. Payments run in **demo mode** until Stripe keys are add
 | Protected payment | Money is held; released to the seller 2 days after delivery |
 | Reviews | One per completed order; seller can reply; admin can hide |
 | Seller panel | Apply, add items with photos, dispatch orders, see payouts |
-| Admin | Approve sellers, moderate items and reviews, release or refund, set fees |
+| Promotion | Sellers book paid promotion for an item from the seller panel: Featured on the home page, Piece of the week, or Top of its street. One to four weeks from a chosen date, a fixed number of slots per package, full refund if cancelled before the start. Promoted items carry a "Sponsored" label |
+| Customer account | `/account`: name, saved delivery address (pre-fills checkout), change password. `/favourites`: saved items |
+| Admin | Approve sellers, moderate items and reviews, release or refund, set fees and promotion prices, see and cancel promotions, list customers and create one-time password reset links |
+| Sign-in safety | Passwords are hashed; eight wrong passwords lock that email for 15 minutes |
 
 ## Fees (changeable in Admin > Fees)
 

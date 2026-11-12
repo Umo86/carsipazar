@@ -17,7 +17,12 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
   return (
     <div className="wrap max-w-md pt-16">
       <h1 className="text-5xl">{t.auth.loginTitle}</h1>
-      {sp.error && <p className="notice notice-error mt-6" role="alert">{t.auth.errInvalid}</p>}
+      {sp.reset && <p className="notice mt-6" role="status">{t.account.resetDone}</p>}
+      {sp.error && (
+        <p className="notice notice-error mt-6" role="alert">
+          {sp.error === "locked" ? t.auth.errLocked : t.auth.errInvalid}
+        </p>
+      )}
       <form action={login} className="mt-8 grid gap-5">
         <input type="hidden" name="lang" value={lang} />
         <input type="hidden" name="next" value={next} />
@@ -31,6 +36,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
         </label>
         <SubmitButton>{t.auth.login}</SubmitButton>
       </form>
+      <p className="hint mt-4">{t.auth.forgot}</p>
       <p className="mt-6 text-soft">
         {t.auth.noAccount}{" "}
         <Link href={`/${lang}/register?next=${encodeURIComponent(next)}`} className="text-ink underline underline-offset-4">

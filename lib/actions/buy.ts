@@ -9,6 +9,9 @@ import { createOrder, markDelivered, OrderError } from "../orders";
 import { getListing, isUuid } from "../queries";
 import { langOf, origin, str } from "./util";
 
+const ADDRESS = (a: { line1: string; line2: string; city: string; postcode: string; phone: string }) =>
+  [a.line1, a.line2, a.city, a.postcode, a.phone].map((v) => v.slice(0, 120));
+
 export async function placeOrder(fd: FormData) {
   const lang = langOf(fd);
   const listingId = str(fd, "listing");
@@ -50,6 +53,12 @@ export async function placeOrder(fd: FormData) {
       redirect(`${here}&error=${e.code === "stock" ? "stock" : "unavailable"}`);
     }
     throw e;
+  }
+  if (fd.get("save_address") === "on") {
+    await q(
+      `update users set ship_line1=$2, ship_line2=$3, ship_city=$4, ship_postcode=$5, ship_phone=$6 where id = $1`,
+      [user.id, ...ADDRESS(shipping)],
+    );
   }
   redirect(result.redirectUrl ?? `/${lang}/orders/${result.orderId}`);
 }

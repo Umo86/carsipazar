@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CATEGORIES, isLocale } from "@/lib/config";
 import { getDict, itemCount, pick, reviewCount } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
-import { approvedShops, categoryCovers, featuredListings, newestListings } from "@/lib/queries";
+import { approvedShops, categoryCovers, featuredListings, newestListings, spotlightListing } from "@/lib/queries";
 import ListingCard from "@/components/ListingCard";
 import Carousel from "@/components/Carousel";
 import ShopMark from "@/components/ShopMark";
@@ -14,15 +14,18 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDict(lang);
-  const [featured, newest, covers, shops] = await Promise.all([
+  const [featured, newest, covers, shops, booked] = await Promise.all([
     featuredListings(10),
     newestListings(8),
     categoryCovers(),
     approvedShops(),
+    spotlightListing(),
   ]);
   // The banner shows a piece of furniture; the arch beside it shows something else.
   const hero = featured.find((i) => i.category === "furniture" && i.image_id) ?? featured[0];
-  const piece = featured.find((i) => i.id !== hero?.id && i.category !== hero?.category && i.image_id);
+  // A seller's booked "piece of the week" takes the arch; otherwise we pick one.
+  const piece =
+    booked ?? featured.find((i) => i.id !== hero?.id && i.category !== hero?.category && i.image_id);
   const name = (i: { title_tr: string; title_en: string }) => pick(lang, i.title_tr, i.title_en).text;
 
   return (
@@ -94,7 +97,10 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               />
             </div>
             <p className="mt-5 leading-snug transition-colors duration-200 group-hover:text-cobalt">{name(piece)}</p>
-            <p className="mt-1 text-sm text-soft">{piece.shop_name}</p>
+            <p className="mt-1 text-sm text-soft">
+              {piece.shop_name}
+              {piece.sponsored && <span className="ml-2 rounded-full bg-paper px-2 py-0.5 text-xs">{t.promo.sponsored}</span>}
+            </p>
             <p className="mt-2 text-lg font-medium">{formatGBP(piece.price_pence)}</p>
           </Link>
         )}

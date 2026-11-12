@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth";
+import { getAddress, requireUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { fmt, getDict, pick } from "@/lib/i18n";
 import { formatGBP, instalmentsAllowed } from "@/lib/money";
@@ -24,7 +24,11 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
   if (l.status !== "active" || l.shop_status !== "approved" || l.shop_owner === user.id) {
     redirect(`/${lang}/l/${id}`);
   }
-  const [images, settings] = await Promise.all([listingImageIds(l.id), getSettings()]);
+  const [images, settings, saved] = await Promise.all([
+    listingImageIds(l.id),
+    getSettings(),
+    getAddress(user.id),
+  ]);
   const item = l.price_pence * qty;
   const total = item + l.postage_pence;
   const klarna = instalmentsAllowed(l, total, settings);
@@ -36,7 +40,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
     : null;
 
   const radio =
-    "flex cursor-pointer items-start gap-3 rounded-md border border-[#b9b4a8] p-4 has-[:checked]:border-cobalt has-[:checked]:bg-mist";
+    "flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-5 transition-colors duration-200 has-[:checked]:border-cobalt has-[:checked]:bg-sky";
 
   return (
     <div className="wrap pt-12">
@@ -58,25 +62,29 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
             </label>
             <label className="field">
               <span>{t.checkout.line1}</span>
-              <input className="input" name="line1" autoComplete="address-line1" required />
+              <input className="input" name="line1" autoComplete="address-line1" defaultValue={saved?.ship_line1} required />
             </label>
             <label className="field">
               <span>{t.checkout.line2}</span>
-              <input className="input" name="line2" autoComplete="address-line2" />
+              <input className="input" name="line2" autoComplete="address-line2" defaultValue={saved?.ship_line2} />
             </label>
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="field">
                 <span>{t.checkout.city}</span>
-                <input className="input" name="city" autoComplete="address-level2" required />
+                <input className="input" name="city" autoComplete="address-level2" defaultValue={saved?.ship_city} required />
               </label>
               <label className="field">
                 <span>{t.checkout.postcode}</span>
-                <input className="input" name="postcode" autoComplete="postal-code" required />
+                <input className="input" name="postcode" autoComplete="postal-code" defaultValue={saved?.ship_postcode} required />
               </label>
             </div>
             <label className="field">
               <span>{t.checkout.phone}</span>
-              <input className="input" type="tel" name="phone" autoComplete="tel" required />
+              <input className="input" type="tel" name="phone" autoComplete="tel" defaultValue={saved?.ship_phone} required />
+            </label>
+            <label className="flex items-center gap-3">
+              <input type="checkbox" name="save_address" defaultChecked className="h-4 w-4" />
+              <span>{t.account.saveForNext}</span>
             </label>
           </fieldset>
 
@@ -110,7 +118,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
           <div className="mt-5 flex gap-4">
             {images[0] && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={`/img/${images[0].id}`} alt="" className="h-28 w-[5.6rem] shrink-0 object-cover" />
+              <img src={`/img/${images[0].id}`} alt="" className="h-28 w-[5.6rem] shrink-0 rounded-lg object-cover" />
             )}
             <div>
               <p className="leading-snug">{title}</p>

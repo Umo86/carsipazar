@@ -39,6 +39,11 @@ export default function ListingCard({
             </span>
           )
         )}
+        {item.sponsored && (
+          <span className="absolute top-3 right-3 rounded-full bg-ink/80 px-2.5 py-1 text-xs font-medium text-paper">
+            {t.promo.sponsored}
+          </span>
+        )}
         <span
           aria-hidden="true"
           className="absolute inset-x-3 bottom-3 translate-y-3 rounded-full bg-paper/95 py-2.5 text-center text-sm font-medium opacity-0 shadow-lift transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 motion-reduce:transition-none"

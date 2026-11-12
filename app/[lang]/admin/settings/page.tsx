@@ -15,7 +15,7 @@ export default async function AdminSettings({ params, searchParams }: PageProps<
   // Stored as basis points and pence; shown as percent and pounds.
   const shown = (key: keyof Settings) => {
     if (key.endsWith("_bps")) return s[key] / 100;
-    if (key === "instalments_min" || key === "instalments_max") return s[key] / 100;
+    if (key === "instalments_min" || key === "instalments_max" || key.endsWith("_price")) return s[key] / 100;
     return s[key];
   };
 

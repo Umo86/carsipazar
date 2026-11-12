@@ -105,6 +105,12 @@ export default function Header({
                   <span className="hidden md:inline">{t.nav.orders}</span>
                   <span className="sr-only md:hidden">{t.nav.orders}</span>
                 </Link>
+                <Link href={`/${lang}/favourites`} className={action} aria-label={t.account.favourites}>
+                  <Icon name="heart" />
+                </Link>
+                <Link href={`/${lang}/account`} className={action} aria-label={t.account.title}>
+                  <Icon name="user" />
+                </Link>
                 <form action={logout}>
                   <input type="hidden" name="lang" value={lang} />
                   <button className={`${action} cursor-pointer text-soft`}>{t.nav.logout}</button>

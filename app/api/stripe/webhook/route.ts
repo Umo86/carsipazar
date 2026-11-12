@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { markPaid } from "@/lib/orders";
+import { markPromotionPaid } from "@/lib/promotions";
 import { parseWebhook } from "@/lib/payments/stripe";
 
 // Stripe calls this when a buyer's payment succeeds. Unused in demo mode.
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
     const orderId = session.metadata?.order_id;
     const pi = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id;
     if (orderId && pi && session.payment_status === "paid") await markPaid(orderId, pi);
+    const promotionId = session.metadata?.promotion_id;
+    if (promotionId && pi && session.payment_status === "paid") await markPromotionPaid(promotionId, pi);
   }
   return NextResponse.json({ received: true });
 }

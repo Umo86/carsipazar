@@ -25,6 +25,7 @@ export default async function DashboardLayout({ children, params }: LayoutProps<
           { href: `${base}/listings`, label: t.dash.listings },
           { href: `${base}/orders`, label: t.dash.orders },
           { href: `${base}/reviews`, label: t.dash.reviews },
+          { href: `${base}/promote`, label: t.promo.tab },
           { href: `${base}/shop`, label: t.dash.shop },
         ]}
       />

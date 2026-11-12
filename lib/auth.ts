@@ -38,6 +38,22 @@ export async function verifyPassword(password: string, stored: string) {
 }
 
 const sha = (v: string) => createHash("sha256").update(v).digest("hex");
+export const hashToken = sha;
+export const newToken = () => randomBytes(24).toString("hex");
+
+export type Address = {
+  ship_line1: string;
+  ship_line2: string;
+  ship_city: string;
+  ship_postcode: string;
+  ship_phone: string;
+};
+
+export const getAddress = (userId: string) =>
+  one<Address>(
+    "select ship_line1, ship_line2, ship_city, ship_postcode, ship_phone from users where id = $1",
+    [userId],
+  );
 
 export async function createSession(userId: string) {
   const token = randomBytes(32).toString("hex");

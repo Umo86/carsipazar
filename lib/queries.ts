@@ -1,5 +1,6 @@
 import "server-only";
 import { one, q } from "./db";
+import type { PromoKind } from "./config";
 
 export type ListingCard = {
   id: string;
@@ -17,29 +18,52 @@ export type ListingCard = {
   shop_avg: string | null;
   shop_reviews: string;
   status: string;
+  sponsored: boolean;
 };
 
-const CARD_SELECT = `
-  select l.id, l.title_tr, l.title_en, l.price_pence, l.postage_pence, l.instalments, l.stock,
+// True when the item has a paid promotion of this kind running today.
+const promoted = (kind: PromoKind) =>
+  `exists (select 1 from promotions p where p.listing_id = l.id and p.kind = '${kind}'
+            and p.status = 'booked' and current_date between p.starts_on and p.ends_on)`;
+
+const cardSelect = (kind?: PromoKind) => `
+  select ${kind ? promoted(kind) : "false"} as sponsored, l.id, l.title_tr, l.title_en, l.price_pence, l.postage_pence, l.instalments, l.stock,
          l.category, l.status, s.name as shop_name, s.slug as shop_slug, s.logo_id as shop_logo,
          (select avg(r.rating)::numeric(3,2) from reviews r where r.shop_id = s.id and r.status = 'published') as shop_avg,
          (select count(*) from reviews r where r.shop_id = s.id and r.status = 'published') as shop_reviews,
          (select i.id from listing_images i where i.listing_id = l.id order by i.position limit 1) as image_id
     from listings l join shops s on s.id = l.shop_id`;
+const CARD_SELECT = cardSelect();
 
 // Public listings: live items from approved shops.
 const PUBLIC = "l.status = 'active' and s.status = 'approved'";
 
+// The home page row: paid promotions first, then the admin's picks, then the newest.
 export const featuredListings = (limit = 9) =>
   q<ListingCard>(
-    `${CARD_SELECT} where ${PUBLIC} order by l.featured desc, l.created_at desc limit $1`,
+    `${cardSelect("featured")} where ${PUBLIC} order by sponsored desc, l.featured desc, l.created_at desc limit $1`,
     [limit],
   );
 
+// The item booked as "piece of the week" today, if any.
+export const spotlightListing = () =>
+  one<ListingCard>(`${cardSelect("spotlight")} where ${PUBLIC} and ${promoted("spotlight")} limit 1`);
+
+export const favouriteListings = (userId: string) =>
+  q<ListingCard>(
+    `${CARD_SELECT} join favourites f on f.listing_id = l.id
+      where f.user_id = $1 and l.status <> 'removed' and s.status = 'approved'
+      order by f.created_at desc`,
+    [userId],
+  );
+
+export const isFavourite = async (userId: string, listingId: string) =>
+  Boolean(await one("select 1 from favourites where user_id = $1 and listing_id = $2", [userId, listingId]));
+
 export const listingsByCategory = (category: string, instalmentsOnly: boolean) =>
   q<ListingCard>(
-    `${CARD_SELECT} where ${PUBLIC} and l.category = $1 and ($2::boolean = false or l.instalments)
-      order by l.created_at desc limit 120`,
+    `${cardSelect("category_top")} where ${PUBLIC} and l.category = $1 and ($2::boolean = false or l.instalments)
+      order by sponsored desc, l.created_at desc limit 120`,
     [category, instalmentsOnly],
   );
 

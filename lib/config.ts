@@ -38,6 +38,9 @@ export const DEFAULT_SETTINGS = {
   instalments_min: 3000, // £30
   instalments_max: 200000, // £2,000
   release_days: 2, // days after delivery before the seller is paid
+  promo_featured_price: 1500, // price per week, in pence
+  promo_spotlight_price: 4000,
+  promo_category_price: 1000,
 } as const;
 
 export type Settings = { -readonly [K in keyof typeof DEFAULT_SETTINGS]: number };
@@ -49,3 +52,15 @@ export const PAYMENT_COST = {
 } as const;
 
 export const MAX_IMAGES = 5;
+
+// Promotion a seller can book for one of their items. `slots` is how many
+// items can run at the same time (per category for the category package).
+export const PROMO_KINDS = {
+  featured: { slots: 8, priceKey: "promo_featured_price" },
+  spotlight: { slots: 1, priceKey: "promo_spotlight_price" },
+  category_top: { slots: 4, priceKey: "promo_category_price" },
+} as const;
+export type PromoKind = keyof typeof PROMO_KINDS;
+export const isPromoKind = (v: string): v is PromoKind => v in PROMO_KINDS;
+export const PROMO_MAX_WEEKS = 4;
+export const PROMO_BOOK_AHEAD_DAYS = 60;

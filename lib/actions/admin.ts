@@ -81,7 +81,9 @@ export async function saveSettings(fd: FormData) {
     if (!Number.isFinite(raw) || raw < 0) continue;
     let value = Math.round(raw);
     if (key.endsWith("_bps")) value = Math.round(raw * 100);
-    if (key === "instalments_min" || key === "instalments_max") value = Math.round(raw * 100);
+    if (key === "instalments_min" || key === "instalments_max" || key.endsWith("_price")) {
+      value = Math.round(raw * 100);
+    }
     if (key.endsWith("_bps") && value > 5000) continue; // never above 50%
     await saveSetting(key, value);
   }

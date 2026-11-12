@@ -145,6 +145,57 @@ create table if not exists reviews (
 );
 create index if not exists reviews_shop_idx on reviews(shop_id);
 
+-- Saved delivery address, filled in from the account page or at checkout.
+alter table users add column if not exists ship_line1 text not null default '';
+alter table users add column if not exists ship_line2 text not null default '';
+alter table users add column if not exists ship_city text not null default '';
+alter table users add column if not exists ship_postcode text not null default '';
+alter table users add column if not exists ship_phone text not null default '';
+
+create table if not exists favourites (
+  user_id uuid not null references users(id) on delete cascade,
+  listing_id uuid not null references listings(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (user_id, listing_id)
+);
+
+-- One-time links the admin creates so a customer can set a new password.
+create table if not exists password_resets (
+  token_hash text primary key,
+  user_id uuid not null references users(id) on delete cascade,
+  expires_at timestamptz not null,
+  used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+-- Failed logins, counted to slow down password guessing.
+create table if not exists login_attempts (
+  email text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists login_attempts_email_idx on login_attempts(email, created_at);
+
+-- Paid promotion a seller books for one of their items.
+create table if not exists promotions (
+  id uuid primary key default gen_random_uuid(),
+  shop_id uuid not null references shops(id) on delete cascade,
+  listing_id uuid not null references listings(id) on delete cascade,
+  kind text not null check (kind in ('featured', 'spotlight', 'category_top')),
+  category text not null,
+  starts_on date not null,
+  ends_on date not null,
+  weeks integer not null check (weeks between 1 and 4),
+  price_pence integer not null check (price_pence >= 0),
+  status text not null default 'pending' check (status in ('pending', 'booked', 'cancelled')),
+  provider text not null default 'demo',
+  provider_ref text,
+  created_at timestamptz not null default now(),
+  paid_at timestamptz,
+  cancelled_at timestamptz
+);
+create index if not exists promotions_dates_idx on promotions(kind, starts_on, ends_on);
+create index if not exists promotions_shop_idx on promotions(shop_id);
+
 create table if not exists settings (
   key text primary key,
   value integer not null

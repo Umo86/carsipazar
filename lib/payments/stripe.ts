@@ -66,6 +66,32 @@ export async function createCheckoutSession(args: {
   return { url: session.url!, sessionId: session.id };
 }
 
+// A seller paying the platform for promotion. No money goes on to anyone else.
+export async function createPromotionCheckout(args: {
+  promotionId: string;
+  label: string;
+  amountPence: number;
+  buyerEmail: string;
+  returnUrl: string;
+}) {
+  const session = await stripe().checkout.sessions.create({
+    mode: "payment",
+    allowed_payment_method_types: ["card"],
+    line_items: [
+      {
+        quantity: 1,
+        price_data: { currency: "gbp", unit_amount: args.amountPence, product_data: { name: args.label } },
+      },
+    ],
+    customer_email: args.buyerEmail,
+    client_reference_id: args.promotionId,
+    metadata: { promotion_id: args.promotionId },
+    success_url: args.returnUrl,
+    cancel_url: args.returnUrl,
+  });
+  return { url: session.url!, sessionId: session.id };
+}
+
 export function parseWebhook(body: string, signature: string) {
   return stripe().webhooks.constructEvent(
     body,
