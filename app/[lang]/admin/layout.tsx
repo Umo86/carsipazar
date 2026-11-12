@@ -23,6 +23,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
           { href: `${base}/orders`, label: t.admin.orders },
           { href: `${base}/reviews`, label: t.admin.reviews },
           { href: `${base}/promotions`, label: t.promo.adminTab },
+          { href: `${base}/social`, label: t.social.tab },
           { href: `${base}/customers`, label: t.account.customers },
           { href: `${base}/settings`, label: t.admin.settings },
         ]}

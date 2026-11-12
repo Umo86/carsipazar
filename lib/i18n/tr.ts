@@ -30,7 +30,7 @@ const tr = {
     openShop: "Dükkân aç",
     allShops: "Tüm dükkânlar",
     demo: "Bu bir test sitesidir. Ödemeler gerçek değildir.",
-    credit: "Örnek fotoğraflar ve video: Pixabay",
+    credit: "Örnek fotoğraflar ve video: Pixabay ve Unsplash",
   },
   home: {
     coverLine: "Çarşının en güzeli, şimdi taksitle.",
@@ -461,6 +461,49 @@ const tr = {
     pending: "Onay bekliyor",
     approved: "Onaylı",
     suspended: "Askıda",
+  },
+  social: {
+    tab: "Sosyal medya",
+    title: "Paylaşıma hazır görseller",
+    intro:
+      "Instagram ve WhatsApp'ta paylaşabileceğin görseller. Her biri ürünün kendi fotoğrafından hazırlanır. Görseli indir, metni kopyala, paylaş.",
+    needApproval: "Dükkânın onaylandığında görselleri buradan indirebilirsin.",
+    none: "Yayında ürünün yok. Bir ürün yayınladığında görseli burada çıkar.",
+    previewAlt: "{name} için paylaşım görseli",
+    formatsHint: "Post 4:5 (akış), Story 9:16 (hikâye), Kare 1:1 (WhatsApp ve diğerleri).",
+    format: { post: "Post", story: "Story", square: "Kare" },
+    ratio: { post: "4:5", story: "9:16", square: "1:1" },
+    langName: { tr: "Türkçe", en: "İngilizce" },
+    downloadAria: "{format} ({ratio}) görselini {language} indir",
+    caption: "Paylaşım metni",
+    captionShop: "Dükkânıma bak: {url}",
+    pill: "3 taksit imkânı",
+    tags: {
+      furniture: "#mobilya #furniture #carsipazar #londra",
+      clothing: "#giyim #fashion #carsipazar #londra",
+      jewellery: "#taki #jewellery #carsipazar #londra",
+    },
+    tagsOther: "#carsipazar #londra #turkishmarketplace",
+    brandTitle: "CarsiPazar'ın kendi paylaşımları",
+    brandIntro: "Sitenin kendi tanıtım görselleri. Dilediğin hesapta paylaşabilirsin.",
+    brandCaption: "{head}\n{sub}\n\n{url}\n\n#carsipazar #mobilya #giyim #taki #londra",
+    brandNames: { welcome: "Hoş geldin", instalments: "Taksit", sell: "Satıcı daveti" },
+    brand: {
+      welcome: {
+        head: "Çarşının en güzeli, şimdi taksitle.",
+        sub: "Mobilya, giyim ve takı. Onaylı Türk satıcılardan.",
+      },
+      instalments: {
+        head: "Beğendin mi? Üçe böl.",
+        sub: "Seçili ürünlerde üç taksit. Satıcı parasını hemen alır.",
+      },
+      sell: {
+        head: "Instagram'dan mı satıyorsun?",
+        sub: "Dükkânını aç, linkini profiline koy.",
+      },
+    },
+    featuredTitle: "Öne çıkan ürünler",
+    featuredNone: "Şu an öne çıkan ürün yok.",
   },
   misc: {
     back: "Geri",

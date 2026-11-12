@@ -41,14 +41,21 @@ export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
       {paymentsMode() === "demo" && (
         <p className="border-t border-line py-4 text-center text-sm text-soft">
           {t.footer.demo}{" "}
-          <a
-            href="https://pixabay.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-4 hover:text-ink"
-          >
-            {t.footer.credit}
-          </a>
+          {t.footer.credit.split(/(Pixabay|Unsplash)/).map((part, i) =>
+            part === "Pixabay" || part === "Unsplash" ? (
+              <a
+                key={i}
+                href={`https://${part.toLowerCase()}.com`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-4 hover:text-ink"
+              >
+                {part}
+              </a>
+            ) : (
+              part
+            ),
+          )}
         </p>
       )}
     </footer>

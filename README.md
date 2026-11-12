@@ -45,13 +45,14 @@ the admin login and four sample shops.
 
 ## Sample photos and video
 
-The sample items, the shop covers and the home page video come from Pixabay.
+The sample photos come from Pixabay and Unsplash (both free licences; paid
+Unsplash+ images are not used). The home page video comes from Pixabay.
 Pixabay does not allow its files to be hot-linked, so the site downloads each
-one once and stores the bytes in its own database. Visitors never load
-anything from Pixabay.
+one once and stores the bytes in its own server (the database), for Unsplash
+photos too. Visitors never load anything from Pixabay or Unsplash.
 
-- `lib/sample-media-data.ts` lists which Pixabay file each item uses (the file
-  on `cdn.pixabay.com` and its page on `pixabay.com`, kept as the credit).
+- `lib/sample-media-data.ts` lists which file each item uses (the file on
+  `cdn.pixabay.com` or `images.unsplash.com` and its page, kept as the credit).
   An empty address means "no photo chosen" and the drawn pattern stays.
 - A new database is seeded with drawn patterns. Then `/api/setup` downloads
   the photos and swaps them in. The video and its poster go in the
@@ -63,9 +64,9 @@ anything from Pixabay.
 - Setup downloads four files at a time. If the first three fail it stops and
   says so in the log, because the network is probably unreachable. Fix that
   and run setup again. A failed download leaves the old picture in place.
-- Only `https://cdn.pixabay.com/...` addresses are fetched, and only files
+- Only `https://cdn.pixabay.com/...` and `https://images.unsplash.com/...` addresses are fetched, and only files
   that really are JPEG, PNG, WebP or MP4 (photos up to 4 MB, video up to 14 MB).
-- The footer credits Pixabay while payments are in demo mode. Add a proper
+- The footer credits Pixabay and Unsplash while payments are in demo mode. Add a proper
   credit page before launching with real sellers.
 - Real sellers upload their own photos, which are stored in the database.
   Delete the sample shops in Admin before launch.
@@ -78,8 +79,8 @@ anything from Pixabay.
 | `SETUP_TOKEN` | Guards `/api/setup`. Remove it once the site is set up |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | The admin login created by setup |
 | `DEMO_PASSWORD` | Password for the sample buyer and seller logins |
-| `DEMO_IMAGES` | Set to `art` to keep the drawn patterns and skip the Pixabay downloads (for working offline) |
-| `MEDIA_TEST_ORIGIN` | Testing only, for example `http://127.0.0.1:4010`. Sends the Pixabay downloads to that server instead (same path), so tests run without internet. Leave empty in production |
+| `DEMO_IMAGES` | Set to `art` to keep the drawn patterns and skip the sample photo downloads (for working offline) |
+| `MEDIA_TEST_ORIGIN` | Testing only, for example `http://127.0.0.1:4010`. Sends the Pixabay and Unsplash downloads to that server instead (same path and query), so tests run without internet. Leave empty in production |
 | `STRIPE_SECRET_KEY` | Switches payments from demo to Stripe |
 | `STRIPE_WEBHOOK_SECRET` | Verifies Stripe's calls to `/api/stripe/webhook` |
 

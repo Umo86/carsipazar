@@ -22,7 +22,7 @@ export type DemoListing = {
   instalments: boolean;
   art: keyof typeof ART;
   palette: keyof typeof PALETTES;
-  was?: string; // the English title this item had before, so setup can find and rename it
+  was?: string | string[]; // English title(s) this item had before, so setup can find and rename it
   featured?: boolean;
 };
 
@@ -62,15 +62,15 @@ export const SHOPS: {
         featured: true,
       },
       {
-        category: "furniture", tr: "Yuvarlak dışbükey duvar aynaları seti", en: "Set of round convex wall mirrors",
-        dtr: "Metal çerçeveli, bir arada duvara asılan yuvarlak dışbükey aynalardan oluşan dekoratif set.", den: "A group of round convex mirrors with metal frames, hung together as a feature wall.",
-        was: "Set of brass-framed wall mirrors",
+        category: "furniture", tr: "Pirinç çerçeveli duvar aynası seti", en: "Set of brass-framed wall mirrors",
+        dtr: "Dokuz parça, farklı boy ve biçimlerde.", den: "Nine pieces in mixed sizes and shapes.",
+        was: ["Set of round convex wall mirrors"],
         price: 310, postage: 20, stock: 3, instalments: true, art: "arches", palette: "brass",
       },
       {
-        category: "furniture", tr: "Çelik çapraz ayaklı yemek masası", en: "Dining table with steel cross legs",
-        dtr: "Çelik X ayaklı, ahşap tablalı yemek masası; döşemeli sandalyelerle birlikte gösterilmiştir.", den: "A wooden-top dining table on a sculptural steel X base, shown with upholstered chairs.",
-        was: "Solid wood dining table, seats six",
+        category: "furniture", tr: "Masif yemek masası, 6 kişilik", en: "Solid wood dining table, seats six",
+        dtr: "180 × 90 cm. Siparişe göre yapılır.", den: "180 × 90 cm. Made to order.",
+        was: ["Dining table with steel cross legs"],
         price: 1250, postage: 0, stock: 1, instalments: true, art: "arches", palette: "night",
       },
       {
@@ -98,15 +98,15 @@ export const SHOPS: {
         featured: true,
       },
       {
-        category: "furniture", tr: "Pirinç ayaklı pudra rengi saklamalı puf", en: "Blush storage pouffe with brass legs",
-        dtr: "Pirinç ayaklı, yuvarlak döşemeli puf. Kapağı kalkar, içinde saklama alanı var.", den: "A round upholstered pouffe on brass legs. The lid lifts off for storage inside.",
-        was: "Pair of wooden stools",
+        category: "furniture", tr: "Ahşap tabure, 2'li", en: "Pair of wooden stools",
+        dtr: "45 cm yükseklik, masif ahşap.", den: "45 cm high in solid wood.",
+        was: ["Blush storage pouffe with brass legs"],
         price: 95, postage: 6, stock: 12, instalments: true, art: "kilim", palette: "madder",
       },
       {
-        category: "furniture", tr: "Alçak ahşap sehpa", en: "Low wooden coffee table",
-        dtr: "Sade, sıcak doğal ahşaptan, masif panel ayaklı alçak sehpa.", den: "A simple low coffee table in warm natural wood with solid panel legs.",
-        was: "Coffee table with hairpin legs",
+        category: "furniture", tr: "Metal ayaklı orta sehpa", en: "Coffee table with hairpin legs",
+        dtr: "Masif tabla, siyah metal ayak.", den: "A solid top on black metal legs.",
+        was: ["Low wooden coffee table"],
         price: 260, postage: 15, stock: 3, instalments: true, art: "stars", palette: "brass",
       },
       {
@@ -154,15 +154,15 @@ export const SHOPS: {
         price: 180, postage: 8, stock: 6, instalments: true, art: "stripes", palette: "brass",
       },
       {
-        category: "clothing", tr: "Lacivert çizgili örgü kazak", en: "Navy striped knitted jumper",
-        dtr: "Lacivert zemin üzerine gri çizgili, kalın örgü kazak.", den: "A chunky knitted jumper in navy with grey stripes, laid flat.",
-        was: "Brown knitted jumper",
+        category: "clothing", tr: "Kahverengi örgü kazak", en: "Brown knitted jumper",
+        dtr: "El örgüsü, yün karışımlı.", den: "Hand-knitted in a wool blend.",
+        was: ["Navy striped knitted jumper"],
         price: 85, postage: 6, stock: 8, instalments: true, art: "kilim", palette: "madder",
       },
       {
-        category: "clothing", tr: "Ekose desenli ipek eşarp", en: "Silk scarf with check print",
-        dtr: "Sıcak kırmızı, turuncu ve mor tonlarında, cesur ekose desenli yumuşak eşarp.", den: "A soft scarf in warm red, orange and purple tones with a bold check pattern.",
-        was: "Silk scarf with chain print",
+        category: "clothing", tr: "Zincir desenli ipek eşarp", en: "Silk scarf with chain print",
+        dtr: "90 × 90 cm, kenarları elde rulo dikilmiş.", den: "90 × 90 cm with hand-rolled edges.",
+        was: ["Silk scarf with check print"],
         price: 45, postage: 3, stock: 20, instalments: false, art: "tulips", palette: "madder",
       },
     ],
@@ -200,7 +200,7 @@ export const SHOPS: {
       },
       {
         category: "jewellery", tr: "Kolye ve küpe takımı", en: "Necklace and earring set",
-        dtr: "Altın kaplama, mavi taşlı; özel günler için.", den: "Gold-plated with blue stones, for special occasions.",
+        dtr: "Yeşil ve pembe taşlı, özel gün için.", den: "Green and pink stones, for special occasions.",
         price: 240, postage: 6, stock: 3, instalments: true, art: "beads", palette: "emerald",
       },
     ],

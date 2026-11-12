@@ -31,7 +31,7 @@ const en: Dict = {
     openShop: "Open a shop",
     allShops: "All shops",
     demo: "This is a test site. Payments are not real.",
-    credit: "Sample photos and video: Pixabay",
+    credit: "Sample photos and video: Pixabay and Unsplash",
   },
   home: {
     coverLine: "The best of the bazaar, now in instalments.",
@@ -461,6 +461,49 @@ const en: Dict = {
     pending: "Awaiting approval",
     approved: "Approved",
     suspended: "Suspended",
+  },
+  social: {
+    tab: "Social posts",
+    title: "Ready-to-post images",
+    intro:
+      "Images you can post on Instagram and WhatsApp, each made from the item's own photo. Download the image, copy the text, post.",
+    needApproval: "Once your shop is approved you can download the images here.",
+    none: "You have no live items. When you publish one, its image appears here.",
+    previewAlt: "Social post image for {name}",
+    formatsHint: "Post 4:5 (feed), Story 9:16, Square 1:1 (WhatsApp and others).",
+    format: { post: "Post", story: "Story", square: "Square" },
+    ratio: { post: "4:5", story: "9:16", square: "1:1" },
+    langName: { tr: "Turkish", en: "English" },
+    downloadAria: "Download the {format} ({ratio}) image in {language}",
+    caption: "Caption",
+    captionShop: "See the shop: {url}",
+    pill: "Pay in 3 instalments",
+    tags: {
+      furniture: "#furniture #mobilya #carsipazar #london",
+      clothing: "#fashion #giyim #carsipazar #london",
+      jewellery: "#jewellery #taki #carsipazar #london",
+    },
+    tagsOther: "#carsipazar #london #turkishmarketplace",
+    brandTitle: "CarsiPazar's own posts",
+    brandIntro: "The site's own promotional images. Post them on any account you like.",
+    brandCaption: "{head}\n{sub}\n\n{url}\n\n#carsipazar #furniture #fashion #jewellery #london",
+    brandNames: { welcome: "Welcome", instalments: "Instalments", sell: "Seller invitation" },
+    brand: {
+      welcome: {
+        head: "The best of the bazaar, now in instalments.",
+        sub: "Furniture, clothing and jewellery. From verified Turkish sellers.",
+      },
+      instalments: {
+        head: "Love it? Split it in three.",
+        sub: "Three instalments on selected items. The seller is paid straight away.",
+      },
+      sell: {
+        head: "Selling on Instagram?",
+        sub: "Open your shop and put the link in your profile.",
+      },
+    },
+    featuredTitle: "Featured items",
+    featuredNone: "No featured items right now.",
   },
   misc: {
     back: "Back",

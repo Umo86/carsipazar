@@ -5,10 +5,10 @@ import { SHOPS } from "./seed";
 import { COVER_MEDIA, HERO_POSTER, HERO_VIDEO, LISTING_MEDIA, type MediaRef } from "./sample-media-data";
 
 // Pixabay does not allow hot-linking, so each sample photo and the hero video
-// are downloaded once and stored in our own database. See README, "Sample
-// photos and video".
+// are downloaded once and stored in our own database (Unsplash photos are
+// stored the same way). See README, "Sample photos and video".
 
-const HOST = "cdn.pixabay.com";
+const HOSTS = ["cdn.pixabay.com", "images.unsplash.com"];
 const MAX_BYTES = { image: 4 * 1024 * 1024, video: 14 * 1024 * 1024 };
 const PARALLEL = 4;
 const GIVE_UP_AFTER = 3;
@@ -31,11 +31,11 @@ function sniff(bytes: Buffer, kind: "image" | "video"): string | null {
   return null;
 }
 
-// Downloads one file from Pixabay's CDN. Never throws; null means "did not work".
+// Downloads one file from Pixabay's or Unsplash's CDN. Never throws; null means "did not work".
 export async function fetchRemote(rawUrl: string, kind: "image" | "video"): Promise<Fetched | null> {
   try {
     const wanted = new URL(rawUrl);
-    if (wanted.protocol !== "https:" || wanted.host !== HOST || wanted.username || wanted.password) return null;
+    if (wanted.protocol !== "https:" || !HOSTS.includes(wanted.host) || wanted.username || wanted.password) return null;
     // Tests point this at a local stand-in; the host check above still applies to the real address.
     const origin = process.env.MEDIA_TEST_ORIGIN?.replace(/\/+$/, "");
     const target = origin ? `${origin}${wanted.pathname}${wanted.search}` : wanted.toString();
@@ -169,9 +169,9 @@ export async function importSampleMedia(): Promise<string[]> {
     for (const l of s.listings) {
       const found = await one<{ id: string; title_en: string }>(
         `select id, title_en from listings
-         where shop_id = $1 and (title_en = $2 or ($3::text is not null and title_en = $3))
+         where shop_id = $1 and (title_en = $2 or title_en = any($3::text[]))
          order by (title_en = $2) desc limit 1`,
-        [shop.id, l.en, l.was ?? null],
+        [shop.id, l.en, [l.was ?? []].flat()],
       );
       if (!found) continue;
       if (found.title_en !== l.en) {

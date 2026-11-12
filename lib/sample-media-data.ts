@@ -1,53 +1,53 @@
-// Which Pixabay file each sample item uses. `url` is the file on cdn.pixabay.com,
-// `source` is its page on pixabay.com (kept as the credit). An empty url means
-// "no photo chosen": the drawn pattern stays.
+// Which stock file each sample item uses. `url` is the file on cdn.pixabay.com
+// or images.unsplash.com, `source` is its page there (kept as the credit). An
+// empty url means "no photo chosen": the drawn pattern stays.
 export type MediaRef = { url: string; source: string };
 
 // Keyed by the listing's English title.
 export const LISTING_MEDIA: Record<string, MediaRef> = {
   "Walnut nesting tables, set of three": {
-    url: "https://cdn.pixabay.com/photo/2019/03/05/22/47/living-room-table-4037281_1280.jpg",
-    source: "https://pixabay.com/photos/living-room-table-living-room-table-4037281/",
+    url: "https://images.unsplash.com/photo-1611486212355-d276af4581c0?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/brown-wooden-table-on-white-background-xej3GOtAQ-o",
   },
-  "Set of round convex wall mirrors": {
-    url: "https://cdn.pixabay.com/photo/2017/07/07/23/43/mirror-2483172_1280.jpg",
-    source: "https://pixabay.com/photos/mirrors-reflection-mirror-image-2483172/",
+  "Set of brass-framed wall mirrors": {
+    url: "https://images.unsplash.com/photo-1595455967759-5f1356993e53?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/black-framed-wall-mounted-mirror-xnLHz7NJzRA",
   },
-  "Dining table with steel cross legs": {
-    url: "https://cdn.pixabay.com/photo/2017/02/08/21/59/architecture-2050197_1280.jpg",
-    source: "https://pixabay.com/photos/architecture-design-interior-design-2050197/",
+  "Solid wood dining table, seats six": {
+    url: "https://images.unsplash.com/photo-1758977404039-6e834be8eca8?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/wooden-dining-table-with-six-upholstered-chairs-h_BP6DlGOvo",
   },
   "Wooden chest of drawers with brass fittings": {
     url: "https://cdn.pixabay.com/photo/2017/08/22/20/39/korea-2670391_1280.jpg",
     source: "https://pixabay.com/photos/korea-korean-furniture-history-2670391/",
   },
   "Grey wingback armchair": {
-    url: "https://cdn.pixabay.com/photo/2021/03/05/14/04/karriezhu-6071378_1280.jpg",
-    source: "https://pixabay.com/photos/karriezhu-acrylic-pouring-painting-6071378/",
+    url: "https://images.unsplash.com/photo-1759722667490-e5fd31b8dbd5?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/a-gray-armchair-with-a-cream-blanket-draped-over-it-Onyw32UMHKg",
   },
-  "Blush storage pouffe with brass legs": {
-    url: "https://cdn.pixabay.com/photo/2024/09/07/11/02/storage-9029561_1280.jpg",
-    source: "https://pixabay.com/photos/storage-home-pouf-pouffe-9029561/",
+  "Pair of wooden stools": {
+    url: "https://images.unsplash.com/photo-1540809799-5da9372c3f64?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/two-brown-wooden-stools-0Y1qUg1w2bs",
   },
-  "Low wooden coffee table": {
-    url: "https://cdn.pixabay.com/photo/2020/04/16/20/37/table-5052283_1280.jpg",
-    source: "https://pixabay.com/photos/table-wooden-furniture-wood-5052283/",
+  "Coffee table with hairpin legs": {
+    url: "https://images.unsplash.com/photo-1575501263736-a97adedcf1e6?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/pink-mug-on-table-with-marshmallows--vkrFD2sDsg",
   },
   "Three-seat sofa in forest green": {
-    url: "https://cdn.pixabay.com/photo/2023/05/09/07/28/green-velvet-sofa-7980576_1280.jpg",
-    source: "https://pixabay.com/photos/green-velvet-sofa-sofa-factory-7980576/",
+    url: "https://images.unsplash.com/photo-1699901524286-41a46a4cd5c8?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/a-living-room-with-two-couches-and-a-coffee-table-ghUf8UzTK8g",
   },
   "Side table with open shelf": {
-    url: "https://cdn.pixabay.com/photo/2019/09/09/08/52/side-table-4463091_1280.jpg",
-    source: "https://pixabay.com/photos/side-table-end-table-4463091/",
+    url: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/books-in-brown-wooden-side-table-beside-white-wall-C_dRtsnBOQA",
   },
   "Cream bentwood chair": {
     url: "https://cdn.pixabay.com/photo/2014/03/31/02/09/chair-301745_1280.jpg",
     source: "https://pixabay.com/photos/chair-white-interior-furniture-sit-301745/",
   },
   "White strapless dress": {
-    url: "https://cdn.pixabay.com/photo/2017/02/02/03/04/wedding-dress-2031960_1280.jpg",
-    source: "https://pixabay.com/photos/wedding-dress-wedding-shoes-window-2031960/",
+    url: "https://images.unsplash.com/photo-1540459920617-415d62f1f76b?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/white-sweetheart-neckline-dress-pHA6KL_HpoE",
   },
   "Brown leather jacket": {
     url: "https://cdn.pixabay.com/photo/2018/10/22/21/44/fashion-3766441_1280.jpg",
@@ -57,53 +57,53 @@ export const LISTING_MEDIA: Record<string, MediaRef> = {
     url: "https://cdn.pixabay.com/photo/2017/07/31/22/37/black-and-white-2561703_1280.jpg",
     source: "https://pixabay.com/photos/black-and-white-coat-suit-tuxedo-2561703/",
   },
-  "Navy striped knitted jumper": {
-    url: "https://cdn.pixabay.com/photo/2016/03/27/19/31/fashion-1283863_1280.jpg",
-    source: "https://pixabay.com/photos/fashion-sweater-wool-clothing-1283863/",
+  "Brown knitted jumper": {
+    url: "https://images.unsplash.com/photo-1773747310662-e7cc9e681226?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/a-brown-knitted-sweater-hangs-on-a-white-hanger-g3AwbdZut70",
   },
-  "Silk scarf with check print": {
-    url: "https://cdn.pixabay.com/photo/2015/09/08/15/42/scarf-930184_1280.jpg",
-    source: "https://pixabay.com/photos/scarf-colored-print-handkerchief-930184/",
+  "Silk scarf with chain print": {
+    url: "https://images.unsplash.com/photo-1551028442-ee84b4d3a50a?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/purple-and-white-textile-JGl6nH5XhMU",
   },
   "Silver pendant necklace": {
-    url: "https://cdn.pixabay.com/photo/2016/07/16/11/50/heart-1521377_1280.jpg",
-    source: "https://pixabay.com/photos/heart-love-jewellery-silver-1521377/",
+    url: "https://images.unsplash.com/photo-1589128777073-263566ae5e4d?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/silver-heart-pendant-necklace-on-white-background-u1Hv_erOQH0",
   },
   "Silver earrings with blue stones": {
     url: "https://cdn.pixabay.com/photo/2017/10/10/16/56/earrings-2837941_1280.jpg",
     source: "https://pixabay.com/photos/earrings-silver-sapphire-wonder-2837941/",
   },
   "Silver solitaire ring": {
-    url: "https://cdn.pixabay.com/photo/2019/06/17/13/39/ring-4279997_1280.jpg",
-    source: "https://pixabay.com/photos/ring-diamond-ring-wedding-ring-4279997/",
+    url: "https://images.unsplash.com/photo-1514612497953-05d1e5e171fa?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/silver-colored-clear-gemstone-ring-u91R8WPaKQU",
   },
   "Turquoise bead bracelet": {
-    url: "https://cdn.pixabay.com/photo/2017/06/28/10/23/amanu-2450186_1280.jpg",
-    source: "https://pixabay.com/photos/amanu-jewelry-trends-corsican-2450186/",
+    url: "https://images.unsplash.com/photo-1629890731335-52295b8be1d9?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/blue-and-silver-beaded-bracelet-cHcaTsM-Isg",
   },
   "Necklace and earring set": {
-    url: "https://cdn.pixabay.com/photo/2020/10/10/22/31/accessories-5644332_1280.jpg",
-    source: "https://pixabay.com/photos/accessories-necklace-earrings-5644332/",
+    url: "https://images.unsplash.com/photo-1742627032795-1dfb552448ce?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/elegant-necklace-and-earrings-against-a-black-background-SAGRtyL5L_Y",
   },
 };
 
 // Keyed by shop slug.
 export const COVER_MEDIA: Record<string, MediaRef> = {
   "ceviz-atolye": {
-    url: "https://cdn.pixabay.com/photo/2020/02/24/09/13/japan-4875669_1280.jpg",
-    source: "https://pixabay.com/photos/japan-japanese-craftsmanship-wood-4875669/",
+    url: "https://images.unsplash.com/photo-1758977403865-f79e156415b3?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/wooden-dining-table-and-chairs-with-grey-upholstery-T_CYjDSfvkY",
   },
   "hane-mobilya": {
-    url: "https://cdn.pixabay.com/photo/2017/09/09/18/25/living-room-2732939_1280.jpg",
-    source: "https://pixabay.com/photos/living-room-couch-interior-room-2732939/",
+    url: "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-a-large-window-OtXADkUh3-I",
   },
   "pera-giyim": {
     url: "https://cdn.pixabay.com/photo/2019/02/10/15/09/clothes-3987460_1280.jpg",
     source: "https://pixabay.com/photos/clothes-hangers-shop-shopping-3987460/",
   },
   "telkari-atolye": {
-    url: "https://cdn.pixabay.com/photo/2015/04/08/19/53/beads-713340_1280.jpg",
-    source: "https://pixabay.com/photos/pearls-chain-silk-velvet-jewellery-713340/",
+    url: "https://images.unsplash.com/photo-1719862057229-4dd650b5ccee?w=1280&q=80&fm=jpg&fit=max",
+    source: "https://unsplash.com/photos/ornate-pearl-and-diamond-necklace-with-matching-earrings-and-pendant-2BYXjDSVtlc",
   },
 };
 
