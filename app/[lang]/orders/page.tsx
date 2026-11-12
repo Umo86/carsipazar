@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { q } from "@/lib/db";
-import { fmt, formatDate, getDict } from "@/lib/i18n";
+import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import type { Order } from "@/lib/orders";
 
@@ -42,7 +42,7 @@ export default async function OrdersPage({ params }: PageProps<"/[lang]/orders">
                 </div>
                 <div className="sm:text-right">
                   <p className="font-medium">{formatGBP(o.total_pence)}</p>
-                  <p className="text-sm text-turq">{t.orders.status[o.status]}</p>
+                  <p className="text-sm text-turq">{orderStatus(t, o)}</p>
                 </div>
               </Link>
             </li>

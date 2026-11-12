@@ -25,6 +25,7 @@ export default async function ListingForm({ params, searchParams }: PageProps<"/
   const images = l ? await listingImageIds(l.id) : [];
   const pounds = (p: number) => (p / 100).toFixed(2).replace(/\.00$/, "");
   const platform = l?.delivery_method === "platform";
+  const collection = l?.collection ?? "no";
   const box = "rounded-md border border-[#b9b4a8] p-4";
 
   return (
@@ -132,6 +133,25 @@ export default async function ListingForm({ params, searchParams }: PageProps<"/
           <p className="hint mt-3">{f.tooBig}</p>
           <p className="hint mt-2">{f.platformSteps}</p>
         </div>
+
+        {/* "Collection only" overrides the two choices above on the server, so this works without JavaScript. */}
+        <fieldset className={`${box} grid gap-3`}>
+          <legend className="label px-1">{f.collection}</legend>
+          {(["no", "optional", "only"] as const).map((mode) => (
+            <label key={mode} className="flex cursor-pointer items-start gap-3">
+              <input type="radio" name="collection" value={mode} defaultChecked={collection === mode} className="mt-1.5" />
+              <span>
+                <span className="block font-medium">
+                  {{ no: f.collectionNo, optional: f.collectionOptional, only: f.collectionOnly }[mode]}
+                </span>
+                <span className="hint">
+                  {{ no: f.collectionNoHint, optional: f.collectionOptionalHint, only: f.collectionOnlyHint }[mode]}
+                </span>
+              </span>
+            </label>
+          ))}
+          <p className="hint">{f.collectionNoteHint}</p>
+        </fieldset>
       </fieldset>
 
       <label className="flex cursor-pointer items-start gap-3 rounded-md border border-[#b9b4a8] p-4 has-[:checked]:border-cobalt has-[:checked]:bg-mist">

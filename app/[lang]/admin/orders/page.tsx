@@ -2,9 +2,9 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import type { Locale } from "@/lib/config";
 import { q } from "@/lib/db";
-import { fmt, formatDate, getDict } from "@/lib/i18n";
+import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
-import { releaseDueOrders, type Order } from "@/lib/orders";
+import { ORDER_NO_CODE, releaseDueOrders, type Order } from "@/lib/orders";
 import { adminOrder } from "@/lib/actions/admin";
 
 export default async function AdminOrders({ params }: PageProps<"/[lang]/admin/orders">) {
@@ -13,7 +13,7 @@ export default async function AdminOrders({ params }: PageProps<"/[lang]/admin/o
   await requireAdmin(lang);
   await releaseDueOrders();
   const orders = await q<Order & { shop_name: string; buyer_email: string }>(
-    `select o.*, s.name as shop_name, u.email as buyer_email
+    `select o.*, ${ORDER_NO_CODE}, s.name as shop_name, u.email as buyer_email
        from orders o join shops s on s.id = o.shop_id join users u on u.id = o.buyer_id
       where o.status <> 'pending' order by o.created_at desc limit 300`,
   );
@@ -48,14 +48,14 @@ export default async function AdminOrders({ params }: PageProps<"/[lang]/admin/o
               <td>
                 <Link href={`/${lang}/orders/${o.id}`} className="font-medium underline underline-offset-4">#{o.number}</Link>
                 <div className="text-soft">{formatDate(new Date(o.created_at), lang)}</div>
-                <div className="text-turq">{t.orders.status[o.status]}</div>
+                <div className="text-turq">{orderStatus(t, o)}</div>
               </td>
               <td>
                 {o.title} × {o.quantity}
                 <div className="text-soft">{o.shop_name}</div>
                 <div className="text-soft">{o.buyer_email}</div>
                 <div className="text-soft" data-delivery={o.delivery_method}>
-                  {t.delivery.by[o.delivery_method]}
+                  {o.fulfilment === "collection" ? t.dash.o.collection : t.delivery.by[o.delivery_method]}
                   {o.parcel_size && ` (${t.delivery.size[o.parcel_size]})`}
                   {o.label_ref && ` · ${fmt(t.dash.o.labelRef, { ref: o.label_ref })}`}
                 </div>

@@ -16,7 +16,9 @@ export async function placeOrder(fd: FormData) {
   const lang = langOf(fd);
   const listingId = str(fd, "listing");
   const quantity = Math.max(1, Math.min(20, parseInt(str(fd, "qty") || "1", 10) || 1));
-  const here = `/${lang}/checkout/${listingId}?qty=${quantity}`;
+  // "how" is the buyer's choice; createOrder checks it against the item before anything is stored.
+  const fulfilment = str(fd, "how") === "collection" ? "collection" : "delivery";
+  const here = `/${lang}/checkout/${listingId}?qty=${quantity}${fulfilment === "collection" ? "&how=collection" : ""}`;
 
   const user = await getUser();
   if (!user) redirect(`/${lang}/login?next=${encodeURIComponent(here)}`);
@@ -32,7 +34,10 @@ export async function placeOrder(fd: FormData) {
     postcode: str(fd, "postcode").toUpperCase(),
     phone: str(fd, "phone"),
   };
-  if (!shipping.name || !shipping.line1 || !shipping.city || !shipping.postcode || !shipping.phone) {
+  if (fulfilment === "collection") {
+    // Only a name and a phone number are needed to collect.
+    if (!shipping.name || !shipping.phone) redirect(`${here}&error=collectfields`);
+  } else if (!shipping.name || !shipping.line1 || !shipping.city || !shipping.postcode || !shipping.phone) {
     redirect(`${here}&error=fields`);
   }
   const method = str(fd, "method") === "klarna" ? "klarna" : "card";
@@ -44,17 +49,19 @@ export async function placeOrder(fd: FormData) {
       listingId,
       quantity,
       method,
+      fulfilment,
       shipping,
       title: pick(lang, listing.title_tr, listing.title_en).text,
       returnBase: `${await origin()}/${lang}`,
     });
   } catch (e) {
     if (e instanceof OrderError) {
-      redirect(`${here}&error=${e.code === "stock" ? "stock" : "unavailable"}`);
+      redirect(`${here}&error=${e.code === "stock" ? "stock" : e.code === "how" ? "how" : "unavailable"}`);
     }
     throw e;
   }
-  if (fd.get("save_address") === "on") {
+  // A collection order has no address, so there is nothing to save.
+  if (fulfilment === "delivery" && fd.get("save_address") === "on") {
     await q(
       `update users set ship_line1=$2, ship_line2=$3, ship_city=$4, ship_postcode=$5, ship_phone=$6 where id = $1`,
       [user.id, ...ADDRESS(shipping)],

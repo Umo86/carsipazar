@@ -35,6 +35,13 @@ const SAMPLE_DELIVERY_EN = "Sample text: Orders are sent by tracked delivery wit
 const SAMPLE_RETURNS_TR = "Örnek metin: Teslimattan sonra 14 gün içinde iade kabul edilir.";
 const SAMPLE_RETURNS_EN = "Sample text: Returns are accepted within 14 days of delivery.";
 
+// The two furniture sample shops let buyers collect, with these notes.
+const COLLECTION_SHOPS = ["ceviz-atolye", "hane-mobilya"];
+const SAMPLE_COLLECTION_TR = "Örnek metin: Hafta içi 10:00-18:00 arası, önceden haber vererek.";
+const SAMPLE_COLLECTION_EN = "Sample text: Weekdays 10am to 6pm, please tell us before you come.";
+const sampleCollection = (shopSlug: string, l: DemoListing) =>
+  COLLECTION_SHOPS.includes(shopSlug) && l.category === "furniture" ? "optional" : "no";
+
 export const SHOPS: {
   slug: string;
   name: string;
@@ -234,6 +241,39 @@ export async function upgradeSampleDelivery(): Promise<string[]> {
   return [`sample items moved to CarsiPazar delivery: ${n}`];
 }
 
+// Lets buyers collect the sample furniture items, and gives those two shops their collection
+// note, in a database that already exists. Matched by shop slug and English title; only an
+// item still at 'no' is changed and only an empty note is filled in, so a seller's own
+// choices are kept and running it again changes nothing.
+export async function upgradeSampleCollection(): Promise<string[]> {
+  let items = 0;
+  let notes = 0;
+  for (const s of SHOPS) {
+    if (!COLLECTION_SHOPS.includes(s.slug)) continue;
+    for (const l of s.listings) {
+      if (sampleCollection(s.slug, l) === "no") continue;
+      const rows = await q(
+        `update listings set collection = 'optional'
+          where collection = 'no' and title_en = $2
+            and shop_id = (select id from shops where slug = $1)
+          returning id`,
+        [s.slug, l.en],
+      );
+      items += rows.length;
+    }
+    const tr = await q(
+      "update shops set collection_note_tr = $2 where slug = $1 and collection_note_tr = '' returning id",
+      [s.slug, SAMPLE_COLLECTION_TR],
+    );
+    const en = await q(
+      "update shops set collection_note_en = $2 where slug = $1 and collection_note_en = '' returning id",
+      [s.slug, SAMPLE_COLLECTION_EN],
+    );
+    notes += tr.length + en.length;
+  }
+  return [`sample items open for collection: ${items}`, `sample collection notes added: ${notes}`];
+}
+
 export async function runSetup(opts: {
   adminEmail: string;
   adminPassword: string;
@@ -258,6 +298,7 @@ export async function runSetup(opts: {
     log.push("demo data already present");
     log.push(...(await importSampleMedia())); // may rename old sample items, so it runs first
     log.push(...(await upgradeSampleDelivery()));
+    log.push(...(await upgradeSampleCollection()));
     return log;
   }
 
@@ -276,11 +317,14 @@ export async function runSetup(opts: {
     );
     const shop = await one<{ id: string }>(
       `insert into shops (owner_id, slug, name, seller_type, legal_name, phone, address, city, postcode,
-                          bio_tr, bio_en, status, founding, delivery_tr, delivery_en, returns_tr, returns_en)
-       values ($1,$2,$3,$4,$5,'07000 000000','1 Demo Street',$6,'N1 1AA',$7,$8,'approved',$9,$10,$11,$12,$13)
+                          bio_tr, bio_en, status, founding, delivery_tr, delivery_en, returns_tr, returns_en,
+                          collection_note_tr, collection_note_en)
+       values ($1,$2,$3,$4,$5,'07000 000000','1 Demo Street',$6,'N1 1AA',$7,$8,'approved',$9,$10,$11,$12,$13,$14,$15)
        returning id`,
       [owner!.id, s.slug, s.name, s.type, `${s.name} (demo)`, s.city, s.bioTr, s.bioEn, s.founding,
-       SAMPLE_DELIVERY_TR, SAMPLE_DELIVERY_EN, SAMPLE_RETURNS_TR, SAMPLE_RETURNS_EN],
+       SAMPLE_DELIVERY_TR, SAMPLE_DELIVERY_EN, SAMPLE_RETURNS_TR, SAMPLE_RETURNS_EN,
+       COLLECTION_SHOPS.includes(s.slug) ? SAMPLE_COLLECTION_TR : "",
+       COLLECTION_SHOPS.includes(s.slug) ? SAMPLE_COLLECTION_EN : ""],
     );
     // Drawn patterns first; importSampleMedia swaps in the downloaded photos.
     const cover = await one<{ id: string }>(
@@ -293,10 +337,11 @@ export async function runSetup(opts: {
       const row = await one<{ id: string }>(
         `insert into listings (shop_id, category, title_tr, title_en, description_tr, description_en,
                                price_pence, postage_pence, stock, instalments, featured,
-                               delivery_method, parcel_size)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning id`,
+                               delivery_method, parcel_size, collection)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning id`,
         [shop!.id, l.category, l.tr, l.en, l.dtr, l.den, l.price * 100, samplePostage(l), l.stock,
-         l.instalments, Boolean(l.featured), l.delivery ? "platform" : "seller", l.delivery ?? null],
+         l.instalments, Boolean(l.featured), l.delivery ? "platform" : "seller", l.delivery ?? null,
+         sampleCollection(s.slug, l)],
       );
       await q(
         "insert into listing_images (listing_id, position, content_type, data) values ($1, 0, 'image/svg+xml', $2)",

@@ -67,6 +67,15 @@ export default async function DashboardShop({ params, searchParams }: PageProps<
             <span>{s.returnsEn}</span>
             <textarea className="input" name="returns_en" maxLength={800} defaultValue={shop.returns_en} lang="en" />
           </label>
+          <label className="field">
+            <span>{s.collectionTr}</span>
+            <textarea className="input" name="collection_note_tr" maxLength={500} defaultValue={shop.collection_note_tr} lang="tr" />
+          </label>
+          <label className="field">
+            <span>{s.collectionEn}</span>
+            <textarea className="input" name="collection_note_en" maxLength={500} defaultValue={shop.collection_note_en} lang="en" />
+          </label>
+          <p className="hint -mt-2 sm:col-span-2">{s.collectionHint}</p>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2">

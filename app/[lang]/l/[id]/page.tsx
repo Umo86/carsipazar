@@ -65,13 +65,24 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
           <h1 className="mt-2 text-4xl md:text-5xl">{title.text}</h1>
 
           <p className="mt-6 text-3xl font-medium">{formatGBP(l.price_pence)}</p>
-          <p className="mt-1 text-sm text-soft">
-            {l.postage_pence === 0
-              ? t.listing.freePostage
-              : fmt(t.listing.postage, { amount: formatGBP(l.postage_pence) })}
-            {" · "}
-            <span data-delivery={l.delivery_method}>{t.delivery.by[l.delivery_method]}</span>
-          </p>
+          {l.collection === "only" ? (
+            <p className="mt-1 text-sm text-soft" data-collection="only">
+              {fmt(t.listing.collectOnly, { city: l.shop_city })}
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-soft">
+              {l.postage_pence === 0
+                ? t.listing.freePostage
+                : fmt(t.listing.postage, { amount: formatGBP(l.postage_pence) })}
+              {" · "}
+              <span data-delivery={l.delivery_method}>{t.delivery.by[l.delivery_method]}</span>
+            </p>
+          )}
+          {l.collection === "optional" && (
+            <p className="mt-1 text-sm text-soft" data-collection="optional">
+              {fmt(t.listing.collectFree, { city: l.shop_city })}
+            </p>
+          )}
 
           {isOwner && <p className="notice mt-6">{t.listing.ownListing}</p>}
 

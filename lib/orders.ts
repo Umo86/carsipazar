@@ -1,5 +1,6 @@
 import "server-only";
-import type { DeliveryMethod, ParcelSize } from "./config";
+import { randomInt, timingSafeEqual } from "node:crypto";
+import { COLLECTION_MAX_ATTEMPTS, type DeliveryMethod, type Fulfilment, type ParcelSize } from "./config";
 import { one, q, tx } from "./db";
 import { createLabel } from "./delivery";
 import { computeFees, instalmentsAllowed, type PaymentMethod } from "./money";
@@ -43,6 +44,11 @@ export type Order = {
   delivery_method: DeliveryMethod;
   parcel_size: ParcelSize | null;
   delivery_cost_pence: number;
+  fulfilment: Fulfilment;
+  // The handover code. Only the buyer's own order page may select this column; seller and
+  // admin queries replace it with null (see ORDER_NO_CODE) so it cannot reach their pages.
+  collection_code: string | null;
+  collection_attempts: number;
   label_ref: string | null;
   label_created_at: Date | null;
   provider: string;
@@ -64,8 +70,13 @@ export type Shipping = {
   phone: string;
 };
 
+// For queries that feed a seller or admin page: every column of orders except the real
+// handover code, which is replaced by null. Use as `select o.*, ${ORDER_NO_CODE}` (the
+// later column wins in the row object).
+export const ORDER_NO_CODE = "null::text as collection_code";
+
 export class OrderError extends Error {
-  constructor(public code: "stock" | "unavailable" | "klarna") {
+  constructor(public code: "stock" | "unavailable" | "klarna" | "how") {
     super(code);
   }
 }
@@ -78,6 +89,7 @@ export async function createOrder(args: {
   listingId: string;
   quantity: number;
   method: PaymentMethod;
+  fulfilment: Fulfilment;
   shipping: Shipping;
   title: string;
   returnBase: string; // e.g. https://site/tr
@@ -88,7 +100,7 @@ export async function createOrder(args: {
   const order = await tx(async (c) => {
     const { rows } = await c.query(
       `select l.id, l.price_pence, l.postage_pence, l.stock, l.instalments, l.status,
-              l.delivery_method, l.parcel_size,
+              l.delivery_method, l.parcel_size, l.collection,
               s.id as shop_id, s.status as shop_status, s.founding, s.owner_id
          from listings l join shops s on s.id = l.shop_id
         where l.id = $1 for update of l`,
@@ -101,30 +113,43 @@ export async function createOrder(args: {
     if (l.owner_id === args.buyer.id) throw new OrderError("unavailable");
     if (l.stock < args.quantity) throw new OrderError("stock");
 
+    // The buyer's choice is checked against the item as it is now, not against the form.
+    const collect = args.fulfilment === "collection";
+    if (collect ? l.collection === "no" : l.collection === "only") throw new OrderError("how");
+    // No tracked delivery means nothing to prove handover to the lender: card only.
+    if (collect && args.method !== "card") throw new OrderError("how");
+
     const item = l.price_pence * args.quantity;
-    const total = item + l.postage_pence;
+    const postage = collect ? 0 : l.postage_pence;
+    const total = item + postage;
     if (args.method === "klarna" && !instalmentsAllowed(l, total, settings)) {
       throw new OrderError("klarna");
     }
     // On a CarsiPazar delivery order the postage pays for delivery and is kept by the platform.
-    const platform = l.delivery_method === "platform";
-    const deliveryCost = platform ? l.postage_pence : 0;
+    const platform = !collect && l.delivery_method === "platform";
+    const deliveryCost = platform ? postage : 0;
     const fees = computeFees({ total, method: args.method, founding: l.founding, settings, deliveryCost });
+    // Six digits from the system's random source, leading zeros kept, so it is stored as text.
+    const code = collect ? String(randomInt(0, 1_000_000)).padStart(6, "0") : null;
+    // A collection order carries no address, only the buyer's name and phone.
+    const ship = collect
+      ? { ...args.shipping, line1: "", line2: "", city: "", postcode: "" }
+      : args.shipping;
 
     const ins = await c.query<Order>(
       `insert into orders
          (buyer_id, shop_id, listing_id, title, quantity, item_pence, postage_pence, total_pence,
           payment_method, commission_pence, payment_cost_pence, seller_payout_pence,
           ship_name, ship_line1, ship_line2, ship_city, ship_postcode, ship_phone, provider,
-          delivery_method, parcel_size, delivery_cost_pence)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
+          delivery_method, parcel_size, delivery_cost_pence, fulfilment, collection_code)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
        returning *`,
       [
-        args.buyer.id, l.shop_id, l.id, args.title, args.quantity, item, l.postage_pence, total,
+        args.buyer.id, l.shop_id, l.id, args.title, args.quantity, item, postage, total,
         args.method, fees.commission, fees.paymentCost, fees.sellerPayout,
-        args.shipping.name, args.shipping.line1, args.shipping.line2, args.shipping.city,
-        args.shipping.postcode, args.shipping.phone, mode,
-        l.delivery_method, platform ? l.parcel_size : null, fees.deliveryCost,
+        ship.name, ship.line1, ship.line2, ship.city, ship.postcode, ship.phone, mode,
+        collect ? "seller" : l.delivery_method, platform ? l.parcel_size : null, fees.deliveryCost,
+        args.fulfilment, code,
       ],
     );
     const created = ins.rows[0];
@@ -208,11 +233,56 @@ export async function markDispatched(args: {
         set status = 'dispatched', dispatched_at = now(),
             tracking_carrier = case when delivery_method = 'platform' then tracking_carrier else $3 end,
             tracking_number = case when delivery_method = 'platform' then tracking_number else $4 end
-      where id = $1 and shop_id = $2 and status = 'paid'
+      where id = $1 and shop_id = $2 and status = 'paid' and fulfilment = 'delivery'
         and (delivery_method = 'seller' or label_ref is not null)
       returning *`,
     [args.orderId, args.shopId, args.carrier || null, args.tracking || null],
   );
+}
+
+// "Ready for collection": a collection order goes from paid to dispatched with no carrier,
+// no tracking and no label.
+export async function markReadyForCollection(args: { orderId: string; shopId: string }) {
+  return one<Order>(
+    `update orders set status = 'dispatched', dispatched_at = now()
+      where id = $1 and shop_id = $2 and status = 'paid' and fulfilment = 'collection'
+      returning *`,
+    [args.orderId, args.shopId],
+  );
+}
+
+export type HandoverResult = "ok" | "wrong" | "locked" | "invalid" | "state";
+
+// The seller types the buyer's code at the counter. The row is locked, so two requests
+// cannot both count as the first attempt, and the code is compared in constant time.
+// A wrong code adds one attempt; after COLLECTION_MAX_ATTEMPTS wrong ones the order is
+// locked and even the right code is refused (only the admin can complete it then).
+// Input that is not 6 digits cannot be a guess at the code, so it is not counted.
+export async function confirmHandover(args: {
+  orderId: string;
+  shopId: string;
+  code: string;
+}): Promise<HandoverResult> {
+  if (!/^\d{6}$/.test(args.code)) return "invalid";
+  return tx(async (c) => {
+    const { rows } = await c.query<{ status: string; collection_code: string | null; collection_attempts: number }>(
+      `select status, collection_code, collection_attempts from orders
+        where id = $1 and shop_id = $2 and fulfilment = 'collection' for update`,
+      [args.orderId, args.shopId],
+    );
+    const o = rows[0];
+    if (!o || o.status !== "dispatched" || !o.collection_code) return "state";
+    if (o.collection_attempts >= COLLECTION_MAX_ATTEMPTS) return "locked";
+    const a = Buffer.from(args.code);
+    const b = Buffer.from(o.collection_code);
+    if (a.length === b.length && timingSafeEqual(a, b)) {
+      // Same effects as the buyer or admin confirming: delivered, and the payout clock starts.
+      await c.query("update orders set status = 'delivered', delivered_at = now() where id = $1", [args.orderId]);
+      return "ok";
+    }
+    await c.query("update orders set collection_attempts = collection_attempts + 1 where id = $1", [args.orderId]);
+    return "wrong";
+  });
 }
 
 // The buyer confirms receipt (or the admin does it for them).

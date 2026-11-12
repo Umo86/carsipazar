@@ -37,3 +37,15 @@ export const parcelLimits = (t: Dict, size: ParcelSize) => {
   const p = PARCEL_SIZES[size];
   return fmt(t.delivery.limits, { kg: p.kg, l: p.cm[0], w: p.cm[1], h: p.cm[2] });
 };
+
+// The status words for an order. A collection order reuses "dispatched" and "delivered"
+// for "ready to collect" and "collected".
+type StatusKey = keyof Dict["orders"]["status"];
+export const orderStatus = (t: Dict, o: { status: StatusKey; fulfilment: string }) =>
+  (o.fulfilment === "collection" &&
+    (t.orders.statusCollection as Partial<Record<StatusKey, string>>)[o.status]) ||
+  t.orders.status[o.status];
+export const orderExplain = (t: Dict, o: { status: StatusKey; fulfilment: string }) =>
+  (o.fulfilment === "collection" &&
+    (t.orders.explainCollection as Partial<Record<StatusKey, string>>)[o.status]) ||
+  t.orders.explain[o.status];

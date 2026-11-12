@@ -32,11 +32,15 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
   const isOwner = user?.id === shop.owner_id;
   if (shop.status !== "approved" && !isOwner && user?.role !== "admin") notFound();
 
-  const [allItems, rating, reviews, base] = await Promise.all([
+  const [allItems, rating, reviews, base, collectable] = await Promise.all([
     listingsByShop(shop.id),
     shopRating(shop.id),
     shopReviews(shop.id),
     origin(),
+    one<{ yes: boolean }>(
+      "select exists(select 1 from listings where shop_id = $1 and status = 'active' and collection <> 'no') as yes",
+      [shop.id],
+    ),
   ]);
   const sp = await searchParams;
   const filter = typeof sp.c === "string" && isCategory(sp.c) ? sp.c : null;
@@ -46,6 +50,7 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
   const bio = pick(lang, shop.bio_tr, shop.bio_en).text;
   const delivery = pick(lang, shop.delivery_tr, shop.delivery_en).text;
   const returns = pick(lang, shop.returns_tr, shop.returns_en).text;
+  const collectionNote = pick(lang, shop.collection_note_tr, shop.collection_note_en).text;
   const self = `/${lang}/s/${shop.slug}`;
   const shareUrl = `${base}/s/${shop.slug}`;
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(
@@ -154,6 +159,14 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
               <section>
                 <h2 className="text-3xl">{t.shop.delivery}</h2>
                 <p className="mt-3 max-w-[38rem] whitespace-pre-line text-soft">{delivery}</p>
+              </section>
+            )}
+            {collectable?.yes && (
+              <section data-collection="available">
+                <h2 className="text-3xl">{t.shop.collectionAvailable}</h2>
+                {collectionNote && (
+                  <p className="mt-3 max-w-[38rem] whitespace-pre-line text-soft">{collectionNote}</p>
+                )}
               </section>
             )}
             {returns && (

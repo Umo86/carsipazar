@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { one } from "@/lib/db";
-import { fmt, formatDate, getDict } from "@/lib/i18n";
+import { fmt, formatDate, getDict, orderExplain, orderStatus, pick } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import type { Order } from "@/lib/orders";
 import { isUuid } from "@/lib/queries";
@@ -20,8 +20,20 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
   if (!isLocale(lang) || !isUuid(id)) notFound();
   const t = getDict(lang);
   const user = await requireUser(lang, `/${lang}/orders/${id}`);
-  const o = await one<Order & { shop_name: string; shop_slug: string }>(
-    `select o.*, s.name as shop_name, s.slug as shop_slug from orders o join shops s on s.id = o.shop_id
+  const o = await one<
+    Order & {
+      shop_name: string;
+      shop_slug: string;
+      shop_address: string;
+      shop_city: string;
+      shop_postcode: string;
+      collection_note_tr: string;
+      collection_note_en: string;
+    }
+  >(
+    `select o.*, s.name as shop_name, s.slug as shop_slug, s.address as shop_address, s.city as shop_city,
+            s.postcode as shop_postcode, s.collection_note_tr, s.collection_note_en
+       from orders o join shops s on s.id = o.shop_id
       where o.id = $1 and (o.buyer_id = $2 or $3)`,
     [id, user.id, user.role === "admin"],
   );
@@ -31,6 +43,10 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
     [o.id],
   );
   const stepIndex = STEPS.indexOf(o.status as (typeof STEPS)[number]);
+  const collection = o.fulfilment === "collection";
+  const shopNote = pick(lang, o.collection_note_tr, o.collection_note_en).text;
+  // The handover code is for the buyer only: an admin who opens the order does not see it.
+  const showCode = collection && o.status === "dispatched" && o.buyer_id === user.id && Boolean(o.collection_code);
   const canReview = (o.status === "delivered" || o.status === "released") && !review && o.buyer_id === user.id;
 
   return (
@@ -50,12 +66,23 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
               aria-current={i === stepIndex ? "step" : undefined}
               className={`border-t-2 pt-2 text-sm ${i <= stepIndex ? "border-cobalt font-medium" : "border-line text-soft"}`}
             >
-              {t.orders.status[s]}
+              {orderStatus(t, { status: s, fulfilment: o.fulfilment })}
             </li>
           ))}
         </ol>
       )}
-      <p className="notice mt-6">{t.orders.explain[o.status]}</p>
+      <p className="notice mt-6">{orderExplain(t, o)}</p>
+
+      {collection && o.status === "paid" && <p className="mt-4" data-collection="wait">{t.orders.collectWait}</p>}
+      {showCode && (
+        <section className="mt-6 rounded-2xl bg-sky p-6" data-collection="code">
+          <h2 className="text-2xl">{t.orders.codeTitle}</h2>
+          <p className="mt-3 font-display text-6xl tracking-[0.25em]" aria-label={o.collection_code!.split("").join(" ")}>
+            {o.collection_code}
+          </p>
+          <p className="mt-3 text-soft">{t.orders.codeHint}</p>
+        </section>
+      )}
 
       {o.status === "dispatched" && o.buyer_id === user.id && (
         <form action={confirmReceived} className="mt-6">
@@ -83,16 +110,31 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
             </Link>
           </dd>
         </div>
-        <div>
-          <dt className="text-sm text-soft">{t.orders.shipTo}</dt>
-          <dd className="mt-1 whitespace-pre-line">
-            {[o.ship_name, o.ship_line1, o.ship_line2, `${o.ship_city} ${o.ship_postcode}`].filter(Boolean).join("\n")}
-          </dd>
-        </div>
+        {collection ? (
+          <div>
+            <dt className="text-sm text-soft">{t.orders.collectFrom}</dt>
+            <dd className="mt-1 whitespace-pre-line">
+              {[o.shop_name, o.shop_address, `${o.shop_city} ${o.shop_postcode}`].join("\n")}
+            </dd>
+            {shopNote && (
+              <>
+                <dt className="mt-4 text-sm text-soft">{t.orders.collectNote}</dt>
+                <dd className="mt-1 whitespace-pre-line">{shopNote}</dd>
+              </>
+            )}
+          </div>
+        ) : (
+          <div>
+            <dt className="text-sm text-soft">{t.orders.shipTo}</dt>
+            <dd className="mt-1 whitespace-pre-line">
+              {[o.ship_name, o.ship_line1, o.ship_line2, `${o.ship_city} ${o.ship_postcode}`].filter(Boolean).join("\n")}
+            </dd>
+          </div>
+        )}
         <div>
           <dt className="text-sm text-soft">{t.orders.delivery}</dt>
           <dd className="mt-1">
-            {t.delivery.by[o.delivery_method]}
+            {collection ? t.orders.collection : t.delivery.by[o.delivery_method]}
             {o.parcel_size && ` (${fmt(t.delivery.parcel, { size: t.delivery.size[o.parcel_size] })})`}
           </dd>
         </div>

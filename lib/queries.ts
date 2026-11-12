@@ -1,6 +1,6 @@
 import "server-only";
 import { one, q } from "./db";
-import type { DeliveryMethod, ParcelSize, PromoKind } from "./config";
+import type { CollectionMode, DeliveryMethod, ParcelSize, PromoKind } from "./config";
 
 export type ListingCard = {
   id: string;
@@ -117,6 +117,7 @@ export type ListingFull = {
   postage_pence: number;
   delivery_method: DeliveryMethod;
   parcel_size: ParcelSize | null;
+  collection: CollectionMode;
   stock: number;
   instalments: boolean;
   status: "active" | "paused" | "removed";
@@ -128,6 +129,10 @@ export type ListingFull = {
   seller_type: "business" | "sole_trader";
   founding: boolean;
   shop_city: string;
+  shop_address: string;
+  shop_postcode: string;
+  collection_note_tr: string;
+  collection_note_en: string;
   shop_logo: string | null;
 };
 
@@ -136,7 +141,8 @@ export const getListing = (id: string) =>
     ? one<ListingFull>(
         `select l.*, s.name as shop_name, s.slug as shop_slug, s.status as shop_status,
                 s.owner_id as shop_owner, s.seller_type, s.founding, s.city as shop_city,
-                s.logo_id as shop_logo
+                s.address as shop_address, s.postcode as shop_postcode,
+                s.collection_note_tr, s.collection_note_en, s.logo_id as shop_logo
            from listings l join shops s on s.id = l.shop_id where l.id = $1`,
         [id],
       )

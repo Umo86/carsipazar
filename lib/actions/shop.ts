@@ -3,10 +3,10 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSession, getMyShop, getUser, hashPassword } from "../auth";
-import { deliveryPrice, isCategory, isParcelSize, MAX_IMAGES } from "../config";
+import { deliveryPrice, isCategory, isCollectionMode, isParcelSize, MAX_IMAGES } from "../config";
 import { one, q, tx } from "../db";
 import { parsePounds } from "../money";
-import { createDeliveryLabel, markDispatched } from "../orders";
+import { confirmHandover, createDeliveryLabel, markDispatched, markReadyForCollection } from "../orders";
 import { paymentsMode } from "../payments";
 import * as stripe from "../payments/stripe";
 import { isUuid } from "../queries";
@@ -101,7 +101,8 @@ export async function updateShop(fd: FormData) {
   await tx(async (c) => {
     await c.query(
       `update shops set bio_tr=$2, bio_en=$3, instagram=$4, phone=$5, website=$6, public_email=$7,
-              show_phone=$8, delivery_tr=$9, delivery_en=$10, returns_tr=$11, returns_en=$12
+              show_phone=$8, delivery_tr=$9, delivery_en=$10, returns_tr=$11, returns_en=$12,
+              collection_note_tr=$13, collection_note_en=$14
         where id = $1`,
       [
         shop.id,
@@ -116,6 +117,8 @@ export async function updateShop(fd: FormData) {
         str(fd, "delivery_en").slice(0, 800),
         str(fd, "returns_tr").slice(0, 800),
         str(fd, "returns_en").slice(0, 800),
+        str(fd, "collection_note_tr").slice(0, 500),
+        str(fd, "collection_note_en").slice(0, 500),
       ],
     );
     // A new logo or cover replaces the old one.
@@ -164,15 +167,26 @@ export async function saveListing(fd: FormData) {
   if ((!titleTr && !titleEn) || !price || !isCategory(category)) return back();
   if (!Number.isInteger(stock) || stock < 0 || stock > 9999) return back();
 
+  // Collection from the shop. A missing value keeps what the item has (an old form), a value
+  // that is not one of the three is an error.
+  const rawCollection = str(fd, "collection");
+  if (rawCollection && !isCollectionMode(rawCollection)) return back();
+  const collection = rawCollection || null;
+
   // Delivery. The radio decides; the group that is not chosen is ignored. With
   // CarsiPazar delivery the postage is the current price of the parcel size,
-  // whatever was typed in the postage box.
+  // whatever was typed in the postage box. "Collection only" means no delivery at all,
+  // so whatever else was submitted, the item is stored as seller delivery with no size
+  // and no postage, and the CarsiPazar delivery price limit does not apply.
   const settings = await getSettings();
-  const platform = str(fd, "delivery_method") === "platform";
+  const collectionOnly = collection === "only";
+  const platform = !collectionOnly && str(fd, "delivery_method") === "platform";
   const size = str(fd, "parcel_size");
   let postage: number;
   let parcelSize: string | null = null;
-  if (platform) {
+  if (collectionOnly) {
+    postage = 0;
+  } else if (platform) {
     if (!isParcelSize(size)) return back("parcel");
     if (settings.delivery_max_item_price > 0 && price > settings.delivery_max_item_price) return back("limit");
     parcelSize = size;
@@ -196,7 +210,7 @@ export async function saveListing(fd: FormData) {
   const values = [
     category, titleTr, titleEn, str(fd, "description_tr").slice(0, 4000),
     str(fd, "description_en").slice(0, 4000), price, postage, stock, fd.get("instalments") === "on",
-    platform ? "platform" : "seller", parcelSize,
+    platform ? "platform" : "seller", parcelSize, collection,
   ];
 
   await tx(async (c) => {
@@ -205,7 +219,7 @@ export async function saveListing(fd: FormData) {
       const res = await c.query(
         `update listings set category=$3, title_tr=$4, title_en=$5, description_tr=$6,
                 description_en=$7, price_pence=$8, postage_pence=$9, stock=$10, instalments=$11,
-                delivery_method=$12, parcel_size=$13
+                delivery_method=$12, parcel_size=$13, collection=coalesce($14, collection)
           where id = $1 and shop_id = $2 and status <> 'removed'`,
         [id, shop.id, ...values],
       );
@@ -213,8 +227,8 @@ export async function saveListing(fd: FormData) {
     } else {
       const res = await c.query(
         `insert into listings (shop_id, category, title_tr, title_en, description_tr, description_en,
-                               price_pence, postage_pence, stock, instalments, delivery_method, parcel_size)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning id`,
+                               price_pence, postage_pence, stock, instalments, delivery_method, parcel_size, collection)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,coalesce($13, 'no')) returning id`,
         [shop.id, ...values],
       );
       listingId = res.rows[0].id;
@@ -258,10 +272,17 @@ export async function dispatchOrder(fd: FormData) {
   const carrier = str(fd, "carrier").slice(0, 40);
   if (!isUuid(orderId)) redirect(`/${lang}/dashboard/orders`);
 
-  const order = await one<{ payment_method: string; delivery_method: string; label_ref: string | null }>(
-    "select payment_method, delivery_method, label_ref from orders where id = $1 and shop_id = $2",
-    [orderId, shop.id],
-  );
+  const order = await one<{
+    payment_method: string;
+    delivery_method: string;
+    label_ref: string | null;
+    fulfilment: string;
+  }>("select payment_method, delivery_method, label_ref, fulfilment from orders where id = $1 and shop_id = $2", [
+    orderId,
+    shop.id,
+  ]);
+  // A collection order is never shipped: it has its own "ready" and "handover" steps.
+  if (order?.fulfilment === "collection") redirect(`/${lang}/dashboard/orders`);
   if (order?.delivery_method === "platform") {
     if (!order.label_ref) redirect(`/${lang}/dashboard/orders?error=label#o-${orderId}`);
   } else if (order?.payment_method === "klarna" && !tracking) {
@@ -270,6 +291,26 @@ export async function dispatchOrder(fd: FormData) {
   }
   await markDispatched({ orderId, shopId: shop.id, carrier, tracking });
   redirect(`/${lang}/dashboard/orders`);
+}
+
+// "Mark as ready for collection" on a paid collection order. No carrier, tracking or label.
+export async function markReadyAction(fd: FormData) {
+  const lang = langOf(fd);
+  const { shop } = await myShop(lang);
+  const orderId = str(fd, "order");
+  if (isUuid(orderId)) await markReadyForCollection({ orderId, shopId: shop.id });
+  redirect(`/${lang}/dashboard/orders#o-${orderId}`);
+}
+
+// "Confirm handover": the seller types the code the buyer shows at the counter.
+export async function confirmHandoverAction(fd: FormData) {
+  const lang = langOf(fd);
+  const { shop } = await myShop(lang);
+  const orderId = str(fd, "order");
+  if (!isUuid(orderId)) redirect(`/${lang}/dashboard/orders`);
+  const result = await confirmHandover({ orderId, shopId: shop.id, code: str(fd, "code") });
+  const error = result === "wrong" ? "code" : result === "invalid" ? "codeformat" : "";
+  redirect(`/${lang}/dashboard/orders${error ? `?error=${error}&o=${orderId}` : ""}#o-${orderId}`);
 }
 
 // "Create delivery label" on a paid CarsiPazar delivery order.

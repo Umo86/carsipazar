@@ -50,6 +50,9 @@ alter table shops add column if not exists returns_tr text not null default '';
 alter table shops add column if not exists returns_en text not null default '';
 alter table shops add column if not exists logo_id uuid;
 alter table shops add column if not exists cover_id uuid;
+-- Opening hours and instructions shown to buyers who collect from the shop.
+alter table shops add column if not exists collection_note_tr text not null default '';
+alter table shops add column if not exists collection_note_en text not null default '';
 
 create table if not exists shop_images (
   id uuid primary key default gen_random_uuid(),
@@ -92,6 +95,11 @@ alter table listings add column if not exists parcel_size text
 alter table listings drop constraint if exists listings_platform_needs_size;
 alter table listings add constraint listings_platform_needs_size
   check (delivery_method <> 'platform' or parcel_size is not null);
+
+-- Collection from the shop: "no" (delivery only), "optional" (buyer chooses) or "only" (no delivery).
+alter table listings add column if not exists collection text not null default 'no';
+alter table listings drop constraint if exists listings_collection_valid;
+alter table listings add constraint listings_collection_valid check (collection in ('no', 'optional', 'only'));
 
 create table if not exists listing_images (
   id uuid primary key default gen_random_uuid(),
@@ -163,6 +171,17 @@ alter table orders add column if not exists label_created_at timestamptz;
 alter table orders drop constraint if exists orders_delivery_consistent;
 alter table orders add constraint orders_delivery_consistent
   check (delivery_cost_pence <= postage_pence and (delivery_method <> 'platform' or parcel_size is not null));
+-- Collection from the shop. The status names are reused: for a collection order 'dispatched'
+-- means ready for collection and 'delivered' means collected. collection_code is the 6-digit
+-- handover code the buyer gives the seller; it is never sent to a seller or admin page.
+alter table orders add column if not exists fulfilment text not null default 'delivery';
+alter table orders drop constraint if exists orders_fulfilment_valid;
+alter table orders add column if not exists collection_code text;
+alter table orders add column if not exists collection_attempts integer not null default 0;
+alter table orders add constraint orders_fulfilment_valid check (
+  fulfilment in ('delivery', 'collection') and collection_attempts >= 0
+  and (fulfilment = 'delivery' or (coalesce(collection_code ~ '^[0-9]{6}$', false) and postage_pence = 0 and delivery_cost_pence = 0))
+);
 create index if not exists orders_buyer_idx on orders(buyer_id);
 create index if not exists orders_shop_idx on orders(shop_id);
 

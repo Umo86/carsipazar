@@ -130,6 +130,8 @@ export type Shop = {
   delivery_en: string;
   returns_tr: string;
   returns_en: string;
+  collection_note_tr: string;
+  collection_note_en: string;
   logo_id: string | null;
   cover_id: string | null;
 };

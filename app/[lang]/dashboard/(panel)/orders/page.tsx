@@ -1,11 +1,11 @@
 import { requireShop } from "@/lib/auth";
-import type { Locale } from "@/lib/config";
+import { COLLECTION_MAX_ATTEMPTS, type Locale } from "@/lib/config";
 import { q } from "@/lib/db";
-import { fmt, formatDate, getDict } from "@/lib/i18n";
+import { fmt, formatDate, getDict, orderStatus } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
-import { releaseDueOrders, type Order } from "@/lib/orders";
+import { ORDER_NO_CODE, releaseDueOrders, type Order } from "@/lib/orders";
 import { getSettings } from "@/lib/settings";
-import { createLabelAction, dispatchOrder } from "@/lib/actions/shop";
+import { confirmHandoverAction, createLabelAction, dispatchOrder, markReadyAction } from "@/lib/actions/shop";
 import SubmitButton from "@/components/SubmitButton";
 
 export default async function DashboardOrders({ params, searchParams }: PageProps<"/[lang]/dashboard/orders">) {
@@ -17,7 +17,7 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
   await releaseDueOrders();
   const [orders, settings] = await Promise.all([
     q<Order>(
-      "select * from orders where shop_id = $1 and status <> 'pending' order by (status = 'paid') desc, created_at desc limit 200",
+      `select *, ${ORDER_NO_CODE} from orders where shop_id = $1 and status <> 'pending' order by (status = 'paid') desc, created_at desc limit 200`,
       [shop.id],
     ),
     getSettings(),
@@ -27,13 +27,15 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
 
   return (
     <>
-    {sp.error && (
+    {(sp.error === "label" || sp.error === "tracking") && (
       <p className="notice notice-error mb-6" role="alert">
         {sp.error === "label" ? o.labelFirst : o.trackingRequired}
       </p>
     )}
     <ul>
-      {orders.map((ord) => (
+      {orders.map((ord) => {
+        const col = ord.fulfilment === "collection";
+        return (
         <li key={ord.id} id={`o-${ord.id}`} className="grid gap-6 border-t border-line py-6 md:grid-cols-[3fr_2fr]">
           <div>
             <p className="text-sm text-soft">
@@ -43,11 +45,11 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
               {ord.title} × {ord.quantity}
             </p>
             <p className="mt-1 text-sm">
-              <span className="text-turq">{t.orders.status[ord.status]}</span>
+              <span className="text-turq">{orderStatus(t, ord)}</span>
               <span className="text-soft">, {t.orders.paidWith[ord.payment_method]}</span>
             </p>
             <p className="mt-1 text-sm text-soft">
-              {t.delivery.by[ord.delivery_method]}
+              {col ? o.collection : t.delivery.by[ord.delivery_method]}
               {ord.parcel_size && `, ${fmt(t.delivery.parcel, { size: t.delivery.size[ord.parcel_size] }).toLowerCase()}`}
             </p>
             {/* What the buyer paid, what the platform keeps, what the seller gets. */}
@@ -68,14 +70,60 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
           </div>
 
           <div>
-            <p className="text-sm text-soft">{o.shipTo}</p>
+            <p className="text-sm text-soft">{col ? o.collector : o.shipTo}</p>
             <p className="mt-1 whitespace-pre-line text-sm">
-              {[ord.ship_name, ord.ship_line1, ord.ship_line2, `${ord.ship_city} ${ord.ship_postcode}`, ord.ship_phone]
+              {(col
+                ? [ord.ship_name, ord.ship_phone]
+                : [ord.ship_name, ord.ship_line1, ord.ship_line2, `${ord.ship_city} ${ord.ship_postcode}`, ord.ship_phone]
+              )
                 .filter(Boolean)
                 .join("\n")}
             </p>
 
-            {ord.status === "paid" && ord.delivery_method === "platform" && !ord.label_ref && (
+            {col && ord.status === "paid" && (
+              <form action={markReadyAction} className="mt-4 grid gap-3">
+                <input type="hidden" name="lang" value={lang} />
+                <input type="hidden" name="order" value={ord.id} />
+                <p className="hint">{o.readyHint}</p>
+                <div><SubmitButton className="btn btn-sm">{o.markReady}</SubmitButton></div>
+              </form>
+            )}
+            {col && ord.status === "dispatched" && (
+              <div className="mt-4 grid gap-3">
+                <p className="notice">{o.waitingCollect}</p>
+                {ord.collection_attempts >= COLLECTION_MAX_ATTEMPTS ? (
+                  <p className="notice notice-error" role="alert">{o.locked}</p>
+                ) : (
+                  <form action={confirmHandoverAction} className="grid gap-3" autoComplete="off">
+                    <input type="hidden" name="lang" value={lang} />
+                    <input type="hidden" name="order" value={ord.id} />
+                    {(sp.error === "code" || sp.error === "codeformat") && sp.o === ord.id && (
+                      <p className="notice notice-error" role="alert">
+                        {sp.error === "code"
+                          ? fmt(o.errCode, { n: COLLECTION_MAX_ATTEMPTS - ord.collection_attempts })
+                          : o.errCodeFormat}
+                      </p>
+                    )}
+                    <label className="field max-w-48">
+                      <span>{o.handoverTitle}</span>
+                      <input
+                        className="input"
+                        name="code"
+                        inputMode="numeric"
+                        pattern="[0-9]{6}"
+                        maxLength={6}
+                        autoComplete="off"
+                        required
+                      />
+                    </label>
+                    <p className="hint">{o.handoverHint}</p>
+                    <div><SubmitButton className="btn btn-sm">{o.confirmHandover}</SubmitButton></div>
+                  </form>
+                )}
+              </div>
+            )}
+
+            {ord.status === "paid" && !col && ord.delivery_method === "platform" && !ord.label_ref && (
               <form action={createLabelAction} className="mt-4 grid gap-3">
                 <input type="hidden" name="lang" value={lang} />
                 <input type="hidden" name="order" value={ord.id} />
@@ -83,7 +131,7 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
                 <div><SubmitButton className="btn btn-sm">{o.createLabel}</SubmitButton></div>
               </form>
             )}
-            {ord.status === "paid" && ord.delivery_method === "platform" && ord.label_ref && (
+            {ord.status === "paid" && !col && ord.delivery_method === "platform" && ord.label_ref && (
               <div className="mt-4 grid gap-3">
                 <p className="text-sm">
                   {fmt(o.labelRef, { ref: ord.label_ref })}
@@ -106,7 +154,7 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
                 </form>
               </div>
             )}
-            {ord.status === "paid" && ord.delivery_method === "seller" && (
+            {ord.status === "paid" && !col && ord.delivery_method === "seller" && (
               <form action={dispatchOrder} className="mt-4 grid gap-3">
                 <input type="hidden" name="lang" value={lang} />
                 <input type="hidden" name="order" value={ord.id} />
@@ -124,19 +172,20 @@ export default async function DashboardOrders({ params, searchParams }: PageProp
                 <div><SubmitButton className="btn btn-sm">{o.markDispatched}</SubmitButton></div>
               </form>
             )}
-            {ord.status === "dispatched" && (
+            {ord.status === "dispatched" && !col && (
               <p className="notice mt-4">
                 {o.waitingBuyer}
                 {ord.tracking_number && ` ${ord.tracking_carrier ?? ""} ${ord.tracking_number}`}
               </p>
             )}
             {ord.status === "delivered" && (
-              <p className="notice mt-4">{fmt(o.waitingRelease, { days: settings.release_days })}</p>
+              <p className="notice mt-4">{fmt(col ? o.collectedRelease : o.waitingRelease, { days: settings.release_days })}</p>
             )}
             {ord.status === "released" && <p className="notice mt-4">{o.released}</p>}
           </div>
         </li>
-      ))}
+        );
+      })}
     </ul>
     </>
   );

@@ -60,6 +60,17 @@ export const PAYMENT_COST = {
 export const DELIVERY_METHODS = ["seller", "platform"] as const;
 export type DeliveryMethod = (typeof DELIVERY_METHODS)[number];
 
+// Collection from the shop. "no": delivery only. "optional": the buyer chooses.
+// "only": no delivery at all. An order's fulfilment is "delivery" or "collection".
+export const COLLECTION_MODES = ["no", "optional", "only"] as const;
+export type CollectionMode = (typeof COLLECTION_MODES)[number];
+export const isCollectionMode = (v: string): v is CollectionMode =>
+  (COLLECTION_MODES as readonly string[]).includes(v);
+export type Fulfilment = "delivery" | "collection";
+
+// Wrong handover codes allowed on one collection order before it is locked.
+export const COLLECTION_MAX_ATTEMPTS = 5;
+
 // Parcel sizes for CarsiPazar delivery. Anything bigger (sofas, tables) is delivered by the seller.
 export const PARCEL_SIZES = {
   small: { kg: 2, cm: [45, 35, 16], priceKey: "delivery_small_price" },

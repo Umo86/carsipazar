@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getAddress, requireUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
@@ -17,7 +18,8 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
   const t = getDict(lang);
   const sp = await searchParams;
   const qty = Math.max(1, Math.min(20, parseInt(String(sp.qty ?? "1"), 10) || 1));
-  const user = await requireUser(lang, `/${lang}/checkout/${id}?qty=${qty}`);
+  const wantsCollection = sp.how === "collection";
+  const user = await requireUser(lang, `/${lang}/checkout/${id}?qty=${qty}${wantsCollection ? "&how=collection" : ""}`);
 
   const l = await getListing(id);
   if (!l) notFound();
@@ -29,15 +31,23 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
     getSettings(),
     getAddress(user.id),
   ]);
+  // "no" items ignore ?how=collection; "only" items always collect; "optional" follows the link.
+  const collect = l.collection === "only" || (l.collection === "optional" && wantsCollection);
   const item = l.price_pence * qty;
-  const total = item + l.postage_pence;
-  const klarna = instalmentsAllowed(l, total, settings);
+  const postage = collect ? 0 : l.postage_pence;
+  const total = item + postage;
+  const klarna = !collect && instalmentsAllowed(l, total, settings);
   const title = pick(lang, l.title_tr, l.title_en).text;
   const error =
     sp.error === "stock" ? t.checkout.errStock
     : sp.error === "fields" ? t.checkout.errFields
+    : sp.error === "collectfields" ? t.checkout.errCollectFields
+    : sp.error === "how" ? t.checkout.errHow
     : sp.error ? t.checkout.errUnavailable
     : null;
+  const base = `/${lang}/checkout/${l.id}?qty=${qty}`;
+  const shopNote = pick(lang, l.collection_note_tr, l.collection_note_en).text;
+  const sw = (on: boolean) => `btn btn-sm ${on ? "" : "btn-ghost"}`;
 
   const radio =
     "flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-5 transition-colors duration-200 has-[:checked]:border-cobalt has-[:checked]:bg-sky";
@@ -52,8 +62,49 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
         <input type="hidden" name="lang" value={lang} />
         <input type="hidden" name="listing" value={l.id} />
         <input type="hidden" name="qty" value={qty} />
+        {collect && <input type="hidden" name="how" value="collection" />}
 
         <div className="grid gap-10">
+          {l.collection === "optional" && (
+            <nav aria-label={t.checkout.howTitle} className="grid gap-3">
+              <p className="font-display text-3xl">{t.checkout.howTitle}</p>
+              <div className="flex flex-wrap gap-2">
+                <Link href={base} className={sw(!collect)} aria-current={collect ? undefined : "page"} data-how="delivery">
+                  {t.checkout.howDelivery}
+                </Link>
+                <Link href={`${base}&how=collection`} className={sw(collect)} aria-current={collect ? "page" : undefined} data-how="collection">
+                  {t.checkout.howCollection}
+                </Link>
+              </div>
+            </nav>
+          )}
+
+          {collect ? (
+          <fieldset className="grid gap-5">
+            <legend className="mb-4 font-display text-3xl">{t.checkout.collectTitle}</legend>
+            <div className="rounded-2xl bg-mist p-5" data-collection-shop>
+              <p className="text-sm text-soft">{t.checkout.collectWhere}</p>
+              <p className="mt-1 font-medium">{l.shop_name}</p>
+              <p>{l.shop_address}, {l.shop_city} {l.shop_postcode}</p>
+              {shopNote && (
+                <>
+                  <p className="mt-4 text-sm text-soft">{t.checkout.collectNote}</p>
+                  <p className="mt-1 whitespace-pre-line">{shopNote}</p>
+                </>
+              )}
+            </div>
+            <p className="font-display text-2xl">{t.checkout.collectYou}</p>
+            <label className="field">
+              <span>{t.checkout.name}</span>
+              <input className="input" name="name" autoComplete="name" defaultValue={user.name} required />
+            </label>
+            <label className="field">
+              <span>{t.checkout.phone}</span>
+              <input className="input" type="tel" name="phone" autoComplete="tel" defaultValue={saved?.ship_phone} required />
+            </label>
+            <p className="hint">{t.checkout.collectCode}</p>
+          </fieldset>
+          ) : (
           <fieldset className="grid gap-5">
             <legend className="mb-4 font-display text-3xl">{t.checkout.shipTo}</legend>
             <label className="field">
@@ -87,6 +138,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
               <span>{t.account.saveForNext}</span>
             </label>
           </fieldset>
+          )}
 
           <fieldset className="grid gap-3">
             <legend className="mb-4 font-display text-3xl">{t.checkout.payment}</legend>
@@ -108,7 +160,8 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
                 </span>
               </label>
             ) : (
-              <p className="hint">{t.checkout.klarnaOff}</p>
+              // A collection order is card only; it simply does not offer the option.
+              !collect && <p className="hint">{t.checkout.klarnaOff}</p>
             )}
           </fieldset>
         </div>
@@ -131,16 +184,25 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
           <dl className="mt-6 grid grid-cols-[1fr_auto] gap-y-2">
             <dt className="text-soft">{t.checkout.item}</dt>
             <dd>{formatGBP(item)}</dd>
-            <dt className="text-soft">
-              {t.checkout.postage}
-              <span className="block text-sm" data-delivery={l.delivery_method}>{t.delivery.by[l.delivery_method]}</span>
-            </dt>
-            <dd>{l.postage_pence === 0 ? t.listing.freePostage : formatGBP(l.postage_pence)}</dd>
+            {collect ? (
+              <>
+                <dt className="text-soft">{t.checkout.collectRow}</dt>
+                <dd>{t.checkout.free}</dd>
+              </>
+            ) : (
+              <>
+                <dt className="text-soft">
+                  {t.checkout.postage}
+                  <span className="block text-sm" data-delivery={l.delivery_method}>{t.delivery.by[l.delivery_method]}</span>
+                </dt>
+                <dd>{l.postage_pence === 0 ? t.listing.freePostage : formatGBP(l.postage_pence)}</dd>
+              </>
+            )}
             <dt className="mt-2 border-t border-line pt-3 font-medium">{t.checkout.total}</dt>
             <dd className="mt-2 border-t border-line pt-3 font-medium">{formatGBP(total)}</dd>
           </dl>
           <SubmitButton className="btn mt-6 w-full">{fmt(t.checkout.pay, { amount: formatGBP(total) })}</SubmitButton>
-          <p className="hint mt-3">{t.checkout.protectedNote}</p>
+          <p className="hint mt-3">{collect ? t.checkout.protectedNoteCollection : t.checkout.protectedNote}</p>
         </aside>
       </form>
     </div>

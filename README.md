@@ -82,6 +82,51 @@ database transaction that stores its result, so it must not use the database its
 New settings (Admin > Fees): `delivery_small_price`, `delivery_medium_price`,
 `delivery_large_price` (what the buyer pays) and `delivery_max_item_price`.
 
+### Collection from the shop
+
+Besides the delivery method, each item has a collection setting (`listings.collection`),
+chosen in the Delivery fieldset of the item form:
+
+- **Delivery only** (`no`, the default): as before.
+- **Delivery or collection** (`optional`): at checkout the buyer chooses, with two links
+  (`/checkout/<id>?qty=N` and `...&how=collection`), so it works without JavaScript.
+- **Collection only** (`only`): no delivery. Whatever else the form sends, the item is stored
+  as seller delivery, no parcel size and postage 0, and the CarsiPazar delivery price
+  limit is skipped.
+
+Collection is free: the total is the item amount only and fees are `computeFees` on it.
+It is **card only** (no instalments): there is no tracked delivery to prove handover.
+The collection checkout asks for the buyer's name and phone, shows the shop's name, full
+address and collection note (`shops.collection_note_tr/en`, set on the seller's Shop page),
+and does not save a "saved address". `createOrder` checks the choice against the item (a
+collection order for a `no` item, or a delivery order for an `only` item, is refused) and
+stores `fulfilment = 'collection'`, postage and delivery cost 0, `payment_method = 'card'`,
+no address, and a handover code.
+
+**Statuses.** No new statuses. For a collection order `paid` is "Being prepared",
+`dispatched` means **Ready to collect** and `delivered` means **Collected**
+(Turkish: "Teslim almaya hazır" / "Teslim alındı"); `orderStatus()` in `lib/i18n` picks the
+words wherever a status is shown. Release (after `release_days`), refunds and reviews work
+exactly as for delivery orders.
+
+**Handover code.** The order gets 6 random digits from `crypto.randomInt` (leading zeros
+kept, stored as text in `orders.collection_code`). The seller presses "Mark as ready for
+collection" (`paid` to `dispatched`, no carrier, tracking or label). Only then does the buyer's
+order page show the code. At the counter the seller types it into "Handover code": the
+right code makes the order `delivered` (the payout clock starts); a wrong code adds one to
+`collection_attempts`. After 5 wrong codes the form is replaced by a message to contact
+CarsiPazar and even the right code is refused; only the admin's "Mark delivered" completes
+it. The check runs in one transaction with the row locked (`confirmHandover` in
+`lib/orders.ts`) and compares in constant time. The code is selected only by the buyer's own
+order page and shown only to the buyer (not even to an admin who opens the order); seller and
+admin queries replace the column with null (`ORDER_NO_CODE`), so it is never in their HTML.
+The buyer's "I have received it" button also still works on a ready collection order.
+
+**Existing database.** `/api/setup` adds the columns, and `upgradeSampleCollection` in
+`lib/seed.ts` sets the ten sample furniture items of `ceviz-atolye` and `hane-mobilya` to
+`optional` where they are still `no`, and fills the two shops' collection notes where empty.
+It never touches other items and running it again changes nothing.
+
 ## Run it locally
 
 ```bash
