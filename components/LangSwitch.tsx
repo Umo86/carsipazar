@@ -1,7 +1,6 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { usePathname } from "next/navigation";
 import { TurkeyFlag, UKFlag } from "./Flag";
 
 type Lang = "tr" | "en";
@@ -21,10 +20,11 @@ function Group({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Swaps /tr/... for /en/... (and back) and remembers the choice.
-function Inner({ lang }: { lang: Lang }) {
+// Swaps /tr/... for /en/... (and back) and remembers the choice. The link is
+// in the page from the first byte; the query string (search text, filters)
+// is added at click time, so nothing here has to wait for the browser.
+export default function LangSwitch({ lang }: { lang: Lang }) {
   const pathname = usePathname();
-  const search = useSearchParams().toString();
   return (
     <Group>
       {OPTIONS.map(({ code, name, Flag }) => {
@@ -36,14 +36,18 @@ function Inner({ lang }: { lang: Lang }) {
             </span>
           );
         }
-        const href = pathname.replace(/^\/(tr|en)(?=\/|$)/, `/${code}`) + (search ? `?${search}` : "");
+        const href = pathname.replace(/^\/(tr|en)(?=\/|$)/, `/${code}`);
         return (
           <a
             key={code}
             href={href}
             hrefLang={code}
-            onClick={() => {
+            onClick={(e) => {
               document.cookie = `cp_lang=${code}; path=/; max-age=31536000; samesite=lax`;
+              if (window.location.search) {
+                e.preventDefault();
+                window.location.assign(href + window.location.search);
+              }
             }}
             className={`${ITEM} hover:text-cobalt`}
           >
@@ -53,24 +57,5 @@ function Inner({ lang }: { lang: Lang }) {
         );
       })}
     </Group>
-  );
-}
-
-export default function LangSwitch({ lang }: { lang: Lang }) {
-  return (
-    <Suspense
-      fallback={
-        <Group>
-          {OPTIONS.map(({ code, name, Flag }) => (
-            <span key={code} className={`${ITEM} ${code === lang ? "bg-paper font-medium text-ink shadow-sm" : ""}`}>
-              <Flag />
-              <span lang={code}>{name}</span>
-            </span>
-          ))}
-        </Group>
-      }
-    >
-      <Inner lang={lang} />
-    </Suspense>
   );
 }
