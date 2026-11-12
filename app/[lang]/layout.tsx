@@ -27,8 +27,14 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     // lang="tr" matters: it makes browsers capitalise i/ı and İ/I correctly.
     <html lang={lang} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-paper"
+        >
+          {t.nav.skipToContent}
+        </a>
         <Header lang={lang} t={t} user={user} hasShop={Boolean(shop)} />
-        <main className="flex-1 pb-24">{children}</main>
+        <main id="main" tabIndex={-1} className="flex-1 pb-24 focus:outline-none">{children}</main>
         <Footer lang={lang} t={t} />
       </body>
     </html>

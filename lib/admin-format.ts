@@ -1,4 +1,5 @@
 import type { Locale } from "./config";
+import type { Dict } from "./i18n";
 
 // "12 Nov 2026, 14:05" in London time.
 export const formatDateTime = (d: Date | string, lang: Locale) =>
@@ -26,4 +27,12 @@ export function targetHref(kind: string, id: string, lang: Locale): string | nul
   if (kind === "order") return `${a}/orders/${id}`;
   if (kind === "listing") return `/${lang}/l/${id}`;
   return null;
+}
+
+// An item's status in words ("Live", "Offline", "Removed"), never the raw database word.
+export function itemStatusLabel(t: Dict, status: string): string {
+  if (status === "active") return t.dash.statusActive;
+  if (status === "paused") return t.dash.statusPaused;
+  if (status === "removed") return t.adminx.itemRemoved;
+  return status;
 }

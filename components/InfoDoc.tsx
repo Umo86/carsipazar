@@ -13,14 +13,14 @@ const UI = {
     updated: "Last updated",
     draft: "Draft. This page still needs the business's details and a solicitor's review before the site takes real payments.",
     languages:
-      "This page is provided in English and Turkish. If the two differ, the English version prevails. Your legal rights as a consumer are never reduced by the translation.",
+      "We provide these pages in English and Turkish. If the two differ, the version in the language you used when you placed your order applies, and we will correct the other. Your legal rights as a consumer are never reduced by the translation.",
   },
   tr: {
     toc: "Bu sayfada",
     updated: "Son güncelleme",
     draft: "Taslak. Site gerçek ödeme almadan önce bu sayfanın işletme bilgileriyle tamamlanması ve bir avukat tarafından incelenmesi gerekir.",
     languages:
-      "Bu sayfa İngilizce ve Türkçe olarak sunulur. İki metin arasında fark olursa İngilizce sürüm esas alınır. Tüketici olarak sahip olduğun yasal haklar çeviri nedeniyle hiçbir şekilde azalmaz.",
+      "Bu sayfalar İngilizce ve Türkçe sunulur. İkisi arasında fark varsa sipariş verirken kullandığın dildeki sürüm geçerlidir; diğerini düzeltiriz. Tüketici olarak sahip olduğun yasal haklar çeviri nedeniyle hiçbir şekilde azalmaz.",
   },
 } as const;
 
@@ -50,7 +50,7 @@ export function inline(text: string, lang: Locale, tokens: TokenMap, key = "i"):
             {v.text}
           </a>
         );
-      return <span key={k}>{v.text}</span>;
+      return v.text ? <span key={k}>{v.text}</span> : null; // an empty token (a note that does not apply) shows nothing
     }
     const m = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
     if (m) {
@@ -79,8 +79,10 @@ export function inline(text: string, lang: Locale, tokens: TokenMap, key = "i"):
 function BlockView({ b, lang, tokens, k }: { b: Block; lang: Locale; tokens: TokenMap; k: string }) {
   const I = (s: string, kk: string) => inline(s, lang, tokens, kk);
   switch (b.t) {
-    case "p":
-      return <p>{I(b.text, k)}</p>;
+    case "p": {
+      const nodes = I(b.text, k);
+      return nodes.every((n) => n === null) ? null : <p>{nodes}</p>;
+    }
     case "h3":
       return <h3 className="mt-2 text-2xl">{I(b.text, k)}</h3>;
     case "ul":
@@ -210,7 +212,7 @@ export default async function InfoDoc({
           {children}
           {doc.sections.map((s, si) => (
             <section key={s.id} aria-labelledby={`h-${s.id}`} className="mt-12 first:mt-0 print:break-inside-avoid-page">
-              <h2 id={s.id} className="scroll-mt-28 text-3xl md:text-[2.125rem]">
+              <h2 id={s.id} className="scroll-mt-36 text-3xl md:text-[2.125rem] lg:scroll-mt-28">
                 <a href={`#${s.id}`} id={`h-${s.id}`} className="no-underline hover:underline underline-offset-4">{s.heading}</a>
               </h2>
               <div className="mt-5 grid gap-4">

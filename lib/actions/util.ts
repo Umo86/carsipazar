@@ -3,8 +3,10 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUser } from "../auth";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "../config";
+import { cleanText } from "../clean";
 
-export const str = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
+// Form text: control characters (including NUL) stripped, line breaks normalised, ends trimmed.
+export const str = (fd: FormData, key: string) => cleanText(String(fd.get(key) ?? "")).trim();
 
 export const langOf = (fd: FormData): Locale => {
   const v = str(fd, "lang");

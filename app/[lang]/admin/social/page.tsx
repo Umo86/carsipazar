@@ -14,7 +14,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
   const [items, base] = await Promise.all([featuredListings(8), origin()]);
 
   return (
-    <div className="grid gap-12">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-12">
       <section>
         <h2 className="text-3xl">{t.social.brandTitle}</h2>
         <p className="mt-2 max-w-xl text-soft">{t.social.brandIntro}</p>

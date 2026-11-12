@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { CATEGORIES, categoryName, isCategory, isLocale } from "@/lib/config";
 import { fmt, getDict, itemCount } from "@/lib/i18n";
 import { searchListings } from "@/lib/queries";
+import { cleanText } from "@/lib/clean";
 import ListingCard from "@/components/ListingCard";
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
@@ -18,7 +19,7 @@ export default async function SearchPage({ params, searchParams }: PageProps<"/[
   if (!isLocale(lang)) notFound();
   const t = getDict(lang);
   const sp = await searchParams;
-  const text = first(sp.q).trim().slice(0, 80);
+  const text = cleanText(first(sp.q)).trim().slice(0, 80);
   const c = first(sp.c);
   const category = isCategory(c) ? c : null;
   const items = await searchListings({ text, category });

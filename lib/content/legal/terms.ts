@@ -12,7 +12,7 @@ export const terms: Bi<Doc> = {
         id: "who",
         heading: "Who we are and what we do",
         blocks: [
-          { t: "p", text: "{{site}} is an online marketplace run by {{legal_name}} ({{legal_form}}, company number {{company_no}}), registered office {{registered_address}}. Our full details are on the [company details](/legal/company) page. We are \"we\" and \"us\" in these terms." },
+          { t: "p", text: "{{site}} is an online marketplace run by {{operator}}. Our full details are on the [company details](/legal/company) page. We are \"we\" and \"us\" in these terms." },
           { t: "p", text: "On {{site}}, independent shops list furniture, clothing and jewellery. **When you buy, your contract for the goods is with the shop, not with us.** The shop is the seller. We run the website, take your payment, hold it safely, pay it to the seller when the order is complete, and help if there is a dispute." },
           { t: "p", text: "We do not own, check or send the goods. Each shop page shows the seller's company details, delivery information and returns policy." },
         ],
@@ -34,10 +34,11 @@ export const terms: Bi<Doc> = {
         heading: "Placing an order and when the contract is made",
         blocks: [
           { t: "ol", items: [
-            "Open an item, choose delivery or collection where the seller offers both, and press Buy now.",
-            "Check the item, quantity, delivery details and total at checkout. You can correct mistakes before you pay.",
-            "Pay by card. Your order is made when your payment is received and your order appears in My orders as “Being prepared”. That is when the contract between you and the seller starts.",
+            "Open an item and press **Buy now**.",
+            "At checkout, choose delivery or collection where the seller offers both. Check the item, quantity, delivery details and total. You can correct mistakes before you pay.",
+            "Press the **Pay** button, which shows the total, and pay by one of the payment methods shown at checkout. Pressing Pay places a binding order with an obligation to pay. Your order is made when your payment is received and it appears in **My orders** as “Being prepared”. That is when the contract between you and the seller starts.",
           ] },
+          { t: "p", text: "You can see your order at any time under **My orders**, where you can also print an order confirmation." },
           { t: "p", text: "If an item is no longer available, or a payment does not go through, no contract is made and you are not charged for it." },
           { t: "p", text: "{{site}} is offered in English and Turkish. You can place an order in either. The contract is in the language you used." },
         ],
@@ -80,6 +81,13 @@ export const terms: Bi<Doc> = {
         ],
       },
       {
+        id: "content",
+        heading: "Sponsored items and illegal content",
+        blocks: [
+          { t: "p", text: "Items marked Sponsored are paid for by the seller; see [how results are ordered](/legal/ranking). You can report illegal content with the Report link on every item, shop and review. We remove illegal content when we become aware of it. Contact: {{email}}." },
+        ],
+      },
+      {
         id: "use",
         heading: "Using the site properly",
         blocks: [
@@ -90,7 +98,7 @@ export const terms: Bi<Doc> = {
             "try to get round our payment protection, for example by asking a seller to take payment elsewhere",
             "interfere with the site or try to get at other people's data",
           ] },
-          { t: "p", text: "We may suspend or close an account that breaks these rules. We will tell you why unless the law stops us." },
+          { t: "p", text: "We may suspend or close an account that breaks these rules. If we do, you can ask us for the reasons by writing to {{email}}. We reply within 2 working days." },
         ],
       },
       {
@@ -135,8 +143,8 @@ export const terms: Bi<Doc> = {
         id: "who",
         heading: "Biz kimiz, ne yapıyoruz",
         blocks: [
-          { t: "p", text: "{{site}}, {{legal_name}} ({{legal_form}}, şirket numarası {{company_no}}, tescilli adres {{registered_address}}) tarafından işletilen bir online çarşıdır. Ayrıntılı bilgilerimiz [şirket bilgileri](/legal/company) sayfasında. Bu koşullarda “biz” bizi ifade eder." },
-          { t: "p", text: "{{site}}'da bağımsız dükkânlar mobilya, giyim ve takı satar. **Alışveriş yaptığında mal satış sözleşmen bizimle değil, dükkânla yapılmış olur.** Satıcı dükkândır. Biz web sitesini işletir, ödemeni alır ve güvenle bekletir, sipariş tamamlanınca satıcıya aktarır ve uyuşmazlık olursa yardımcı oluruz." },
+          { t: "p", text: "{{site}}, {{operator}} tarafından işletilen bir online çarşıdır. Ayrıntılı bilgilerimiz [şirket bilgileri](/legal/company) sayfasında. Bu koşullarda “biz”, {{site}}'ı işleten işletme anlamına gelir." },
+          { t: "p", text: "{{site}}'da bağımsız dükkânlar mobilya, giyim ve takı satar. **Alışveriş yaptığında ürünün satış sözleşmesi bizimle değil, dükkânla yapılmış olur.** Satıcı dükkândır. Biz web sitesini işletiriz, ödemeni alırız ve güvenle bekletiriz, sipariş tamamlanınca satıcıya aktarırız ve uyuşmazlık olursa yardımcı oluruz." },
           { t: "p", text: "Ürünlerin sahibi biz değiliz; onları kontrol etmeyiz, göndermeyiz. Her dükkân sayfasında satıcının şirket bilgileri, teslimat bilgisi ve iade koşulları yer alır." },
         ],
       },
@@ -157,10 +165,11 @@ export const terms: Bi<Doc> = {
         heading: "Sipariş verme ve sözleşmenin kurulması",
         blocks: [
           { t: "ol", items: [
-            "Bir ürünü aç, satıcı ikisini de sunuyorsa teslimat ya da dükkândan teslim seç ve Satın al düğmesine bas.",
-            "Ödeme sayfasında ürünü, adedi, teslimat bilgilerini ve toplamı kontrol et. Ödemeden önce hataları düzeltebilirsin.",
-            "Kartla öde. Siparişin ödemen alındığında ve Siparişlerim sayfasında “Hazırlanıyor” olarak göründüğünde verilmiş olur. Seninle satıcı arasındaki sözleşme o anda başlar.",
+            "Bir ürünü aç ve **Satın al** düğmesine bas.",
+            "Ödeme sayfasında, satıcı ikisini de sunuyorsa teslimat ya da dükkândan teslim almayı seç. Ürünü, adedi, teslimat bilgilerini ve toplamı kontrol et. Ödemeden önce hataları düzeltebilirsin.",
+            "Toplam tutarın yazdığı **Öde** düğmesine bas ve ödeme sayfasında gösterilen ödeme yöntemlerinden biriyle öde. Öde'ye basmak, ödeme yükümlülüğü doğuran bağlayıcı bir sipariş verir. Siparişin, ödemen alındığında verilmiş olur ve **Siparişlerim** sayfasında “Hazırlanıyor” olarak görünür. Seninle satıcı arasındaki sözleşme o anda başlar.",
           ] },
+          { t: "p", text: "Siparişini istediğin zaman **Siparişlerim**'de görebilir, sipariş onayını oradan yazdırabilirsin." },
           { t: "p", text: "Ürün artık satışta değilse ya da ödeme tamamlanmazsa sözleşme kurulmaz ve ücret alınmaz." },
           { t: "p", text: "{{site}} İngilizce ve Türkçe sunulur. Siparişi iki dilde de verebilirsin. Sözleşme, kullandığın dilde yapılmış sayılır." },
         ],
@@ -203,6 +212,13 @@ export const terms: Bi<Doc> = {
         ],
       },
       {
+        id: "content",
+        heading: "Sponsorlu ürünler ve yasa dışı içerik",
+        blocks: [
+          { t: "p", text: "Sponsorlu etiketli ürünler için satıcı ödeme yapar; [sonuçların nasıl sıralandığına](/legal/ranking) bak. Yasa dışı içeriği her ürün, dükkân ve yorumdaki Bildir bağlantısıyla bildirebilirsin. Yasa dışı içeriği öğrendiğimizde kaldırırız. İletişim: {{email}}." },
+        ],
+      },
+      {
         id: "use",
         heading: "Siteyi doğru kullanma",
         blocks: [
@@ -213,7 +229,7 @@ export const terms: Bi<Doc> = {
             "ödeme korumamızı aşmaya çalışmak; örneğin satıcıdan ödemeyi başka yerden almasını istemek",
             "siteye zarar vermek ya da başkalarının verilerine ulaşmaya çalışmak",
           ] },
-          { t: "p", text: "Bu kuralları çiğneyen bir hesabı askıya alabilir veya kapatabiliriz. Yasa engellemiyorsa nedenini sana söyleriz." },
+          { t: "p", text: "Bu kuralları çiğneyen bir hesabı askıya alabilir veya kapatabiliriz. Bunu yaparsak gerekçesini {{email}} adresine yazarak isteyebilirsin; 2 iş günü içinde yanıt veririz." },
         ],
       },
       {

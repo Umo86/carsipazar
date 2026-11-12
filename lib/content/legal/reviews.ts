@@ -51,7 +51,7 @@ export const reviews: Bi<Doc> = {
         id: "report",
         heading: "Reporting a review",
         blocks: [
-          { t: "p", text: "Use the Report link on the review or the shop page, or [contact us](/contact) with the web address and what is wrong. We look at every report and decide whether the review breaks these rules. We will tell the person who reported it what we decided where we can." },
+          { t: "p", text: "Use the Report link on the review or the shop page, or [contact us](/contact) with the web address and what is wrong. We look at every report and decide whether the review breaks these rules. If you give an email address when you report, we will write to you with the outcome." },
         ],
       },
     ],
@@ -75,7 +75,7 @@ export const reviews: Bi<Doc> = {
       },
       {
         id: "paid",
-        heading: "Yorumların karşılığı ödenmez",
+        heading: "Yorum için ödeme yapılmaz",
         blocks: [
           { t: "p", text: "Dükkânlar yorum için ödeme yapamaz, yorum karşılığında hediye, indirim ya da iade sunamaz, kendi dükkânlarına yorum yazamaz ve yalnızca memnun müşterilerden yorum isteyemez. Alıcılar yorum yazmak için ödeme kabul edemez. Biz de yorum için ödeme yapmayız." },
           { t: "p", text: "Bir dükkânın puanı, yayımlanan yorumlarının ortalamasıdır. Tanıtım için ödeme yapmak puanı değiştirmez. [Sonuçların nasıl sıralandığına](/legal/ranking) bak." },
@@ -106,7 +106,7 @@ export const reviews: Bi<Doc> = {
         id: "report",
         heading: "Bir yorumu bildirmek",
         blocks: [
-          { t: "p", text: "Yorumdaki ya da dükkân sayfasındaki Bildir bağlantısını kullan ya da web adresi ve neyin yanlış olduğuyla [bize ulaş](/contact). Her bildirimi inceler ve yorumun bu kuralları çiğneyip çiğnemediğine karar veririz. Mümkün olduğunda kararımızı bildirene söyleriz." },
+          { t: "p", text: "Yorumdaki ya da dükkân sayfasındaki Bildir bağlantısını kullan ya da web adresi ve neyin yanlış olduğuyla [bize ulaş](/contact). Her bildirimi inceler ve yorumun bu kuralları çiğneyip çiğnemediğine karar veririz. Bildirirken bir e-posta adresi verirsen sonucu sana yazarız." },
         ],
       },
     ],

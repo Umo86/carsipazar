@@ -8,6 +8,7 @@ import { q, tx } from "./db";
 export const SITE_DETAIL_KEYS = [
   "legal_name", // registered company name, or the sole trader's own name
   "legal_form", // e.g. "Private limited company registered in England and Wales"
+  "legal_form_tr", // the same in Turkish, for the Turkish pages
   "company_no", // Companies House number, if a company
   "registered_address", // registered office (company) or business address
   "contact_address", // geographic address customers can write to, if different
@@ -16,6 +17,8 @@ export const SITE_DETAIL_KEYS = [
   "vat_no", // only if VAT registered
   "ico_no", // ICO data protection registration number
   "complaints_email", // optional; falls back to email
+  "adr", // one sentence on alternative dispute resolution, e.g. the provider used, or that none is used
+  "adr_tr", // the same sentence in Turkish
 ] as const;
 
 export type SiteDetailKey = (typeof SITE_DETAIL_KEYS)[number];

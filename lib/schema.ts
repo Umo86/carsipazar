@@ -296,4 +296,5 @@ create table if not exists admin_log (
   created_at timestamptz not null default now()
 );
 create index if not exists admin_log_created_idx on admin_log(created_at desc);
+alter table admin_log add column if not exists target_label text not null default '';
 `;

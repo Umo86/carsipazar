@@ -4,19 +4,16 @@ import type { Metadata } from "next";
 import { getUser } from "@/lib/auth";
 import { isLocale, type Locale } from "@/lib/config";
 import { one } from "@/lib/db";
-import { isUuidStrict, REPORT_KINDS, type ReportKind } from "@/lib/admin-queries";
+import { isUuidStrict, REPORT_KINDS, REPORT_REASONS_BY_KIND, type ReportKind } from "@/lib/admin-queries";
 import { fmt, getDict, pick } from "@/lib/i18n";
 import { submitReport } from "@/lib/actions/reports";
 import Rating from "@/components/Rating";
 import SubmitButton from "@/components/SubmitButton";
 
-export const metadata: Metadata = { robots: { index: false } };
-
-const REASONS: Record<ReportKind, readonly string[]> = {
-  listing: ["illegal", "counterfeit", "unsafe", "misleading", "offensive", "other"],
-  review: ["fake_review", "offensive", "misleading", "illegal", "other"],
-  shop: ["illegal", "counterfeit", "misleading", "offensive", "other"],
-};
+export async function generateMetadata({ params }: PageProps<"/[lang]/report">): Promise<Metadata> {
+  const { lang } = await params;
+  return { title: getDict(isLocale(lang) ? lang : "tr").report.title, robots: { index: false } };
+}
 
 // What is being reported, as long as the public can see it. Anything else is a 404.
 async function target(kind: ReportKind, id: string, lang: Locale) {
@@ -99,7 +96,7 @@ export default async function ReportPage({ params, searchParams }: PageProps<"/[
               <span>{r.reason}</span>
               <select className="input" name="reason" required defaultValue="">
                 <option value="" disabled>{r.choose}</option>
-                {REASONS[kind].map((k) => (
+                {REPORT_REASONS_BY_KIND[kind].map((k) => (
                   <option key={k} value={k}>{r.reasons[k as keyof typeof r.reasons]}</option>
                 ))}
               </select>

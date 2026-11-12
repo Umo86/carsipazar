@@ -5,7 +5,7 @@ import { createSession, getUser, hashPassword, hashToken, newToken, verifyPasswo
 import { one, q, tx } from "../db";
 import { isUuidStrict, logAdmin } from "../admin-queries";
 import { isUuid } from "../queries";
-import { langOf, str } from "./util";
+import { langOf, origin, str } from "./util";
 
 async function me(lang: string, next: string) {
   const user = await getUser();
@@ -71,14 +71,19 @@ export async function toggleFavourite(fd: FormData) {
   redirect(str(fd, "back") === "favourites" ? `/${lang}/favourites` : `/${lang}/l/${listingId}`);
 }
 
-// Admin only. The link is shown once, to pass on to the customer by hand.
-export async function createResetLink(fd: FormData) {
+export type ResetLinkState = { link?: string; error?: "failed" } | null;
+
+// Admin only. The link is shown once, to pass on to the customer by hand. It goes back to the
+// page in the action's result and never into an address, so it cannot end up in browser history,
+// server logs or a Referer header.
+export async function createResetLink(_prev: ResetLinkState, fd: FormData): Promise<ResetLinkState> {
   const lang = langOf(fd);
   const admin = await getUser();
   if (!admin || admin.role !== "admin") redirect(`/${lang}`);
   const userId = str(fd, "user");
+  // No reset links for admins: their access is not handed out by a link someone passes on.
   if (!isUuidStrict(userId) || !(await one("select 1 from users where id = $1 and role <> 'admin'", [userId]))) {
-    redirect(`/${lang}/admin/customers`);
+    return { error: "failed" };
   }
   const token = newToken();
   await q("delete from password_resets where user_id = $1 or expires_at < now()", [userId]);
@@ -87,12 +92,7 @@ export async function createResetLink(fd: FormData) {
     [hashToken(token), userId],
   );
   await logAdmin(admin.id, "user.reset_link", "user", userId);
-  // From the user's own page the link comes back to that page; from the list, to the list.
-  redirect(
-    str(fd, "back") === "detail"
-      ? `/${lang}/admin/customers/${userId}?link=${token}`
-      : `/${lang}/admin/customers?for=${userId}&link=${token}`,
-  );
+  return { link: `${await origin()}/${lang}/reset/${token}` };
 }
 
 export async function resetPassword(fd: FormData) {

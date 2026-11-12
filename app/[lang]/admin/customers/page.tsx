@@ -3,10 +3,8 @@ import { requireAdmin } from "@/lib/auth";
 import type { Locale } from "@/lib/config";
 import { cleanSearch, listUsers, pageOf, pick1, ROLES } from "@/lib/admin-queries";
 import { formatDate, getDict } from "@/lib/i18n";
-import { origin } from "@/lib/actions/util";
-import { createResetLink } from "@/lib/actions/account";
 import AdminPager from "@/components/AdminPager";
-import CopyLink from "@/components/CopyLink";
+import ResetLinkForm from "@/components/ResetLinkForm";
 
 export default async function AdminCustomers({ params, searchParams }: PageProps<"/[lang]/admin/customers">) {
   const lang = (await params).lang as Locale;
@@ -18,8 +16,6 @@ export default async function AdminCustomers({ params, searchParams }: PageProps
   const blocked = sp.status === "blocked";
   const page = pageOf(sp.page);
   const { rows, total } = await listUsers({ text: find, role, blocked, page });
-  const link =
-    typeof sp.link === "string" && /^[0-9a-f]{48}$/.test(sp.link) ? `${await origin()}/${lang}/reset/${sp.link}` : null;
   const x = t.adminx;
   const path = `/${lang}/admin/customers`;
 
@@ -54,12 +50,6 @@ export default async function AdminCustomers({ params, searchParams }: PageProps
           {x.csv}
         </a>
       </div>
-      {link && (
-        <div className="notice mt-6 max-w-2xl" role="status">
-          <p className="mb-3">{t.account.resetReady}</p>
-          <CopyLink url={link} copy={t.misc.copy} copied={t.misc.copied} />
-        </div>
-      )}
       {rows.length === 0 ? (
         <p className="mt-8 text-soft">{t.admin.none}</p>
       ) : (
@@ -78,7 +68,7 @@ export default async function AdminCustomers({ params, searchParams }: PageProps
             </thead>
             <tbody>
               {rows.map((u) => (
-                <tr key={u.id} className={sp.for === u.id ? "bg-sky" : ""}>
+                <tr key={u.id}>
                   <td>
                     <Link href={`${path}/${u.id}`} className="underline underline-offset-4 hover:text-cobalt">{u.name}</Link>
                   </td>
@@ -89,11 +79,15 @@ export default async function AdminCustomers({ params, searchParams }: PageProps
                   <td>{u.blocked_at ? <span className="tag !bg-rose !text-[#7d0a1d]">{x.us.blocked}</span> : x.us.active}</td>
                   <td>
                     {u.role !== "admin" && (
-                      <form action={createResetLink}>
-                        <input type="hidden" name="lang" value={lang} />
-                        <input type="hidden" name="user" value={u.id} />
-                        <button className="btn btn-ghost btn-sm">{t.account.resetLink}</button>
-                      </form>
+                      <ResetLinkForm
+                        lang={lang}
+                        userId={u.id}
+                        label={t.account.resetLink}
+                        ready={t.account.resetReady}
+                        failed={x.us.resetFailed}
+                        copy={t.misc.copy}
+                        copied={t.misc.copied}
+                      />
                     )}
                   </td>
                 </tr>

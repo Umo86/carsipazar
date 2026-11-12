@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
+import { itemStatusLabel } from "@/lib/admin-format";
 import { categoryName, type Locale } from "@/lib/config";
 import { q } from "@/lib/db";
 import { getDict, pick } from "@/lib/i18n";
@@ -47,7 +48,7 @@ export default async function AdminListings({ params }: PageProps<"/[lang]/admin
             </Link>
             <p className="mt-1 text-sm text-soft">
               {l.shop_name}, {categoryName(l.category, lang)}, {formatGBP(l.price_pence)},{" "}
-              <span className={l.status === "removed" ? "text-tulip" : ""}>{l.status}</span>
+              <span className={l.status === "removed" ? "text-tulip" : ""}>{itemStatusLabel(t, l.status)}</span>
               {l.featured && <span className="tag ml-2">{t.admin.feature}</span>}
             </p>
           </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import type { Locale } from "@/lib/config";
 import { listLog, pageOf } from "@/lib/admin-queries";
+import { cleanText } from "@/lib/clean";
 import { getDict } from "@/lib/i18n";
 import ActivityLine from "@/components/ActivityLine";
 import AdminPager from "@/components/AdminPager";
@@ -12,7 +13,7 @@ export default async function AdminActivity({ params, searchParams }: PageProps<
   await requireAdmin(lang);
   const sp = await searchParams;
   const page = pageOf(sp.page);
-  const wanted = typeof sp.action === "string" ? sp.action.slice(0, 60) : "";
+  const wanted = typeof sp.action === "string" ? cleanText(sp.action).slice(0, 60) : "";
   const { rows, total, actions } = await listLog({ action: wanted, page });
   // Only an action that exists can be filtered on.
   const action = actions.includes(wanted) ? wanted : "";

@@ -32,7 +32,7 @@ export default async function AdminSettings({ params, searchParams }: PageProps<
   ];
 
   return (
-    <form action={saveSettings} className="grid max-w-xl gap-10">
+    <form action={saveSettings} className="grid max-w-xl grid-cols-[minmax(0,1fr)] gap-10">
       <input type="hidden" name="lang" value={lang} />
       {sp.saved && <p className="notice" role="status">{t.admin.saved}</p>}
       {groups.map((grp) => (

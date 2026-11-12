@@ -9,7 +9,7 @@ import {
   isUuidStrict,
   logAdmin,
   REPORT_KINDS,
-  REPORT_REASONS,
+  REPORT_REASONS_BY_KIND,
   type ReportKind,
   type ReportReason,
 } from "../admin-queries";
@@ -20,9 +20,14 @@ const REPORT_DETAILS_MAX = 1000;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // The IP address is never stored: only a salted hash, used to count reports per hour.
+// Which header to trust matters, because the hash is the rate-limit key and a caller can send any
+// header they like: x-real-ip and x-vercel-forwarded-for are set by the platform in front of us
+// (they overwrite anything the client sent). In x-forwarded-for each proxy appends the address it
+// saw, so the FIRST entry is whatever the client claimed and only the LAST one was added by us.
 async function ipHash() {
   const h = await headers();
-  const ip = (h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "unknown").trim().slice(0, 100);
+  const last = h.get("x-forwarded-for")?.split(",").pop();
+  const ip = (h.get("x-real-ip") ?? h.get("x-vercel-forwarded-for") ?? last ?? "unknown").trim().slice(0, 100) || "unknown";
   const salt = `report-ip:${process.env.SETUP_TOKEN ?? "carsipazar"}`;
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
 }
@@ -46,7 +51,7 @@ export async function submitReport(fd: FormData) {
   if (!visible) redirect(`/${lang}/report`);
 
   const reason = str(fd, "reason");
-  if (!(REPORT_REASONS as readonly string[]).includes(reason)) redirect(`${here}&error=reason`);
+  if (!(REPORT_REASONS_BY_KIND[kind as ReportKind] as readonly string[]).includes(reason)) redirect(`${here}&error=reason`);
   const details = str(fd, "details");
   if (details.length > REPORT_DETAILS_MAX) redirect(`${here}&error=long`);
   if (reason === "other" && details.length < 3) redirect(`${here}&error=details`);
@@ -96,7 +101,7 @@ export async function resolveReport(fd: FormData) {
   if (!isUuidStrict(id) || !["remove", "hide", "dismiss"].includes(act)) redirect(list);
   if (!note) redirect(`${list}?error=note`);
 
-  const out = await tx<"ok" | "gone">(async (c) => {
+  const out = await tx<"ok" | "gone" | "mismatch">(async (c) => {
     const r = (
       await c.query<{ kind: ReportKind; target_id: string }>(
         "select kind, target_id from reports where id = $1 and status = 'open' for update",
@@ -117,7 +122,7 @@ export async function resolveReport(fd: FormData) {
     } else if (act === "hide" && r.kind === "review") {
       await c.query("update reviews set status = 'hidden' where id = $1", [r.target_id]);
     } else {
-      return "gone"; // that action does not fit this kind of report
+      return "mismatch"; // that action does not fit this kind of report
     }
     // Every open report about the same thing is settled by the same action.
     await c.query(
@@ -128,5 +133,5 @@ export async function resolveReport(fd: FormData) {
     await logAdmin(me.id, `report.${act}`, r.kind, r.target_id, note, c);
     return "ok";
   });
-  redirect(`${list}?${out === "ok" ? "done=1" : "error=gone"}`);
+  redirect(`${list}?${out === "ok" ? "done=1" : `error=${out}`}`);
 }

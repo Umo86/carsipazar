@@ -1,6 +1,8 @@
 import "server-only";
 import type { PoolClient } from "pg";
 import { one, q } from "./db";
+import { cleanText } from "./clean";
+import { foldSql, foldText } from "./fold";
 import { ORDER_NO_CODE } from "./orders";
 
 // SQL for the admin panel. Everything here takes its values as parameters.
@@ -13,9 +15,15 @@ export const PAGE_SIZE = 25;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const isUuidStrict = (v: unknown): v is string => typeof v === "string" && UUID.test(v);
 
-// Search text -> a LIKE pattern. % _ and \ typed by the user match themselves; long input is cut.
-export const likeArg = (raw: string) => `%${raw.trim().slice(0, 80).replace(/[\\%_]/g, "\\$&")}%`;
-export const cleanSearch = (v: string | string[] | undefined) => (typeof v === "string" ? v.trim().slice(0, 80) : "");
+// Search text -> a LIKE pattern for use with foldSql(column) like $n. Control characters are dropped,
+// Turkish letters are folded the same way as on the column, % _ and \ typed by the user match
+// themselves, and long input is cut.
+export const likeArg = (raw: string) =>
+  `%${foldText(cleanText(raw).trim().slice(0, 80)).replace(/[\\%_]/g, "\\$&")}%`;
+export const cleanSearch = (v: string | string[] | undefined) =>
+  typeof v === "string" ? cleanText(v).trim().slice(0, 80) : "";
+// "column contains the search text", ignoring case and Turkish letters.
+const fl = (col: string, n: string) => `${foldSql(col)} like ${n}`;
 
 export const pageOf = (v: string | string[] | undefined) => {
   const n = typeof v === "string" && /^\d{1,6}$/.test(v) ? parseInt(v, 10) : 1;
@@ -31,6 +39,26 @@ export const PAID_STATUSES = "('paid','dispatched','delivered','released')";
 
 type Runner = Pick<PoolClient, "query">;
 
+// Who or what an action touched, in words ("Ayşe Demir (ayse@x.test)", an item title, a shop name,
+// "Order 1042"), so the activity list is readable without opening each link.
+async function targetLabel(kind: string, id: string, run?: Runner): Promise<string> {
+  if (!isUuidStrict(id)) return "";
+  const sql: Record<string, string> = {
+    user: "select name || ' (' || email || ')' as l from users where id = $1",
+    shop: "select name as l from shops where id = $1",
+    listing: "select coalesce(nullif(title_en, ''), title_tr) as l from listings where id = $1",
+    order: "select 'Order ' || number::text as l from orders where id = $1",
+    review: "select rv.rating::text || ' stars, ' || s.name as l from reviews rv join shops s on s.id = rv.shop_id where rv.id = $1",
+  };
+  if (!sql[kind]) return "";
+  try {
+    const r = run ? (await run.query<{ l: string }>(sql[kind], [id])).rows : await q<{ l: string }>(sql[kind], [id]);
+    return (r[0]?.l ?? "").slice(0, 200);
+  } catch {
+    return "";
+  }
+}
+
 export async function logAdmin(
   adminId: string,
   action: string,
@@ -39,9 +67,10 @@ export async function logAdmin(
   detail = "",
   run?: Runner,
 ) {
+  const label = await targetLabel(targetKind, targetId, run);
   const sql =
-    "insert into admin_log (admin_user_id, action, target_kind, target_id, detail) values ($1, $2, $3, $4, $5)";
-  const args = [adminId, action, targetKind, targetId, detail.slice(0, 500)];
+    "insert into admin_log (admin_user_id, action, target_kind, target_id, detail, target_label) values ($1, $2, $3, $4, $5, $6)";
+  const args = [adminId, action, targetKind, targetId, detail.slice(0, 500), label];
   if (run) await run.query(sql, args);
   else await q(sql, args);
 }
@@ -52,6 +81,7 @@ export type LogRow = {
   target_kind: string;
   target_id: string;
   detail: string;
+  target_label: string | null;
   created_at: Date;
   admin_name: string | null;
   admin_email: string | null;
@@ -61,7 +91,7 @@ export async function listLog(opts: { action: string; page: number }) {
   const where = "where ($1 = '' or l.action = $1)";
   const total = await one<{ n: string }>(`select count(*) as n from admin_log l ${where}`, [opts.action]);
   const rows = await q<LogRow>(
-    `select l.id, l.action, l.target_kind, l.target_id, l.detail, l.created_at, u.name as admin_name, u.email as admin_email
+    `select l.id, l.action, l.target_kind, l.target_id, l.detail, l.target_label, l.created_at, u.name as admin_name, u.email as admin_email
        from admin_log l left join users u on u.id = l.admin_user_id ${where}
       order by l.created_at desc, l.id limit ${PAGE_SIZE} offset $2`,
     [opts.action, (opts.page - 1) * PAGE_SIZE],
@@ -72,7 +102,7 @@ export async function listLog(opts: { action: string; page: number }) {
 
 export const recentLog = (n: number) =>
   q<LogRow>(
-    `select l.id, l.action, l.target_kind, l.target_id, l.detail, l.created_at, u.name as admin_name, u.email as admin_email
+    `select l.id, l.action, l.target_kind, l.target_id, l.detail, l.target_label, l.created_at, u.name as admin_name, u.email as admin_email
        from admin_log l left join users u on u.id = l.admin_user_id
       order by l.created_at desc, l.id limit $1`,
     [n],
@@ -90,21 +120,27 @@ export type PeriodStats = {
   shops: number;
 };
 
+// Every figure on the overview counts calendar days in London time, today included:
+// "7 days" is today and the six days before it, "30 days" today and the 29 before.
+const LONDON_DAY = (col: string) => `(${col} at time zone 'Europe/London')::date`;
+const LONDON_TODAY = "(now() at time zone 'Europe/London')::date";
+
 export async function periodStats(days: number): Promise<PeriodStats> {
+  const since = `${LONDON_TODAY} - ($1::int - 1)`;
   const o = await one<{ sales: string; orders: string; commission: string; delivery: string }>(
     `select coalesce(sum(total_pence), 0) as sales, count(*) as orders,
             coalesce(sum(commission_pence), 0) as commission, coalesce(sum(delivery_cost_pence), 0) as delivery
-       from orders where status in ${PAID_STATUSES} and paid_at >= now() - make_interval(days => $1::int)`,
+       from orders where status in ${PAID_STATUSES} and ${LONDON_DAY("paid_at")} >= ${since}`,
     [days],
   );
   const p = await one<{ n: string }>(
     `select coalesce(sum(price_pence), 0) as n from promotions
-      where status = 'booked' and coalesce(paid_at, created_at) >= now() - make_interval(days => $1::int)`,
+      where status = 'booked' and ${LONDON_DAY("coalesce(paid_at, created_at)")} >= ${since}`,
     [days],
   );
   const u = await one<{ users: string; shops: string }>(
-    `select (select count(*) from users where created_at >= now() - make_interval(days => $1::int)) as users,
-            (select count(*) from shops where created_at >= now() - make_interval(days => $1::int)) as shops`,
+    `select (select count(*) from users where ${LONDON_DAY("created_at")} >= ${since}) as users,
+            (select count(*) from shops where ${LONDON_DAY("created_at")} >= ${since}) as shops`,
     [days],
   );
   return {
@@ -120,12 +156,12 @@ export async function periodStats(days: number): Promise<PeriodStats> {
 
 export type DaySales = { day: string; pence: number; orders: number };
 
-// The last 30 days, today last, with a row for every day (zero when nothing sold).
+// The last 30 London calendar days, today last, with a row for every day (zero when nothing sold).
 export async function dailySales(): Promise<DaySales[]> {
   const rows = await q<{ day: string; pence: string; orders: string }>(
     `select to_char(d, 'YYYY-MM-DD') as day, coalesce(sum(o.total_pence), 0) as pence, count(o.id) as orders
-       from generate_series(((now() at time zone 'UTC')::date - 29)::timestamp, (now() at time zone 'UTC')::date::timestamp, interval '1 day') d
-       left join orders o on (o.paid_at at time zone 'UTC')::date = d::date and o.status in ${PAID_STATUSES}
+       from generate_series((${LONDON_TODAY} - 29)::timestamp, ${LONDON_TODAY}::timestamp, interval '1 day') d
+       left join orders o on ${LONDON_DAY("o.paid_at")} = d::date and o.status in ${PAID_STATUSES}
       group by d order by d`,
   );
   return rows.map((r) => ({ day: r.day, pence: Number(r.pence), orders: Number(r.orders) }));
@@ -182,7 +218,7 @@ export type UserRow = {
 
 export async function listUsers(opts: { text: string; role: string; blocked: boolean; page: number }) {
   const args: unknown[] = [opts.text ? likeArg(opts.text) : "", opts.role, opts.blocked];
-  const where = `where ($1 = '' or u.email ilike $1 or u.name ilike $1)
+  const where = `where ($1 = '' or ${fl('u.email', '$1')} or ${fl('u.name', '$1')})
                    and ($2 = '' or u.role = $2) and (not $3::boolean or u.blocked_at is not null)`;
   const total = await one<{ n: string }>(`select count(*) as n from users u ${where}`, args);
   const rows = await q<UserRow>(
@@ -284,7 +320,7 @@ const SHOP_COLS = `s.id, s.slug, s.name, s.seller_type, s.legal_name, s.company_
 
 export async function listShops(opts: { text: string; status: string; page: number }) {
   const args: unknown[] = [opts.text ? likeArg(opts.text) : "", opts.status];
-  const where = `where ($1 = '' or s.name ilike $1 or s.legal_name ilike $1 or s.slug ilike $1 or s.city ilike $1 or u.email ilike $1)
+  const where = `where ($1 = '' or ${fl('s.name', '$1')} or ${fl('s.legal_name', '$1')} or ${fl('s.slug', '$1')} or ${fl('s.city', '$1')} or ${fl('u.email', '$1')})
                    and ($2 = '' or s.status = $2)`;
   const total = await one<{ n: string }>(
     `select count(*) as n from shops s join users u on u.id = s.owner_id ${where}`,
@@ -372,7 +408,7 @@ export async function listOrders(opts: { text: string; status: string; fulfilmen
   const where = `where ($3 = '' and o.status <> 'pending' or $3 <> '' and o.status = $3)
                    and ($4 = '' or o.fulfilment = $4)
                    and (not $5::boolean or (o.status = 'paid' and o.paid_at < now() - interval '3 days'))
-                   and ($1 = '' or o.number = $2 or u.email ilike $1 or s.name ilike $1)`;
+                   and ($1 = '' or o.number = $2 or ${fl('u.email', '$1')} or ${fl('s.name', '$1')})`;
   const from = "from orders o join shops s on s.id = o.shop_id join users u on u.id = o.buyer_id";
   const total = await one<{ n: string }>(`select count(*) as n ${from} ${where}`, args);
   const rows = await q(
@@ -484,6 +520,13 @@ export const REPORT_KINDS = ["listing", "review", "shop"] as const;
 export type ReportKind = (typeof REPORT_KINDS)[number];
 export const REPORT_REASONS = ["illegal", "counterfeit", "unsafe", "misleading", "offensive", "fake_review", "other"] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
+// Which reasons make sense for what is being reported. The public form offers only these
+// and submitReport refuses anything else.
+export const REPORT_REASONS_BY_KIND: Record<ReportKind, readonly ReportReason[]> = {
+  listing: ["illegal", "counterfeit", "unsafe", "misleading", "offensive", "other"],
+  review: ["fake_review", "offensive", "misleading", "illegal", "other"],
+  shop: ["illegal", "counterfeit", "misleading", "offensive", "other"],
+};
 
 export type ReportRow = {
   id: string;
@@ -607,7 +650,8 @@ export async function exportRows(kind: ExportKind): Promise<string[][]> {
 // One CSV cell. A value a spreadsheet could read as a formula gets a leading apostrophe.
 export function csvCell(value: string) {
   let v = value;
-  if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`;
+  // Spreadsheets ignore leading spaces before a formula, so test the value after them.
+  if (/^[=+\-@\t\r]/.test(v) || /^[=+\-@]/.test(v.trimStart())) v = `'${v}`;
   return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
 }
 

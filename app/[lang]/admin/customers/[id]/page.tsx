@@ -15,10 +15,8 @@ import {
 import { formatDateTime } from "@/lib/admin-format";
 import { fmt, formatDate, getDict, orderStatus, type Dict } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
-import { origin } from "@/lib/actions/util";
-import { createResetLink } from "@/lib/actions/account";
 import { blockUser, setUserAdmin, unblockUser } from "@/lib/actions/admin";
-import CopyLink from "@/components/CopyLink";
+import ResetLinkForm from "@/components/ResetLinkForm";
 import Rating from "@/components/Rating";
 
 const own = <T extends object>(o: T, k: unknown): string | null =>
@@ -62,8 +60,6 @@ export default async function AdminUser({ params, searchParams }: PageProps<"/[l
     reportsByUser(id),
     reportsAboutUser(id),
   ]);
-  const link =
-    typeof sp.link === "string" && /^[0-9a-f]{48}$/.test(sp.link) ? `${await origin()}/${lang}/reset/${sp.link}` : null;
   const ok = own(x.us.ok, sp.done);
   const err = own(x.us.err, sp.error);
   const isMe = user.id === me.id;
@@ -75,20 +71,14 @@ export default async function AdminUser({ params, searchParams }: PageProps<"/[l
   );
 
   return (
-    <div className="grid max-w-4xl gap-12">
+    <div className="grid max-w-4xl grid-cols-[minmax(0,1fr)] gap-12">
       <div>
         <Link href={`/${lang}/admin/customers`} className="text-sm underline underline-offset-4 hover:text-cobalt">
           ← {x.us.allUsers}
         </Link>
         {ok && <p className="notice mt-4" role="status">{ok}</p>}
         {err && <p className="notice notice-error mt-4" role="alert">{err}</p>}
-        {link && (
-          <div className="notice mt-4" role="status">
-            <p className="mb-3">{t.account.resetReady}</p>
-            <CopyLink url={link} copy={t.misc.copy} copied={t.misc.copied} />
-          </div>
-        )}
-        <h2 className="mt-6 text-4xl">{user.name}</h2>
+        <h2 className="mt-6 text-4xl break-words">{user.name}</h2>
         <dl className="mt-5 grid gap-x-8 gap-y-3 rounded-3xl bg-mist p-6 sm:grid-cols-[10rem_1fr]">
           <dt className="text-sm text-soft">{t.auth.email}</dt>
           <dd className="break-all">{user.email}</dd>
@@ -118,6 +108,8 @@ export default async function AdminUser({ params, searchParams }: PageProps<"/[l
             <h3 className="text-2xl">{x.us.blockTitle}</h3>
             {isMe ? (
               <p className="mt-3 text-soft">{x.us.you}</p>
+            ) : user.role === "admin" ? (
+              <p className="mt-3 text-soft">{x.us.removeAdminFirst}</p>
             ) : user.blocked_at ? (
               <>
                 <p className="hint mt-3">{x.us.unblockNote}</p>
@@ -162,12 +154,17 @@ export default async function AdminUser({ params, searchParams }: PageProps<"/[l
             )}
             <p className="hint mt-3">{x.us.lastAdmin}</p>
             {user.role !== "admin" && (
-              <form action={createResetLink} className="mt-6 border-t border-line pt-5">
-                <input type="hidden" name="lang" value={lang} />
-                <input type="hidden" name="user" value={user.id} />
-                <input type="hidden" name="back" value="detail" />
-                <button className="btn btn-ghost btn-sm">{t.account.resetLink}</button>
-              </form>
+              <div className="mt-6 border-t border-line pt-5">
+                <ResetLinkForm
+                  lang={lang}
+                  userId={user.id}
+                  label={t.account.resetLink}
+                  ready={t.account.resetReady}
+                  failed={x.us.resetFailed}
+                  copy={t.misc.copy}
+                  copied={t.misc.copied}
+                />
+              </div>
             )}
           </div>
         </div>

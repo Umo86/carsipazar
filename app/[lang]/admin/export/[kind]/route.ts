@@ -1,5 +1,5 @@
 import { getUser } from "@/lib/auth";
-import { EXPORT_KINDS, exportRows, toCsv, type ExportKind } from "@/lib/admin-queries";
+import { EXPORT_KINDS, exportRows, logAdmin, toCsv, type ExportKind } from "@/lib/admin-queries";
 import { isLocale } from "@/lib/config";
 
 // Admin only. Anyone else, logged in or not, gets a plain 404 so the route does not announce itself.
@@ -10,6 +10,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/[lang]/admin/export
     return new Response("Not found", { status: 404, headers: { "Cache-Control": "private, no-store" } });
   }
   const body = "\uFEFF" + toCsv(await exportRows(kind as ExportKind));
+  await logAdmin(user.id, `export.${kind}`, "export", "");
   const stamp = new Date().toISOString().slice(0, 10);
   return new Response(body, {
     headers: {

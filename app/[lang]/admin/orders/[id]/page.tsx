@@ -30,15 +30,18 @@ export default async function AdminOrder({ params }: PageProps<"/[lang]/admin/or
   ].filter((s) => s.at);
 
   const net = o.commission_pence - o.payment_cost_pence;
-  const money: [string, number, boolean?][] = [
+  // A refunded order earned nothing: commission, net and payout show as £0.00 with the original
+  // amount kept beside them as "would have been".
+  const refunded = o.status === "refunded";
+  const money: [string, number, boolean?, boolean?][] = [
     [x.or.itemTotal, o.item_pence],
     [x.or.postage, o.postage_pence],
     [x.or.total, o.total_pence, true],
     [x.or.deliveryCost, o.delivery_cost_pence],
-    [x.or.commission, o.commission_pence],
+    [x.or.commission, o.commission_pence, false, true],
     [x.or.paymentCost, o.payment_cost_pence],
-    [x.or.net, net],
-    [x.or.payout, o.seller_payout_pence, true],
+    [x.or.net, net, false, true],
+    [x.or.payout, o.seller_payout_pence, true, true],
   ];
 
   const act = (name: string, label: string, danger?: boolean) => (
@@ -52,13 +55,13 @@ export default async function AdminOrder({ params }: PageProps<"/[lang]/admin/or
   );
 
   return (
-    <div className="grid max-w-4xl gap-12">
+    <div className="grid max-w-4xl grid-cols-[minmax(0,1fr)] gap-12">
       <div>
         <Link href={`/${lang}/admin/orders`} className="text-sm underline underline-offset-4 hover:text-cobalt">
           ← {x.or.allOrders}
         </Link>
         <h2 className="mt-6 text-4xl">{fmt(t.orders.order, { n: o.number })}</h2>
-        <p className="mt-2 text-lg">
+        <p className="mt-2 text-lg break-words">
           {o.title} × {o.quantity}
         </p>
         <p className="mt-1 text-turq">{orderStatus(t, o)}</p>
@@ -86,10 +89,19 @@ export default async function AdminOrder({ params }: PageProps<"/[lang]/admin/or
       <section aria-labelledby="o-money">
         <h2 id="o-money" className="text-3xl">{x.or.money}</h2>
         <dl className="mt-4 max-w-xl rounded-3xl bg-mist p-6">
-          {money.map(([label, pence, strong]) => (
+          {money.map(([label, pence, strong, earned]) => (
             <div key={label} className="flex justify-between gap-6 border-t border-line py-2.5 first:border-t-0">
               <dt className={strong ? "font-medium" : "text-soft"}>{label}</dt>
-              <dd className={`tabular-nums ${strong ? "font-medium" : ""}`}>{formatGBP(pence)}</dd>
+              {refunded && earned ? (
+                <dd className={`text-right tabular-nums ${strong ? "font-medium" : ""}`} data-not-earned>
+                  {formatGBP(0)}
+                  <span className="block text-sm font-normal text-soft">
+                    {x.or.wouldHaveBeen} <s>{formatGBP(pence)}</s>
+                  </span>
+                </dd>
+              ) : (
+                <dd className={`tabular-nums ${strong ? "font-medium" : ""}`}>{formatGBP(pence)}</dd>
+              )}
             </div>
           ))}
           <div className="flex justify-between gap-6 border-t border-line py-2.5">
@@ -97,6 +109,7 @@ export default async function AdminOrder({ params }: PageProps<"/[lang]/admin/or
             <dd>{t.orders.paidWith[o.payment_method as "card" | "klarna"]}</dd>
           </div>
         </dl>
+        {refunded && <p className="notice mt-4 max-w-xl">{x.or.refundedNote}</p>}
         <p className="hint mt-3">{x.or.noCodeNote}</p>
       </section>
 

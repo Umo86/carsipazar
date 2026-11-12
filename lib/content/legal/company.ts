@@ -15,11 +15,11 @@ export const company: Bi<Doc> = {
             ["Trading name", "{{site}}"],
             ["Legal name", "{{legal_name}}"],
             ["Legal form", "{{legal_form}}"],
-            ["Company number", "{{company_no}}"],
-            ["Registered office", "{{registered_address}}"],
+            ["Company number", "{{company_no_or_na}}"],
+            ["Registered office (or business address)", "{{registered_address}}"],
             ["Postal address for customers", "{{postal_address}}"],
           ] },
-          { t: "p", text: "If we are a company, the name, number and registered office are as registered at Companies House. If we are a sole trader, the legal name is the owner's name and the address is a UK address where documents can be served." },
+          { t: "p", text: "{{legal_note}}" },
         ],
       },
       {
@@ -29,7 +29,7 @@ export const company: Bi<Doc> = {
           { t: "table", caption: "Contact details", head: ["Detail", "Value"], rows: [
             ["Email", "{{email}}"],
             ["Complaints email", "{{complaints_email}}"],
-            ["Telephone (if any)", "{{phone}}"],
+            ["Telephone (if any)", "{{phone_or_na}}"],
           ] },
           { t: "p", text: "We aim to reply within 2 working days. See [Contact us](/contact)." },
         ],
@@ -39,7 +39,7 @@ export const company: Bi<Doc> = {
         heading: "Tax and registrations",
         blocks: [
           { t: "table", caption: "Registrations", head: ["Detail", "Value"], rows: [
-            ["VAT number", "{{vat_no}}"],
+            ["VAT number", "{{vat_no_or_na}}"],
             ["ICO registration number", "{{ico_no}}"],
           ] },
           { t: "p", text: "A VAT number is shown only if we are registered for VAT." },
@@ -68,11 +68,11 @@ export const company: Bi<Doc> = {
             ["Ticari ad", "{{site}}"],
             ["Yasal ad", "{{legal_name}}"],
             ["Şirket türü", "{{legal_form}}"],
-            ["Şirket numarası", "{{company_no}}"],
-            ["Tescilli adres", "{{registered_address}}"],
+            ["Şirket numarası", "{{company_no_or_na}}"],
+            ["Tescilli adres (ya da iş adresi)", "{{registered_address}}"],
             ["Müşteriler için posta adresi", "{{postal_address}}"],
           ] },
-          { t: "p", text: "Şirketsek ad, numara ve tescilli adres Companies House'ta kayıtlı olduğu gibidir. Şahıs işletmesiysek yasal ad işletme sahibinin adıdır ve adres, tebligat yapılabilecek bir Birleşik Krallık adresidir." },
+          { t: "p", text: "{{legal_note}}" },
         ],
       },
       {
@@ -82,7 +82,7 @@ export const company: Bi<Doc> = {
           { t: "table", caption: "İletişim bilgileri", head: ["Bilgi", "Değer"], rows: [
             ["E-posta", "{{email}}"],
             ["Şikâyet e-postası", "{{complaints_email}}"],
-            ["Telefon (varsa)", "{{phone}}"],
+            ["Telefon (varsa)", "{{phone_or_na}}"],
           ] },
           { t: "p", text: "2 iş günü içinde cevap vermeyi hedefleriz. [İletişim](/contact) sayfasına bak." },
         ],
@@ -92,7 +92,7 @@ export const company: Bi<Doc> = {
         heading: "Vergi ve kayıtlar",
         blocks: [
           { t: "table", caption: "Kayıtlar", head: ["Bilgi", "Değer"], rows: [
-            ["KDV numarası", "{{vat_no}}"],
+            ["KDV numarası", "{{vat_no_or_na}}"],
             ["ICO kayıt numarası", "{{ico_no}}"],
           ] },
           { t: "p", text: "KDV numarası yalnızca KDV mükellefiysek gösterilir." },
@@ -102,7 +102,7 @@ export const company: Bi<Doc> = {
         id: "role",
         heading: "Rolümüz",
         blocks: [
-          { t: "p", text: "{{site}} bir çarşıdır. Ürünleri bağımsız işletmeler satar ve her satış, alıcı ile o satıcı arasındaki bir sözleşmedir. Biz siteyi işletir, ödemeyi alır, sipariş teslim edilene ya da teslim alınana kadar bekletir ve satıcıya öderiz. [Alıcı koşullarına](/legal/terms) bak. Her dükkân sayfasında satıcının kendi şirket bilgileri yer alır." },
+          { t: "p", text: "{{site}} bir çarşıdır. Ürünleri bağımsız işletmeler satar ve her satış, alıcı ile o satıcı arasındaki bir sözleşmedir. Biz siteyi işletiriz, ödemeyi alırız, sipariş teslim edilene ya da teslim alınana kadar bekletiriz ve satıcıya öderiz. [Alıcı koşullarına](/legal/terms) bak. Her dükkân sayfasında satıcının kendi şirket bilgileri yer alır." },
         ],
       },
     ],

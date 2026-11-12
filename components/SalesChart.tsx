@@ -47,7 +47,7 @@ export default function SalesChart({ days, lang, t }: { days: DaySales[]; lang: 
                   data-day={d.day}
                   data-pence={d.pence}
                 >
-                  <title>{fmt(o.bar, { day: formatShortDay(d.day, lang), amount: formatGBP(d.pence), n: d.orders })}</title>
+                  <title>{fmt(d.orders === 1 ? o.barOne : o.bar, { day: formatShortDay(d.day, lang), amount: formatGBP(d.pence), n: d.orders })}</title>
                 </rect>
                 {labelAt.has(i) && (
                   <text

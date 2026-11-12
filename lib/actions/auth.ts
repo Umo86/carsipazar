@@ -32,6 +32,9 @@ export async function login(fd: FormData) {
     redirect(`/${lang}/login?error=invalid&next=${encodeURIComponent(next)}`);
   }
   await q("delete from login_attempts where email = $1 or created_at < now() - interval '1 day'", [email]);
+  // Housekeeping on each successful log-in: expired sessions, and password reset links that have expired or been used.
+  await q("delete from sessions where expires_at < now()");
+  await q("delete from password_resets where expires_at < now() or used_at is not null");
   // Only someone who knows the password is told the account is blocked.
   if (user.blocked_at) redirect(`/${lang}/login?error=blocked&next=${encodeURIComponent(next)}`);
   await createSession(user.id);

@@ -68,7 +68,7 @@ export default async function Footer({ lang, t }: { lang: Locale; t: Dict }) {
       </div>
       <div className="border-t border-line">
         <div className="wrap flex flex-col gap-1 py-5 text-sm text-soft sm:flex-row sm:flex-wrap sm:gap-x-6">
-          <p>© 2026{d.legal_name ? ` ${d.legal_name}` : ""}</p>
+          <p>© {new Date().getFullYear()}{d.legal_name ? ` ${d.legal_name}` : ""}</p>
           {fine.length > 0 && <p>{fine.join(" · ")}</p>}
         </div>
       </div>

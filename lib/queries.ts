@@ -1,5 +1,7 @@
 import "server-only";
 import { one, q } from "./db";
+import { cleanText } from "./clean";
+import { foldSql, foldText } from "./fold";
 import type { CollectionMode, DeliveryMethod, ParcelSize, PromoKind } from "./config";
 
 export type ListingCard = {
@@ -73,14 +75,8 @@ export const newestListings = (limit = 8) =>
 // Search ignores case and Turkish letters, so "sandik" finds "sandık" and
 // "Gumus" finds "gümüş". Every word typed has to appear somewhere in the
 // item's titles, descriptions or shop name.
-const FOLD_FROM = "İIÇĞÖŞÜçğıöşüâîû";
-const FOLD_TO = "iicgosucgiosuaiu";
-const foldSql = (expr: string) => `lower(translate(${expr}, '${FOLD_FROM}', '${FOLD_TO}'))`;
-const foldText = (v: string) =>
-  [...v].map((ch) => { const i = FOLD_FROM.indexOf(ch); return i < 0 ? ch : FOLD_TO[i]; }).join("").toLowerCase();
-
 export function searchListings(opts: { text: string; category: string | null }) {
-  const words = foldText(opts.text)
+  const words = foldText(cleanText(opts.text))
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 6)

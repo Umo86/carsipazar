@@ -10,7 +10,7 @@ import {
   shopOrders,
   shopTotals,
 } from "@/lib/admin-queries";
-import { formatDateTime } from "@/lib/admin-format";
+import { formatDateTime, itemStatusLabel } from "@/lib/admin-format";
 import { formatDate, getDict, itemCount, orderStatus, pick, type Dict } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import { setFounding, setShopStatus } from "@/lib/actions/admin";
@@ -67,13 +67,13 @@ export default async function AdminSeller({ params, searchParams }: PageProps<"/
   ];
 
   return (
-    <div className="grid max-w-5xl gap-12">
+    <div className="grid max-w-5xl grid-cols-[minmax(0,1fr)] gap-12">
       <div>
         <Link href={`/${lang}/admin/sellers`} className="text-sm underline underline-offset-4 hover:text-cobalt">
           ← {x.se.allShops}
         </Link>
         {sp.error === "blocked" && <p className="notice notice-error mt-4" role="alert">{x.se.blockedOwner}</p>}
-        <h2 className="mt-6 text-4xl">{shop.name}</h2>
+        <h2 className="mt-6 text-4xl break-words">{shop.name}</h2>
         <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
           <span className={shop.status === "approved" ? "text-turq" : shop.status === "suspended" ? "text-tulip" : "font-medium"}>
             {t.status[shop.status]}
@@ -144,7 +144,7 @@ export default async function AdminSeller({ params, searchParams }: PageProps<"/
                     </td>
                     <td className="tabular-nums">{formatGBP(i.price_pence)}</td>
                     <td className="tabular-nums text-soft">{x.se.stock}: {i.stock}</td>
-                    <td>{i.status}</td>
+                    <td>{itemStatusLabel(t, i.status)}</td>
                   </tr>
                 ))}
               </tbody>

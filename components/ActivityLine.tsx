@@ -9,6 +9,8 @@ export default function ActivityLine({ row, lang, t }: { row: LogRow; lang: Loca
   const a = t.adminx.ac;
   const href = targetHref(row.target_kind, row.target_id, lang);
   const kind = a.kinds[row.target_kind] ?? row.target_kind;
+  // Newer rows carry a name; older ones only the kind.
+  const what = row.target_label ? `${kind}: ${row.target_label}` : kind;
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <time dateTime={new Date(row.created_at).toISOString()} className="text-soft tabular-nums">
@@ -17,9 +19,9 @@ export default function ActivityLine({ row, lang, t }: { row: LogRow; lang: Loca
       <span className="font-medium">{row.admin_name ?? a.unknownAdmin}</span>
       <span>{a.actions[row.action] ?? row.action}</span>
       {href ? (
-        <Link href={href} className="underline underline-offset-4 hover:text-cobalt">{kind}</Link>
+        <Link href={href} className="underline underline-offset-4 hover:text-cobalt break-words">{what}</Link>
       ) : (
-        <span className="text-soft">{kind}</span>
+        <span className="text-soft break-words">{what}</span>
       )}
       {row.detail && <span className="basis-full text-sm text-soft break-words">{row.detail}</span>}
     </div>

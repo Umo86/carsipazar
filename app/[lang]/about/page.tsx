@@ -4,11 +4,14 @@ import type { Metadata } from "next";
 import { isLocale } from "@/lib/config";
 import { getDict } from "@/lib/i18n";
 import { paymentsMode } from "@/lib/payments";
+import { docMetadata } from "@/lib/content/meta";
 import Icon from "@/components/Icon";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/about">): Promise<Metadata> {
   const { lang } = await params;
-  return { title: getDict(isLocale(lang) ? lang : "tr").about.title };
+  if (!isLocale(lang)) return { title: getDict("tr").about.title };
+  const a = getDict(lang).about;
+  return docMetadata(lang, "/about", { title: a.title, description: a.lead });
 }
 
 export default async function AboutPage({ params }: PageProps<"/[lang]/about">) {

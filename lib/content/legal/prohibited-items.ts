@@ -65,7 +65,7 @@ export const prohibited: Bi<Doc> = {
         blocks: [
           { t: "ul", items: [
             "We take the listing down.",
-            "We tell the seller why.",
+            "If we remove a listing or suspend a shop, the seller can ask us for the reasons by writing to {{email}}; we reply within 2 working days.",
             "For a serious or repeated breach we suspend the shop. See the [seller terms](/legal/seller-terms).",
             "Where the law requires, we tell the police, Trading Standards or another authority.",
           ] },
@@ -96,7 +96,7 @@ export const prohibited: Bi<Doc> = {
             "çalıntı mallar",
             "yasa dışı silahlar; yasal olarak satılamayan bıçaklar dahil",
             "fildişi, kaplumbağa kabuğu ya da mercan gibi korunan türlerden yapılmış ürünler",
-            "damga mevzuatını ihlal eden kıymetli maden ürünleri",
+            "damga mevzuatını ihlal eden kıymetli metal ürünleri",
             "yangın güvenliği mevzuatına uymayan döşemeli mobilya",
             "Birleşik Krallık'ta satılması yasa dışı olan her şey",
             "hizmetler, hediye kartları ve dijital ürünler. {{site}}; mobilya, giyim ve takı alanında fiziksel ürünler içindir",
@@ -108,8 +108,8 @@ export const prohibited: Bi<Doc> = {
         id: "furniture",
         heading: "Mobilya",
         blocks: [
-          { t: "p", text: "Koltuk, berjer, yastık ve yatak gibi döşemeli mobilya, değişikliklerle birlikte Furniture and Furnishings (Fire) (Safety) Regulations 1988'e uymalıdır. Geçerli olan kalıcı yangına dayanıklılık etiketleri de buna dahildir. Kurallar 30 Ekim 2025'te değişti; ürünün için güncel kuralları kontrol et. Belgesini sakla. Uyduğunu gösteremiyorsan döşemeli mobilya listeleme." },
-          { t: "p", text: "Bir ürün ikinci el, hasarlıysa ya da onarım gerektiriyorsa ilanda açıkça belirt. Gerçek ölçüleri yaz." },
+          { t: "p", text: "Kanepe, berjer koltuk, yastık ve yatak gibi döşemeli mobilya, değişikliklerle birlikte Furniture and Furnishings (Fire) (Safety) Regulations 1988'e uymalıdır. Geçerli olan kalıcı yangına dayanıklılık etiketleri de buna dahildir. Kurallar 30 Ekim 2025'te değişti; ürünün için güncel kuralları kontrol et. Belgesini sakla. Uyduğunu gösteremiyorsan döşemeli mobilya listeleme." },
+          { t: "p", text: "Bir ürün ikinci el ya da hasarlıysa veya onarım gerektiriyorsa ilanda açıkça belirt. Gerçek ölçüleri yaz." },
         ],
       },
       {
@@ -125,7 +125,7 @@ export const prohibited: Bi<Doc> = {
         blocks: [
           { t: "ul", items: [
             "Bir ürün gerçekten altın, gümüş, platin ya da paladyum değilse öyle tanımlama. Kaplama ya da dolgu ürünlerde bunu belirt.",
-            "Ağırlık sınırlarını aşan kıymetli maden ürünleri bir Birleşik Krallık damga ofisi tarafından damgalanmış olmalıdır. [Damga](/legal/hallmarking) sayfasını oku.",
+            "Ağırlık sınırlarını aşan kıymetli metal ürünleri bir Birleşik Krallık damga ofisi tarafından damgalanmış olmalıdır. [Damga](/legal/hallmarking) sayfasını oku.",
             "Cilde temas eden takılar nikel, kurşun ve kadmiyum sınırlarına uymalıdır.",
             "Her taşın ne olduğunu yaz: doğal, laboratuvar üretimi ya da taklit.",
           ] },
@@ -144,7 +144,7 @@ export const prohibited: Bi<Doc> = {
         blocks: [
           { t: "ul", items: [
             "İlanı kaldırırız.",
-            "Satıcıya nedenini söyleriz.",
+            "Bir ilanı kaldırırsak ya da bir dükkânı askıya alırsak satıcı gerekçeyi {{email}} adresine yazarak isteyebilir; 2 iş günü içinde yanıt veririz.",
             "Ciddi ya da tekrarlanan ihlalde dükkânı askıya alırız. [Satıcı koşullarına](/legal/seller-terms) bak.",
             "Yasa gerektirdiğinde polise, Trading Standards'a ya da başka bir kuruma bildiririz.",
           ] },

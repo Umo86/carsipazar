@@ -116,25 +116,43 @@ export async function saveSettings(fd: FormData) {
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMAIL_KEYS: SiteDetailKey[] = ["email", "complaints_email"];
 
-export async function saveSiteDetailsForm(fd: FormData) {
+export type SiteFormState = {
+  values: Record<string, string>;
+  errors: Partial<Record<SiteDetailKey, "email" | "long">>;
+  saved: boolean;
+} | null;
+
+// Returns the typed values with any problems, so the form keeps everything the admin entered and
+// shows each message by its own field. Nothing is saved unless every field is valid.
+export async function saveSiteDetailsForm(_prev: SiteFormState, fd: FormData): Promise<SiteFormState> {
   const lang = langOf(fd);
   const me = await adminOnly(lang);
-  const here = `/${lang}/admin/site`;
   const entries: [SiteDetailKey, string][] = [];
+  const values: Record<string, string> = {};
+  const errors: Partial<Record<SiteDetailKey, "email" | "long">> = {};
   for (const key of SITE_DETAIL_KEYS) {
     const v = str(fd, key);
-    if (v.length > SITE_DETAIL_MAX) redirect(`${here}?error=long&key=${key}`);
-    if (v && EMAIL_KEYS.includes(key) && !EMAIL.test(v)) redirect(`${here}?error=email&key=${key}`);
+    values[key] = v;
+    if (v.length > SITE_DETAIL_MAX) errors[key] = "long";
+    else if (v && EMAIL_KEYS.includes(key) && !EMAIL.test(v)) errors[key] = "email";
     entries.push([key, v]);
   }
+  if (Object.keys(errors).length) return { values, errors, saved: false };
+
+  const rows = await q<{ key: string; value: string }>("select key, value from site_details");
+  const before = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  const short = (v: string) => (v === "" ? "empty" : v.length > 60 ? `${v.slice(0, 57)}...` : v);
+  const changed = entries
+    .filter(([k, v]) => (before[k] ?? "") !== v)
+    .map(([k, v]) => `${k}: ${short(before[k] ?? "")} to ${short(v)}`);
   await saveSiteDetails(entries);
-  await logAdmin(me.id, "site.save", "site", "", entries.filter(([, v]) => v).map(([k]) => k).join(", "));
-  redirect(`${here}?saved=1`);
+  if (changed.length) await logAdmin(me.id, "site.save", "site", "", changed.join("; "));
+  return { values, errors: {}, saved: true };
 }
 
 // --- users ---------------------------------------------------------------------------------
 
-type Outcome = "ok" | "ok_shop" | "missing" | "already" | "lastadmin" | "blockedtarget" | "notadmin";
+type Outcome = "ok" | "ok_shop" | "missing" | "already" | "lastadmin" | "blockedtarget" | "notadmin" | "isadmin";
 
 export async function blockUser(fd: FormData) {
   const lang = langOf(fd);
@@ -147,9 +165,6 @@ export async function blockUser(fd: FormData) {
   if (!reason) redirect(`${here}?error=reason`);
 
   const out = await tx<Outcome>(async (c) => {
-    const admins = await c.query<{ id: string }>(
-      "select id from users where role = 'admin' and blocked_at is null for update",
-    );
     const u = (
       await c.query<{ role: string; blocked_at: Date | null }>(
         "select role, blocked_at from users where id = $1 for update",
@@ -158,7 +173,9 @@ export async function blockUser(fd: FormData) {
     ).rows[0];
     if (!u) return "missing";
     if (u.blocked_at) return "already";
-    if (u.role === "admin" && !admins.rows.some((a) => a.id !== id)) return "lastadmin";
+    // An admin cannot be blocked: unblocking would quietly give the admin role back.
+    // Remove the admin rights first, then block.
+    if (u.role === "admin") return "isadmin";
     await c.query("update users set blocked_at = now(), blocked_reason = $2 where id = $1", [id, reason]);
     await c.query("delete from sessions where user_id = $1", [id]);
     await c.query("delete from password_resets where user_id = $1", [id]);

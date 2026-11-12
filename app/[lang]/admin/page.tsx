@@ -62,7 +62,7 @@ export default async function AdminHome({ params }: PageProps<"/[lang]/admin">) 
   ].filter((i) => i.n > 0);
 
   return (
-    <div className="grid gap-14">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
       <dl className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3">
         {tiles.map((tile) => (
           <div key={tile.label} className="rounded-2xl bg-mist p-5">

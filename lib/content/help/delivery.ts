@@ -83,7 +83,7 @@ export const delivery: Bi<Doc> = {
             t: "ol",
             items: [
               "Look at your order page for the tracking number, and check it with the carrier.",
-              "Message the seller using the contact details on the shop page.",
+              "Write to the seller. The seller's name and address are on the shop page. If the shop shows no email address, write to us at {{email}} and we will pass it on.",
               "Still nothing, or the item is damaged or not as described? [Contact us](/contact) with your order number. Do not press “I have received it”: your payment stays held until you confirm.",
             ],
           },
@@ -101,7 +101,7 @@ export const delivery: Bi<Doc> = {
         id: "who",
         heading: "Ürünü kim gönderir",
         blocks: [
-          { t: "p", text: "Ürünü satıcı gönderir. CarsiPazar mal tutmaz ve göndermez. Satıcı her ürün için iki yoldan birini seçer:" },
+          { t: "p", text: "Ürünü satıcı gönderir. CarsiPazar ürünleri elinde bulundurmaz ve göndermez. Satıcı her ürün için iki yoldan birini seçer:" },
           {
             t: "ul",
             items: [
@@ -109,7 +109,7 @@ export const delivery: Bi<Doc> = {
               "**CarsiPazar teslimatı.** Satıcı sipariş sayfasından takipli bir teslimat etiketi basar ve paketi teslim eder. Takip numarası senin için otomatik girilir.",
             ],
           },
-          { t: "p", text: "Koltuk, masa gibi büyük ürünleri genellikle satıcı kendisi gönderir ya da alıcı dükkândan alır." },
+          { t: "p", text: "Kanepe, masa gibi büyük ürünleri genellikle satıcı kendisi gönderir ya da alıcı dükkândan alır." },
         ],
       },
       {
@@ -174,7 +174,7 @@ export const delivery: Bi<Doc> = {
             t: "ol",
             items: [
               "Sipariş sayfandaki takip numarasına bak ve kargo firmasından kontrol et.",
-              "Dükkân sayfasındaki iletişim bilgileriyle satıcıya yaz.",
+              "Satıcıya yaz. Satıcının adı ve adresi dükkân sayfasında yer alır. Dükkân sayfasında e-posta adresi yoksa {{email}} adresine yaz, biz satıcıya iletiriz.",
               "Hâlâ bir şey yoksa ya da ürün hasarlı veya anlatıldığı gibi değilse sipariş numaranla [bize ulaş](/contact). “Teslim aldım” düğmesine basma: sen onaylayana kadar ödemen bekletilir.",
             ],
           },

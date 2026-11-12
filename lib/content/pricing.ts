@@ -6,7 +6,7 @@ import type { Doc } from "./types";
 // Everything numeric comes from the live settings and computeFees(); nothing is typed in here.
 const EXAMPLES = [
   { en: "A scarf", tr: "Bir eşarp", pence: 4500 },
-  { en: "An armchair", tr: "Bir koltuk", pence: 42000 },
+  { en: "An armchair", tr: "Bir berjer koltuk", pence: 42000 },
   { en: "A table", tr: "Bir masa", pence: 125000 },
 ];
 
@@ -17,7 +17,7 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
   const pct = (bps: number) => (tr ? `%${pc(bps)}` : `${pc(bps)}%`);
   const rate = pct(s.card_bps);
   const founding = tr
-    ? `${pct(s.founding_card_bps)} + ${s.founding_card_fixed} peni`
+    ? `${pct(s.founding_card_bps)} + ${s.founding_card_fixed}p`
     : `${pct(s.founding_card_bps)} + ${s.founding_card_fixed}p`;
 
   const examples = EXAMPLES.map((e) => {
@@ -94,6 +94,7 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
             { t: "p", text: `Founding sellers, the first shops to open with us, pay a lower rate: ${founding} on card sales. The lower rate applies automatically if your shop is a founding seller.` },
             { t: "p", text: "If an order is refunded before you are paid, you pay no commission on it." },
             { t: "note", text: "Other payment methods, where a seller switches them on, carry their own rate. It is shown in the seller panel before you switch them on." },
+            { t: "p", text: "We give at least 15 days' notice of a change to the seller terms. See [Seller terms](/legal/seller-terms)." },
           ],
         },
         {
@@ -128,8 +129,8 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
           id: "paid",
           heading: "When you are paid",
           blocks: [
-            { t: "p", text: "We hold the buyer's payment until the item has been delivered or collected. Once delivery or collection is confirmed, the payment is released to you after {{release_days}} days." },
-            { t: "p", text: "That short wait lets a buyer tell us if something is wrong. It is how the payment protection works. See [Delivery and collection](/help/delivery) for the steps." },
+            { t: "p", text: "We hold the buyer's payment until the item has been delivered or collected. We pay you {{release_days}} days after the buyer confirms they have received the item, or after a collection is confirmed with the handover code. If a buyer does not confirm, tell us: we check the delivery and can confirm it ourselves. You need a connected bank account to be paid." },
+            { t: "p", text: "The payout is processed the next time we run payouts, so it can arrive a little after that date. That short wait lets a buyer tell us if something is wrong. It is how the payment protection works. See [Delivery and collection](/help/delivery) for the steps." },
           ],
         },
         {
@@ -145,9 +146,9 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
           id: "delivery",
           heading: "CarsiPazar delivery labels (optional)",
           blocks: [
-            { t: "p", text: "For small and medium items you can use a tracked CarsiPazar delivery label instead of arranging postage yourself. The buyer pays the label price at checkout. It goes to CarsiPazar, not to you." },
+            { t: "p", text: `Instead of arranging postage yourself, you can use a tracked CarsiPazar delivery label. There are three parcel sizes, shown below${maxItem ? `, and a label is available for items priced up to ${maxItem}` : ""}. The buyer pays the label price at checkout. It goes to CarsiPazar, not to you.` },
             { t: "table", caption: "Delivery label prices by parcel size", head: ["Parcel size", "Limits", "Buyer pays"], rows: parcelRows },
-            { t: "p", text: maxItem ? `CarsiPazar delivery is available for items priced up to ${maxItem}. Anything bigger, such as a sofa or a table, you deliver yourself or the buyer collects.` : "Anything bigger than the largest size, such as a sofa or a table, you deliver yourself or the buyer collects." },
+            { t: "p", text: maxItem ? `Anything that does not fit the largest size, or is priced above ${maxItem}, such as a sofa or a table, you deliver yourself or the buyer collects.` : "Anything bigger than the largest size, such as a sofa or a table, you deliver yourself or the buyer collects." },
           ],
         },
       ],
@@ -180,6 +181,7 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
           { t: "p", text: `Kurucu satıcılar, yani bizimle ilk açılan dükkânlar, daha düşük oran öder: kartlı satışlarda ${founding}. Dükkânın kurucu satıcıysa düşük oran kendiliğinden uygulanır.` },
           { t: "p", text: "Bir sipariş sana ödeme yapılmadan önce iade edilirse o sipariş için komisyon ödemezsin." },
           { t: "note", text: "Satıcının açtığı diğer ödeme yöntemlerinin kendi oranı vardır. Yöntemi açmadan önce oranı satıcı panelinde görürsün." },
+          { t: "p", text: "Satıcı koşullarında yapılacak bir değişikliği en az 15 gün önceden bildiririz. [Satıcı koşulları](/legal/seller-terms) sayfasına bak." },
         ],
       },
       {
@@ -214,8 +216,8 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
         id: "paid",
         heading: "Ödemeni ne zaman alırsın",
         blocks: [
-          { t: "p", text: "Alıcının ödemesini ürün teslim edilene ya da teslim alınana kadar bizde tutarız. Teslimat ya da teslim alma onaylandıktan {{release_days}} gün sonra ödeme sana aktarılır." },
-          { t: "p", text: "Bu kısa bekleme, bir sorun olursa alıcının bize haber vermesini sağlar. Korumalı ödeme böyle çalışır. Adımlar için [Teslimat ve teslim alma](/help/delivery) sayfasına bak." },
+          { t: "p", text: "Alıcının ödemesini ürün teslim edilene ya da teslim alınana kadar bizde tutarız. Alıcı ürünü aldığını onayladıktan, ya da dükkândan teslim, teslim koduyla onaylandıktan {{release_days}} gün sonra ödemeni yaparız. Alıcı onaylamazsa bize haber ver: teslimatı kontrol eder, gerekirse biz onaylarız. Ödeme alabilmen için bağlı bir banka hesabın olmalıdır." },
+          { t: "p", text: "Ödeme, bir sonraki ödeme işlemi çalıştırıldığında yapılır; bu yüzden o tarihten biraz sonra hesabına geçebilir. Bu kısa bekleme, bir sorun olursa alıcının bize haber vermesini sağlar. Korumalı ödeme böyle çalışır. Adımlar için [Teslimat ve teslim alma](/help/delivery) sayfasına bak." },
         ],
       },
       {
@@ -223,7 +225,7 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
         heading: "Ücretli tanıtım (isteğe bağlı)",
         blocks: [
           { t: "p", text: `Bir ürünü daha görünür yapmak için ödeme yapabilirsin. Zorunlu değildir; satıcı panelinden ayırtırsın. En fazla ${PROMO_MAX_WEEKS} hafta seçebilirsin ve başlangıç tarihi en geç ${PROMO_BOOK_AHEAD_DAYS} gün sonra olabilir. Fiyatlar haftalıktır.` },
-          { t: "table", caption: "Ücretli tanıtım paketleri", head: ["Paket", "Ne yapar", "Aynı anda yer", "Haftalık fiyat"], rows: promoRows },
+          { t: "table", caption: "Ücretli tanıtım paketleri", head: ["Paket", "Ne yapar", "Aynı anda kaç yer", "Haftalık fiyat"], rows: promoRows },
           { t: "p", text: "Tanıtılan ürünlerde “Sponsorlu” etiketi görünür. Başlangıç tarihinden önce iptal edersen ücretin tamamı iade edilir. Tanıtım için ödeme yapman yorumlarını ya da puanını değiştirmez. [Sonuçların nasıl sıralandığına](/legal/ranking) bak." },
         ],
       },
@@ -231,9 +233,9 @@ export function pricingDoc(lang: Locale, s: Settings): Doc {
         id: "delivery",
         heading: "CarsiPazar teslimat etiketi (isteğe bağlı)",
         blocks: [
-          { t: "p", text: "Küçük ve orta boy ürünlerde kargoyu kendin ayarlamak yerine takipli bir CarsiPazar teslimat etiketi kullanabilirsin. Etiket bedelini alıcı ödeme sırasında öder. Bu tutar sana değil CarsiPazar'a gider." },
+          { t: "p", text: `Kargoyu kendin ayarlamak yerine takipli bir CarsiPazar teslimat etiketi kullanabilirsin. Aşağıda gösterilen üç paket boyu var${maxItem ? `; etiket ${maxItem} ve altındaki ürünlerde kullanılabilir` : ""}. Etiket bedelini alıcı ödeme sırasında öder. Bu tutar sana değil CarsiPazar'a gider.` },
           { t: "table", caption: "Paket boyuna göre etiket fiyatları", head: ["Paket boyu", "Sınırlar", "Alıcı öder"], rows: parcelRows },
-          { t: "p", text: maxItem ? `CarsiPazar teslimatı ${maxItem} ve altındaki ürünlerde kullanılabilir. Koltuk ya da masa gibi daha büyük ürünleri kendin gönderirsin ya da alıcı dükkândan alır.` : "En büyük boyu aşan ürünleri, örneğin koltuk ya da masayı, kendin gönderirsin ya da alıcı dükkândan alır." },
+          { t: "p", text: maxItem ? `En büyük boya sığmayan ya da ${maxItem} üzerinde fiyatlanan ürünleri, örneğin kanepe ya da masayı, kendin gönderirsin ya da alıcı dükkândan alır.` : "En büyük boyu aşan ürünleri, örneğin kanepe ya da masayı, kendin gönderirsin ya da alıcı dükkândan alır." },
         ],
       },
     ],

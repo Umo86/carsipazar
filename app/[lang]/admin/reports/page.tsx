@@ -63,6 +63,7 @@ export default async function AdminReports({ params, searchParams }: PageProps<"
       {sp.done && <p className="notice mb-6" role="status">{x.rp.ok}</p>}
       {sp.error === "note" && <p className="notice notice-error mb-6" role="alert">{x.rp.errNote}</p>}
       {sp.error === "gone" && <p className="notice notice-error mb-6" role="alert">{x.rp.errGone}</p>}
+      {sp.error === "mismatch" && <p className="notice notice-error mb-6" role="alert">{x.rp.errMismatch}</p>}
       <div className="flex flex-wrap gap-2" role="group" aria-label={x.rp.queue}>
         {REPORT_STATUSES.map((s) => (
           <Link key={s} href={`${path}?status=${s}`} className={pill(s === status)} aria-current={s === status ? "true" : undefined}>

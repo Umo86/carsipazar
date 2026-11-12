@@ -64,9 +64,9 @@ export const returns: Bi<Doc> = {
           {
             t: "ul",
             items: [
-              "**Within 30 days** of receiving them you can reject them and get a full refund.",
-              "**After 30 days, and up to 6 months,** you can ask for a repair or a replacement. If that does not fix it, you can ask for a refund or a price reduction.",
-              "**After 6 months** you can still claim, but you may need to show that the fault was there when the goods arrived. You can claim for up to 6 years in England, Wales and Northern Ireland (5 years in Scotland).",
+              "**If a fault shows up within 30 days** of receiving the goods, you can reject them and get a full refund.",
+              "**After that,** you can ask for a repair or a replacement. If that does not fix it, you can ask for a refund or a price reduction.",
+              "**In the first 6 months** it is assumed the fault was there when you received the goods, unless the seller can show otherwise. **After 6 months** you can still claim, but you may need to show that the fault was there when the goods arrived. You can claim for up to 6 years in England, Wales and Northern Ireland (5 years in Scotland).",
             ],
           },
           { t: "p", text: "These rights are against the seller. They apply whatever the shop's returns policy says. If the goods are faulty, the seller pays the cost of returning them." },
@@ -76,11 +76,11 @@ export const returns: Bi<Doc> = {
         id: "how",
         heading: "How to ask",
         blocks: [
-          { t: "p", text: "There is no return button on the order page yet. This is how it works today:" },
+          { t: "p", text: "Start a return by writing to the seller, or to us at {{email}}. On your order page you can open a cancellation form that is already filled in with your order details, and print an order confirmation." },
           {
             t: "ol",
             items: [
-              "Contact the seller. Their contact details are on the shop page. Say which order it is, that you are cancelling or what is wrong, and attach photos if the item is damaged. You may use the [cancellation form](#form).",
+              "Contact the seller. The seller's name and address are on the shop page. If the shop shows no email address, send your notice to {{email}} and we will pass it on. Say which order it is, that you are cancelling or what is wrong, and attach photos if the item is damaged. You may use the [cancellation form](#form).",
               "Keep a copy of what you send, and any reply.",
               "If the seller does not reply within a few days, or you cannot agree, [contact us](/contact) with your order number. We will look into it with the seller.",
             ],
@@ -95,7 +95,7 @@ export const returns: Bi<Doc> = {
           {
             t: "ul",
             items: [
-              "**You cancel because you changed your mind:** you pay the cost of sending the goods back, unless the seller agreed to pay or did not tell you before you bought that you would have to pay.",
+              "**You cancel because you changed your mind:** you pay the cost of sending the goods back if the seller told you before you bought that you would have to pay, and has not agreed to pay it themselves. Otherwise the seller pays.",
               "**Large items** that cannot normally be posted, such as a sofa: the seller must have told you the cost of return before you bought. If they did not, they pay.",
               "**The goods are faulty, damaged or not what you ordered:** the seller pays.",
               "**You collected the item from the shop:** return it to the shop, so there is no postage.",
@@ -130,21 +130,23 @@ export const returns: Bi<Doc> = {
         id: "form",
         heading: "Cancellation form",
         blocks: [
-          { t: "p", text: "You do not have to use this form. Fill it in and send it to the seller only if you want to cancel. It follows the model form set out in law." },
+          { t: "p", text: "You do not have to use this form. Fill it in and send it to the seller only if you want to cancel." },
           {
             t: "form",
             title: "Cancellation form",
-            intro: "To: [the seller: name, address and email are on the shop page]. Please also send a copy to us at {{email}}. I/We [*] hereby give notice that I/We [*] cancel my/our [*] contract of sale of the following goods [*]:",
+            intro: "You can use this form or write in your own words. It is the model cancellation form set out in the law.",
             fields: [
-              "Goods (item name and order number)",
-              "Ordered on [*] / received on [*]",
-              "Name of consumer(s)",
-              "Address of consumer(s)",
-              "Signature of consumer(s) (only if this form is notified on paper)",
+              "To [here insert the name, geographical address and, where available, the fax number and e-mail address of the trader]:",
+              "I/We [*] hereby give notice that I/We [*] cancel my/our [*] contract of sale of the following goods [*]/for the supply of the following service [*],",
+              "Ordered on [*]/received on [*],",
+              "Name of consumer(s),",
+              "Address of consumer(s),",
+              "Signature of consumer(s) (only if this form is notified on paper),",
               "Date",
             ],
-            outro: "[*] Delete as appropriate.",
+            outro: "[*] Delete as appropriate",
           },
+          { t: "p", text: "The seller's name and address are on the shop page. If the shop shows no email address, send your notice to {{email}} and we will pass it on. Otherwise, you can also send us a copy at {{email}}." },
         ],
       },
     ],
@@ -175,7 +177,7 @@ export const returns: Bi<Doc> = {
         id: "cancel",
         heading: "14 gün içinde cayma hakkın",
         blocks: [
-          { t: "p", text: "Birleşik Krallık'taki bir işletmeden online alışveriş yaptığında siparişten herhangi bir nedenle cayabilirsin. Bu hak, Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013 yönetmeliğinden gelir." },
+          { t: "p", text: "Birleşik Krallık'taki bir işletmeden online alışveriş yaptığında siparişten herhangi bir nedenle cayabilirsin. Bu hak, Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013'ten gelir." },
           {
             t: "ul",
             items: [
@@ -201,7 +203,7 @@ export const returns: Bi<Doc> = {
               "çabuk bozulabilen ürünler",
             ],
           },
-          { t: "p", text: "Bir dükkân daha uzun ya da daha geniş bir iade politikası sunabilir. Bu politika dükkân sayfasında yer alır. Dükkânın politikası haklarına ekleme yapabilir ama bu sayfadaki hakları asla kaldıramaz. Satıcı sana cayma hakkından hiç söz etmediyse 14 günlük süre uzar; en fazla 12 ay olur." },
+          { t: "p", text: "Bir dükkân daha uzun ya da daha geniş bir iade politikası sunabilir. Bu politika dükkân sayfasında yer alır. Dükkânın politikası haklarına ekleme yapabilir ama bu sayfadaki hakları asla kaldıramaz. Satıcı sana cayma hakkından hiç söz etmediyse 14 günlük süre uzar; en fazla 12 aydır." },
         ],
       },
       {
@@ -212,9 +214,9 @@ export const returns: Bi<Doc> = {
           {
             t: "ul",
             items: [
-              "Teslim aldıktan sonraki **30 gün içinde** ürünü reddedip ücretin tamamını geri alabilirsin.",
-              "**30 gün sonrasında ve 6 aya kadar** onarım ya da değişim isteyebilirsin. Bu sorunu çözmezse geri ödeme ya da fiyat indirimi isteyebilirsin.",
-              "**6 aydan sonra** da talepte bulunabilirsin; ancak kusurun ürün sana ulaştığında var olduğunu göstermen gerekebilir. İngiltere, Galler ve Kuzey İrlanda'da 6 yıla kadar talepte bulunabilirsin (İskoçya'da 5 yıl).",
+              "**Arıza, ürünü teslim aldıktan sonraki 30 gün içinde** ortaya çıkarsa ürünü reddedip ücretin tamamını geri alabilirsin.",
+              "**Sonrasında** onarım ya da değişim isteyebilirsin. Bu sorunu çözmezse geri ödeme ya da fiyat indirimi isteyebilirsin.",
+              "**İlk 6 ayda** arızanın ürünü teslim aldığında da var olduğu varsayılır; satıcı aksini gösteremezse. **6 aydan sonra** da talepte bulunabilirsin; ancak kusurun ürün sana ulaştığında var olduğunu göstermen gerekebilir. İngiltere, Galler ve Kuzey İrlanda'da 6 yıla kadar talepte bulunabilirsin (İskoçya'da 5 yıl).",
             ],
           },
           { t: "p", text: "Bu haklar satıcıya karşıdır. Dükkânın iade politikası ne diyorsa desin geçerlidir. Ürün kusurluysa geri gönderme masrafını satıcı öder." },
@@ -224,11 +226,11 @@ export const returns: Bi<Doc> = {
         id: "how",
         heading: "Nasıl başvurulur",
         blocks: [
-          { t: "p", text: "Sipariş sayfasında henüz bir iade düğmesi yok. Bugün şöyle işliyor:" },
+          { t: "p", text: "İadeyi satıcıya ya da bize ({{email}}) yazarak başlat. Sipariş sayfanda sipariş bilgilerinle önceden doldurulmuş bir cayma formu açabilir ve sipariş onayını yazdırabilirsin." },
           {
             t: "ol",
             items: [
-              "Satıcıya ulaş. İletişim bilgileri dükkân sayfasında. Hangi sipariş olduğunu, cayacağını ya da neyin yanlış olduğunu yaz; ürün hasarlıysa fotoğraf ekle. [Cayma formunu](#form) kullanabilirsin.",
+              "Satıcıya ulaş. Satıcının adı ve adresi dükkân sayfasında yer alır. Dükkân sayfasında e-posta adresi yoksa bildirimini {{email}} adresine gönder, biz satıcıya iletiriz. Hangi sipariş olduğunu, cayacağını ya da neyin yanlış olduğunu yaz; ürün hasarlıysa fotoğraf ekle. [Cayma formunu](#form) kullanabilirsin.",
               "Gönderdiklerinin ve gelen cevapların bir kopyasını sakla.",
               "Satıcı birkaç gün içinde cevap vermezse ya da anlaşamazsanız sipariş numaranla [bize ulaş](/contact). Konuyu satıcıyla birlikte inceleriz.",
             ],
@@ -243,8 +245,8 @@ export const returns: Bi<Doc> = {
           {
             t: "ul",
             items: [
-              "**Fikrini değiştirdiğin için cayarsan:** satıcı ödemeyi kabul etmediyse ya da satın almadan önce ödeyeceğini sana bildirmediyse iade kargo masrafı sana aittir.",
-              "**Koltuk gibi postayla gönderilemeyen büyük ürünlerde:** satıcı, satın almadan önce iade masrafını sana bildirmiş olmalıdır. Bildirmediyse masrafı o öder.",
+              "**Fikrini değiştirdiğin için cayarsan:** satıcı, satın almadan önce iade masrafını senin ödeyeceğini sana bildirdiyse ve ödemeyi kendisi üstlenmediyse bu masraf sana aittir. Aksi halde iade masrafını satıcı öder.",
+              "**Kanepe gibi postayla gönderilemeyen büyük ürünlerde:** satıcı, satın almadan önce iade masrafını sana bildirmiş olmalıdır. Bildirmediyse masrafı o öder.",
               "**Ürün kusurlu, hasarlı ya da sipariş ettiğin ürün değilse:** masrafı satıcı öder.",
               "**Ürünü dükkândan aldıysan:** dükkâna geri verirsin, kargo masrafı olmaz.",
             ],
@@ -278,21 +280,23 @@ export const returns: Bi<Doc> = {
         id: "form",
         heading: "Cayma formu",
         blocks: [
-          { t: "p", text: "Bu formu kullanmak zorunda değilsin. Yalnızca cayacaksan doldurup satıcıya gönder. Yasada yer alan örnek forma uygundur." },
+          { t: "p", text: "Bu formu kullanmak zorunda değilsin. Yalnızca cayacaksan doldurup satıcıya gönder." },
           {
             t: "form",
             title: "Cayma formu",
-            intro: "Kime: [satıcı: ad, adres ve e-posta dükkân sayfasında]. Lütfen bir kopyasını {{email}} adresine de gönder. Aşağıdaki ürünün satışına ilişkin sözleşmeden cayma hakkımı kullandığımı bildiririm [*]:",
+            intro: "Bu formu kullanabilir ya da kendi sözlerinle yazabilirsin. Bu, yasada yer alan örnek cayma formudur.",
             fields: [
-              "Ürün (ürün adı ve sipariş numarası)",
-              "Sipariş tarihi [*] / teslim alma tarihi [*]",
-              "Tüketicinin adı soyadı",
-              "Tüketicinin adresi",
-              "Tüketicinin imzası (yalnızca form kâğıt üzerinden bildiriliyorsa)",
+              "Kime [satıcının adını, adresini ve varsa faks numarasını ve e-posta adresini buraya yaz]:",
+              "Ben/Biz [*] aşağıdaki malların satışına [*] / aşağıdaki hizmetin sunumuna [*] ilişkin sözleşmemden/sözleşmemizden [*] cayma hakkımı/haklarımızı kullandığımı/kullandığımızı bildiririm/bildiririz [*],",
+              "Sipariş tarihi [*] / teslim alma tarihi [*],",
+              "Tüketicinin adı soyadı,",
+              "Tüketicinin adresi,",
+              "Tüketicinin imzası (yalnızca form kâğıt üzerinden bildiriliyorsa),",
               "Tarih",
             ],
-            outro: "[*] Uygun olmayanı sil.",
+            outro: "[*] Uygun olmayanı sil",
           },
+          { t: "p", text: "Satıcının adı ve adresi dükkân sayfasında yer alır. Dükkân sayfasında e-posta adresi yoksa bildirimini {{email}} adresine gönder, biz satıcıya iletiriz. Dilersen bir kopyasını {{email}} adresine de gönderebilirsin." },
         ],
       },
     ],

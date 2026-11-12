@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getMyShop, getUser } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
+import Link from "next/link";
 import { fmt, getDict } from "@/lib/i18n";
 import { getSettings } from "@/lib/settings";
 import { applyToSell } from "@/lib/actions/shop";
@@ -35,7 +36,7 @@ export default async function SellPage({ params, searchParams }: PageProps<"/[la
             {(
               [
                 [t.sell.b1Title, t.sell.b1Body],
-                [t.sell.b2Title, t.sell.b2Body],
+                [t.sell.b2Title, fmt(t.sell.b2Body, { days: s.release_days })],
                 [t.sell.b3Title, t.sell.b3Body],
               ] as const
             ).map(([title, body]) => (
@@ -46,7 +47,10 @@ export default async function SellPage({ params, searchParams }: PageProps<"/[la
             ))}
           </ul>
           <p className="notice mt-8">
-            {fmt(t.sell.fees, { card: s.card_bps / 100 })}
+            {fmt(t.sell.fees, { card: s.card_bps / 100 })}{" "}
+            <Link href={`/${lang}/pricing`} className="font-medium underline underline-offset-4 hover:text-cobalt">
+              {t.sell.feesLink}
+            </Link>
           </p>
         </div>
 

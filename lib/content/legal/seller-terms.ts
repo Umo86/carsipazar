@@ -11,7 +11,7 @@ export const sellerTerms: Bi<Doc> = {
         id: "about",
         heading: "About these terms",
         blocks: [
-          { t: "p", text: "{{site}} is run by {{legal_name}} ({{legal_form}}). Our details are on the [company details](/legal/company) page. These terms are between us and you, the shop. They are separate from the [buyer terms](/legal/terms)." },
+          { t: "p", text: "{{site}} is run by {{operator}}. Our details are on the [company details](/legal/company) page. These terms are between us and you, the shop. They are separate from the [buyer terms](/legal/terms)." },
           { t: "p", text: "You agree to these terms when you send your application. The terms are available to you at any time on this page, and you can print them." },
         ],
       },
@@ -22,7 +22,7 @@ export const sellerTerms: Bi<Doc> = {
           { t: "ul", items: [
             "You must be a UK-based business: a company or a sole trader. {{site}} is not for private sellers.",
             "You must give your legal name, business address, phone number, and your company number and VAT number if you have them. We check these before your shop opens.",
-            "Because of the tax reporting rules in “Tax information” below, we will also ask for the details those rules require. If you do not give them, we may hold payouts and close your shop.",
+            "If the tax reporting rules in “Tax information” below apply to us, we will also ask for the details those rules require. If you do not give them, we may hold payouts and close your shop.",
             "Keep your details up to date. Tell us when they change.",
           ] },
         ],
@@ -84,8 +84,8 @@ export const sellerTerms: Bi<Doc> = {
         heading: "Payment hold and payouts",
         blocks: [
           { t: "ul", items: [
-            "We hold the buyer's payment until the order is delivered or collected. We release it to you {{release_days}} days after that.",
-            "You are paid into the bank account you connect to our payment provider.",
+            "We hold the buyer's payment until the order is delivered or collected. We pay you {{release_days}} days after the buyer confirms they have received the item, or after a collection is confirmed with the handover code. If a buyer does not confirm, tell us: we check the delivery and can confirm it ourselves. The payout is processed the next time we run payouts, so it can arrive a little after that date.",
+            "You are paid into the bank account you connect to our payment provider. You need a connected bank account to be paid.",
             "If we refund an order before we have paid you, you receive nothing for it and pay no commission.",
             "If a buyer wins a refund or a chargeback after we have paid you, you must repay it, and we may take it from your future payouts.",
           ] },
@@ -126,7 +126,7 @@ export const sellerTerms: Bi<Doc> = {
         id: "ranking",
         heading: "Ranking and promotion",
         blocks: [
-          { t: "p", text: "How we order items and shops is explained in [How results are ordered](/legal/ranking). Payment affects the order only through the paid Sponsored places. Promotion is optional. A promotion you cancel before it starts is refunded in full. We do not give any shop better terms than others, and we sell no goods ourselves." },
+          { t: "p", text: "How we order items and shops is explained in [How results are ordered](/legal/ranking). Payment affects the order only through the paid Sponsored places. Promotion is optional. A promotion you cancel before it starts is refunded in full. Shops that joined as founding shops pay a lower commission (see [Pricing](/pricing)) and are listed first in the shops directory. Apart from that, we do not give any shop better terms than others. We sell no goods ourselves." },
         ],
       },
       {
@@ -135,7 +135,7 @@ export const sellerTerms: Bi<Doc> = {
         blocks: [
           { t: "p", text: "We may restrict, suspend or close a shop if, for example, it lists prohibited or unsafe items, does not send orders, gives false information, manipulates reviews, treats buyers or staff badly, or does not give the information we must collect." },
           { t: "ul", items: [
-            "We will tell you the reasons when the suspension begins or before.",
+            "If we remove a listing or suspend a shop, you can ask us for the reasons by writing to {{email}}; we reply within 2 working days.",
             "You can answer us by contacting us, and we will review what you say.",
             "If we end the contract we will give at least 30 days' notice, except where there is a serious legal reason or a serious risk to buyers.",
             "You can close your shop at any time. Orders already placed must still be completed.",
@@ -146,8 +146,8 @@ export const sellerTerms: Bi<Doc> = {
         id: "tax",
         heading: "Tax information (HMRC reporting)",
         blocks: [
-          { t: "p", text: "UK law requires online platforms to collect certain information about sellers and to report it to HMRC each year. For this we may need your name, address, date of birth if you are an individual, tax identification number (UTR or National Insurance number), VAT number, company number and bank account details. We also report your sales on the platform. HMRC may share it with tax authorities abroad. We will tell you what we have reported about you." },
-          { t: "p", text: "You are responsible for your own tax, including VAT and income or corporation tax." },
+          { t: "p", text: "Platforms may have to report sellers' income to HMRC under the digital platform reporting rules. If those rules apply to us, we will ask you for the details we need and share them with HMRC. You are responsible for your own tax." },
+          { t: "p", text: "That includes VAT and income or corporation tax, whether or not we report anything about you." },
         ],
       },
       {
@@ -161,7 +161,7 @@ export const sellerTerms: Bi<Doc> = {
         id: "complaints",
         heading: "Complaints by sellers",
         blocks: [
-          { t: "p", text: "If you are unhappy with a decision, such as a suspension or a removed listing, or with how we treat you, write to {{complaints_email}}. We will acknowledge within 2 working days and aim to give a full answer within 15 working days. If we cannot agree, you can ask for mediation with {{adr_provider}}." },
+          { t: "p", text: "If you are unhappy with a decision, such as a suspension or a removed listing, or with how we treat you, write to {{complaints_email}}. We will acknowledge within 2 working days and aim to give a full answer within 15 working days. If we cannot agree, see “If you are still not happy” in [Complaints and reporting](/legal/complaints#adr)." },
         ],
       },
       {
@@ -190,7 +190,7 @@ export const sellerTerms: Bi<Doc> = {
         id: "about",
         heading: "Bu koşullar hakkında",
         blocks: [
-          { t: "p", text: "{{site}}, {{legal_name}} ({{legal_form}}) tarafından işletilir. Bilgilerimiz [şirket bilgileri](/legal/company) sayfasında. Bu koşullar bizimle sen, yani dükkân arasındadır. [Alıcı koşullarından](/legal/terms) ayrıdır." },
+          { t: "p", text: "{{site}}, {{operator}} tarafından işletilir. Bilgilerimiz [şirket bilgileri](/legal/company) sayfasında. Bu koşullar bizimle sen, yani dükkân arasındadır. [Alıcı koşullarından](/legal/terms) ayrıdır." },
           { t: "p", text: "Başvuru gönderdiğinde bu koşulları kabul etmiş olursun. Koşullara her zaman bu sayfadan ulaşabilir ve yazdırabilirsin." },
         ],
       },
@@ -201,7 +201,7 @@ export const sellerTerms: Bi<Doc> = {
           { t: "ul", items: [
             "Birleşik Krallık'ta yerleşik bir işletme olmalısın: şirket ya da şahıs işletmesi. {{site}} bireysel satıcılar için değildir.",
             "Yasal adını, iş adresini, telefon numaranı; varsa şirket numaranı ve KDV numaranı vermelisin. Bunları dükkânın açılmadan önce kontrol ederiz.",
-            "Aşağıdaki “Vergi bilgileri” bölümündeki bildirim kuralları nedeniyle, o kuralların istediği bilgileri de isteyeceğiz. Vermezsen ödemeleri bekletebilir ve dükkânını kapatabiliriz.",
+            "Aşağıdaki “Vergi bilgileri” bölümündeki bildirim kuralları bize uygulanırsa, o kuralların istediği bilgileri de isteyeceğiz. Vermezsen ödemeleri bekletebilir ve dükkânını kapatabiliriz.",
             "Bilgilerini güncel tut. Değişirse bize haber ver.",
           ] },
         ],
@@ -231,19 +231,19 @@ export const sellerTerms: Bi<Doc> = {
             "KDV dahil toplam fiyatı ve teslimat ücretini açıkça göster.",
             "Yalnızca elinde olanı listele ve stoğu güncel tut.",
             "Yasaklı ürün listeleme. [Yasaklı ve kısıtlı ürünler](/legal/prohibited-items) sayfasına bak.",
-            "Aşağıdaki “Ürün hukuku” bölümündeki ürün kurallarına uy.",
+            "Aşağıdaki “Ürün mevzuatı” bölümündeki ürün kurallarına uy.",
           ] },
         ],
       },
       {
         id: "product",
-        heading: "Ürün hukuku",
+        heading: "Ürün mevzuatı",
         blocks: [
           { t: "p", text: "Sattığın ürünle ilgili yasayı bilmek ve uygulamak senin sorumluluğundur. Örneğin:" },
           { t: "ul", items: [
             "**Mobilya.** Döşemeli mobilya, değişikliklerle birlikte Furniture and Furnishings (Fire) (Safety) Regulations 1988'e uymalıdır; geçerli olan yangına dayanıklılık etiketleri dahil. Belgesini sakla.",
             "**Giyim.** Giysilerde Textile Products yönetmeliklerinin istediği elyaf bileşimi etiketi bulunmalı, ilanda da aynı bilgi verilmelidir.",
-            "**Takı.** Ağırlık sınırlarını aşan altın, gümüş, platin ve paladyum ürünler damgalı olmalıdır; kıymetli maden olmayan bir ürünü kıymetli maden olarak tanımlayamazsın. [Damga](/legal/hallmarking) sayfasına bak. Cilde temas eden takılar nikel, kurşun ve kadmiyum sınırlarına uymalıdır.",
+            "**Takı.** Ağırlık sınırlarını aşan altın, gümüş, platin ve paladyum ürünler damgalı olmalıdır; kıymetli metal olmayan bir ürünü kıymetli metal olarak tanımlayamazsın. [Damga](/legal/hallmarking) sayfasına bak. Cilde temas eden takılar nikel, kurşun ve kadmiyum sınırlarına uymalıdır.",
             "**Ürün güvenliği.** Sattığın her şey güvenli olmalı, geri çağırmalara uymalısın.",
             "**Sahte ürünler.** Marka taklidi ya da sahte ürün asla listeleme.",
           ] },
@@ -263,8 +263,8 @@ export const sellerTerms: Bi<Doc> = {
         heading: "Ödemenin bekletilmesi ve ödemeler",
         blocks: [
           { t: "ul", items: [
-            "Alıcının ödemesini sipariş teslim edilene ya da teslim alınana kadar tutarız. Sonrasında {{release_days}} gün içinde sana aktarırız.",
-            "Ödeme, ödeme sağlayıcımıza bağladığın banka hesabına yapılır.",
+            "Alıcının ödemesini sipariş teslim edilene ya da teslim alınana kadar tutarız. Alıcı ürünü aldığını onayladıktan, ya da dükkândan teslim, teslim koduyla onaylandıktan {{release_days}} gün sonra ödemeni yaparız. Alıcı onaylamazsa bize haber ver: teslimatı kontrol eder, gerekirse biz onaylarız. Ödeme, bir sonraki ödeme işlemi çalıştırıldığında yapılır; bu yüzden o tarihten biraz sonra hesabına geçebilir.",
+            "Ödeme, ödeme sağlayıcımıza bağladığın banka hesabına yapılır. Ödeme alabilmen için bağlı bir banka hesabın olmalıdır.",
             "Sana ödeme yapmadan önce bir siparişi iade edersek o sipariş için bir şey almazsın ve komisyon ödemezsin.",
             "Sana ödeme yaptıktan sonra bir alıcı iade ya da ödeme itirazı (chargeback) kazanırsa tutarı geri ödemelisin; bunu sonraki ödemelerinden kesebiliriz.",
           ] },
@@ -298,14 +298,14 @@ export const sellerTerms: Bi<Doc> = {
         id: "reviews",
         heading: "Yorumlar",
         blocks: [
-          { t: "p", text: "Alıcılar teslimattan sonra seni değerlendirir. Yorum satın alamaz, yazamaz, hediye ya da indirimle takas edemez, gizleyemez ya da yalnızca memnun alıcılardan yorum isteyemezsin. Her yoruma bir kez cevap verebilirsin. [Yorumlar nasıl çalışır](/legal/reviews) sayfasına bak. Sahte yorumları gizleyebilir ve yorumları manipüle etmeye çalışan dükkâna işlem uygulayabiliriz." },
+          { t: "p", text: "Alıcılar teslimattan sonra seni değerlendirir. Yorum satın alamazsın, kendin yazamazsın, hediye ya da indirimle takas edemezsin, gizleyemezsin ve yalnızca memnun alıcılardan yorum isteyemezsin. Her yoruma bir kez cevap verebilirsin. [Yorumlar nasıl çalışır](/legal/reviews) sayfasına bak. Sahte yorumları gizleyebilir ve yorumları manipüle etmeye çalışan dükkâna yaptırım uygulayabiliriz." },
         ],
       },
       {
         id: "ranking",
         heading: "Sıralama ve tanıtım",
         blocks: [
-          { t: "p", text: "Ürünleri ve dükkânları nasıl sıraladığımız [Sonuçlar nasıl sıralanır](/legal/ranking) sayfasında. Ödeme, sıralamayı yalnızca ücretli Sponsorlu yerler aracılığıyla etkiler. Tanıtım isteğe bağlıdır. Başlamadan önce iptal ettiğin tanıtımın ücreti tamamen iade edilir. Hiçbir dükkâna diğerlerinden daha iyi koşul sunmayız ve kendimiz mal satmayız." },
+          { t: "p", text: "Ürünleri ve dükkânları nasıl sıraladığımız [Sonuçlar nasıl sıralanır](/legal/ranking) sayfasında. Ödeme, sıralamayı yalnızca ücretli Sponsorlu yerler aracılığıyla etkiler. Tanıtım isteğe bağlıdır. Başlamadan önce iptal ettiğin tanıtımın ücreti tamamen iade edilir. Kurucu dükkânlar daha düşük komisyon öder ([Ücretler](/pricing) sayfasına bak) ve dükkânlar listesinde en üstte yer alır. Bunun dışında hiçbir dükkâna diğerlerinden daha iyi koşullar tanımayız. Kendimiz ürün satmayız." },
         ],
       },
       {
@@ -314,7 +314,7 @@ export const sellerTerms: Bi<Doc> = {
         blocks: [
           { t: "p", text: "Bir dükkânı; örneğin yasaklı ya da güvensiz ürün listelerse, siparişleri göndermezse, yanlış bilgi verirse, yorumları manipüle ederse, alıcılara ya da çalışanlara kötü davranırsa veya toplamamız gereken bilgileri vermezse kısıtlayabilir, askıya alabilir ya da kapatabiliriz." },
           { t: "ul", items: [
-            "Askıya alma başladığında ya da öncesinde nedenlerini sana söyleriz.",
+            "Bir ilanı kaldırırsak ya da bir dükkânı askıya alırsak gerekçeyi {{email}} adresine yazarak isteyebilirsin; 2 iş günü içinde yanıt veririz.",
             "Bize ulaşarak cevap verebilirsin; söylediklerini inceleriz.",
             "Sözleşmeyi sonlandırırsak en az 30 gün önceden haber veririz; ciddi bir hukuki neden ya da alıcılar için ciddi bir risk varsa bunun dışında.",
             "Dükkânını istediğin zaman kapatabilirsin. Verilmiş siparişlerin yine de tamamlanması gerekir.",
@@ -325,8 +325,8 @@ export const sellerTerms: Bi<Doc> = {
         id: "tax",
         heading: "Vergi bilgileri (HMRC bildirimi)",
         blocks: [
-          { t: "p", text: "Birleşik Krallık yasaları online platformların satıcılar hakkında belirli bilgileri toplamasını ve her yıl HMRC'ye bildirmesini ister. Bunun için adını, adresini, bireysel satıcıysan doğum tarihini, vergi kimlik numaranı (UTR ya da National Insurance numarası), KDV numaranı, şirket numaranı ve banka hesap bilgilerini isteyebiliriz. Platformdaki satışlarını da bildiririz. HMRC bunu yabancı vergi idareleriyle paylaşabilir. Hakkında neyi bildirdiğimizi sana söyleriz." },
-          { t: "p", text: "KDV, gelir ya da kurumlar vergisi dahil kendi vergilerinden sen sorumlusun." },
+          { t: "p", text: "Platformlar, dijital platform raporlama kurallarına göre satıcı gelirlerini HMRC'ye bildirmek zorunda olabilir. Bu kurallar bize uygulanırsa gereken bilgileri senden ister ve HMRC ile paylaşırız. Kendi vergin senin sorumluluğundadır." },
+          { t: "p", text: "Bu sorumluluk KDV, gelir vergisi ve kurumlar vergisini de kapsar; biz HMRC'ye bir şey bildirsek de bildirmesek de geçerlidir." },
         ],
       },
       {
@@ -340,7 +340,7 @@ export const sellerTerms: Bi<Doc> = {
         id: "complaints",
         heading: "Satıcı şikâyetleri",
         blocks: [
-          { t: "p", text: "Askıya alma ya da kaldırılan ilan gibi bir karardan veya sana davranış biçimimizden memnun değilsen {{complaints_email}} adresine yaz. 2 iş günü içinde aldığımızı bildiririz ve 15 iş günü içinde tam bir cevap vermeyi hedefleriz. Anlaşamazsak {{adr_provider}} ile arabuluculuk isteyebilirsin." },
+          { t: "p", text: "Askıya alma ya da kaldırılan ilan gibi bir karardan veya sana davranış biçimimizden memnun değilsen {{complaints_email}} adresine yaz. 2 iş günü içinde aldığımızı bildiririz ve 15 iş günü içinde tam bir cevap vermeyi hedefleriz. Anlaşamazsak [Şikâyetler ve bildirimler](/legal/complaints#adr) sayfasındaki “Hâlâ memnun değilsen” bölümüne bak." },
         ],
       },
       {

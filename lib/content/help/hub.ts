@@ -13,7 +13,7 @@ export const hub: Bi<Doc> = {
           {
             t: "qa",
             items: [
-              { q: "How do I buy something?", a: "Open an item, press Buy now, choose delivery or collection where the seller offers it, and pay by card. You need an account." },
+              { q: "How do I buy something?", a: "Open an item, press Buy now, choose delivery or collection where the seller offers it, then press Pay and pay by one of the payment methods shown at checkout. You need an account." },
               { q: "Is there a fee for buyers?", a: "No. The price you see plus delivery is what you pay. We add no service fee." },
               { q: "Who am I buying from?", a: "From the shop that lists the item. Each shop page shows the seller's company details, delivery information and returns policy. Our own details are on the [company details](/legal/company) page." },
             ],
@@ -97,7 +97,7 @@ export const hub: Bi<Doc> = {
           {
             t: "qa",
             items: [
-              { q: "I forgot my password.", a: "[Contact us](/contact) from the email address on your account. We will send you a reset link." },
+              { q: "I forgot my password.", a: "Write to {{email}}. We check it is you and give you a reset link that works for 24 hours." },
               { q: "I entered the wrong password too often.", a: "Log-in is paused for 15 minutes. Then you can try again." },
               { q: "How do I see or delete my data?", a: "See our [privacy notice](/legal/privacy) for your rights and how to use them, or [contact us](/contact)." },
             ],
@@ -118,7 +118,7 @@ export const hub: Bi<Doc> = {
           {
             t: "qa",
             items: [
-              { q: "Nasıl alışveriş yaparım?", a: "Bir ürünü aç, Satın al düğmesine bas, satıcı sunuyorsa teslimat ya da dükkândan teslim seç ve kartla öde. Bir hesabın olması gerekir." },
+              { q: "Nasıl alışveriş yaparım?", a: "Bir ürünü aç, Satın al düğmesine bas, satıcı sunuyorsa teslimat ya da dükkândan teslim seç, sonra Öde düğmesine basıp ödeme sayfasında gösterilen yöntemlerle öde. Bir hesabın olması gerekir." },
               { q: "Alıcılardan ücret alınıyor mu?", a: "Hayır. Gördüğün fiyat artı teslimat, ödeyeceğin tutardır. Hizmet bedeli eklemeyiz." },
               { q: "Kimden alışveriş yapıyorum?", a: "Ürünü listeleyen dükkândan. Her dükkân sayfasında satıcının şirket bilgileri, teslimat bilgisi ve iade koşulları yer alır. Bizim kendi bilgilerimiz [şirket bilgileri](/legal/company) sayfasında." },
             ],
@@ -202,7 +202,7 @@ export const hub: Bi<Doc> = {
           {
             t: "qa",
             items: [
-              { q: "Şifremi unuttum.", a: "Hesabındaki e-posta adresinden [bize yaz](/contact). Sana bir sıfırlama bağlantısı göndeririz." },
+              { q: "Şifremi unuttum.", a: "{{email}} adresine yaz. Senin olduğunu doğrular, 24 saat geçerli bir sıfırlama bağlantısı veririz." },
               { q: "Şifreyi çok fazla yanlış girdim.", a: "Giriş 15 dakika durdurulur. Sonra yeniden deneyebilirsin." },
               { q: "Verilerimi nasıl görür ya da sildirebilirim?", a: "Haklarını ve nasıl kullanacağını [gizlilik bildiriminde](/legal/privacy) bulursun ya da [bize ulaş](/contact)." },
             ],
