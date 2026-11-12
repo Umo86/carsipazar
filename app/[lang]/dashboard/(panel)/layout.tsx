@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireShop } from "@/lib/auth";
 import { isLocale } from "@/lib/config";
 import { getDict } from "@/lib/i18n";
-import PanelNav from "@/components/PanelNav";
+import PanelShell from "@/components/PanelShell";
 
 export const metadata = { robots: { index: false } };
 
@@ -14,23 +14,31 @@ export default async function DashboardLayout({ children, params }: LayoutProps<
   const base = `/${lang}/dashboard`;
 
   return (
-    <div className="wrap pt-10">
-      <p className="text-sm text-soft">{t.dash.title}</p>
-      <h1 className="mt-1 text-5xl">{shop.name}</h1>
-      {shop.status === "pending" && <p className="notice mt-5">{t.dash.pending}</p>}
-      {shop.status === "suspended" && <p className="notice notice-error mt-5">{t.dash.suspended}</p>}
-      <PanelNav
-        items={[
-          { href: base, label: t.dash.overview },
-          { href: `${base}/listings`, label: t.dash.listings },
-          { href: `${base}/orders`, label: t.dash.orders },
-          { href: `${base}/reviews`, label: t.dash.reviews },
-          { href: `${base}/promote`, label: t.promo.tab },
-          { href: `${base}/social`, label: t.social.tab },
-          { href: `${base}/shop`, label: t.dash.shop },
-        ]}
-      />
-      <div className="pt-8">{children}</div>
-    </div>
+    <PanelShell
+      title={shop.name}
+      subtitle={t.dash.title}
+      notice={
+        shop.status === "pending" ? (
+          <p className="notice mb-6">{t.dash.pending}</p>
+        ) : shop.status === "suspended" ? (
+          <p className="notice notice-error mb-6">{t.dash.suspended}</p>
+        ) : null
+      }
+      groups={[
+        {
+          items: [
+            { href: base, label: t.dash.overview, icon: "home" },
+            { href: `${base}/listings`, label: t.dash.listings, icon: "box" },
+            { href: `${base}/orders`, label: t.dash.orders, icon: "receipt" },
+            { href: `${base}/reviews`, label: t.dash.reviews, icon: "star" },
+            { href: `${base}/promote`, label: t.promo.tab, icon: "tag" },
+            { href: `${base}/social`, label: t.social.tab, icon: "share" },
+            { href: `${base}/shop`, label: t.dash.shop, icon: "shop" },
+          ],
+        },
+      ]}
+    >
+      {children}
+    </PanelShell>
   );
 }

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createSession, getUser, hashPassword, hashToken, newToken, verifyPassword } from "../auth";
 import { one, q, tx } from "../db";
+import { isUuidStrict, logAdmin } from "../admin-queries";
 import { isUuid } from "../queries";
 import { langOf, str } from "./util";
 
@@ -76,7 +77,7 @@ export async function createResetLink(fd: FormData) {
   const admin = await getUser();
   if (!admin || admin.role !== "admin") redirect(`/${lang}`);
   const userId = str(fd, "user");
-  if (!isUuid(userId) || !(await one("select 1 from users where id = $1 and role <> 'admin'", [userId]))) {
+  if (!isUuidStrict(userId) || !(await one("select 1 from users where id = $1 and role <> 'admin'", [userId]))) {
     redirect(`/${lang}/admin/customers`);
   }
   const token = newToken();
@@ -85,7 +86,13 @@ export async function createResetLink(fd: FormData) {
     "insert into password_resets (token_hash, user_id, expires_at) values ($1, $2, now() + interval '24 hours')",
     [hashToken(token), userId],
   );
-  redirect(`/${lang}/admin/customers?for=${userId}&link=${token}`);
+  await logAdmin(admin.id, "user.reset_link", "user", userId);
+  // From the user's own page the link comes back to that page; from the list, to the list.
+  redirect(
+    str(fd, "back") === "detail"
+      ? `/${lang}/admin/customers/${userId}?link=${token}`
+      : `/${lang}/admin/customers?for=${userId}&link=${token}`,
+  );
 }
 
 export async function resetPassword(fd: FormData) {

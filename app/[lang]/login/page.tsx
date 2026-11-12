@@ -20,7 +20,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<"/[l
       {sp.reset && <p className="notice mt-6" role="status">{t.account.resetDone}</p>}
       {sp.error && (
         <p className="notice notice-error mt-6" role="alert">
-          {sp.error === "locked" ? t.auth.errLocked : t.auth.errInvalid}
+          {sp.error === "locked" ? t.auth.errLocked : sp.error === "blocked" ? t.auth.errBlocked : t.auth.errInvalid}
         </p>
       )}
       <form action={login} className="mt-8 grid gap-5">

@@ -86,7 +86,7 @@ export const getUser = cache(async (): Promise<User | null> => {
   return one<User>(
     `select u.id, u.email, u.name, u.role
        from sessions s join users u on u.id = s.user_id
-      where s.token_hash = $1 and s.expires_at > now()`,
+      where s.token_hash = $1 and s.expires_at > now() and u.blocked_at is null`,
     [sha(token)],
   );
 });

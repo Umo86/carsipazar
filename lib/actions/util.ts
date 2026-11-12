@@ -1,5 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { getUser } from "../auth";
 import { DEFAULT_LOCALE, isLocale, type Locale } from "../config";
 
 export const str = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
@@ -29,4 +31,18 @@ export function slugify(name: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
+}
+
+// Every admin server action starts here: the signed-in, unblocked admin, or a redirect home.
+export async function adminOnly(lang: Locale) {
+  const user = await getUser();
+  if (!user || user.role !== "admin") redirect(`/${lang}`);
+  return user;
+}
+
+// Where a form sends the admin afterwards: its own "back" field when that is inside the
+// admin area, otherwise the fallback.
+export function backTo(fd: FormData, lang: Locale, fallback: string) {
+  const n = safeNext(str(fd, "back"), fallback);
+  return n === `/${lang}/admin` || n.startsWith(`/${lang}/admin/`) || n.startsWith(`/${lang}/admin?`) ? n : fallback;
 }

@@ -20,18 +20,34 @@ export default async function AdminSettings({ params, searchParams }: PageProps<
     return s[key];
   };
 
+  // The same fields as ever, in the same form; only the headings are new.
+  const keys = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
+  const g = t.adminx.st;
+  const groups: { id: string; title: string; keys: (keyof Settings)[] }[] = [
+    { id: "commission", title: g.commission, keys: keys.filter((k) => k.endsWith("_bps") || k.endsWith("_fixed")) },
+    { id: "limits", title: g.limits, keys: keys.filter((k) => k.startsWith("instalments_")) },
+    { id: "promotions", title: g.promotions, keys: keys.filter((k) => k.startsWith("promo_")) },
+    { id: "delivery", title: g.delivery, keys: keys.filter((k) => k.startsWith("delivery_")) },
+    { id: "payouts", title: g.payouts, keys: keys.filter((k) => k === "release_days") },
+  ];
+
   return (
-    <form action={saveSettings} className="grid max-w-xl gap-5">
+    <form action={saveSettings} className="grid max-w-xl gap-10">
       <input type="hidden" name="lang" value={lang} />
       {sp.saved && <p className="notice" role="status">{t.admin.saved}</p>}
-      {(Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[]).map((key) => (
-        <div key={key} className="grid gap-5">
-          {key === "delivery_small_price" && <p className="hint">{t.admin.deliveryNote}</p>}
-          <label className="field">
-            <span>{t.admin.set[key]}</span>
-            <input className="input max-w-40" name={key} inputMode="decimal" defaultValue={shown(key)} required />
-          </label>
-        </div>
+      {groups.map((grp) => (
+        <section key={grp.id} aria-labelledby={`set-${grp.id}`} className="grid gap-5">
+          <h2 id={`set-${grp.id}`} className="border-b border-line pb-2 text-3xl">{grp.title}</h2>
+          {grp.keys.map((key) => (
+            <div key={key} className="grid gap-5">
+              {key === "delivery_small_price" && <p className="hint">{t.admin.deliveryNote}</p>}
+              <label className="field">
+                <span>{t.admin.set[key]}</span>
+                <input className="input max-w-40" name={key} inputMode="decimal" defaultValue={shown(key)} required />
+              </label>
+            </div>
+          ))}
+        </section>
       ))}
       <div><SubmitButton>{t.admin.save}</SubmitButton></div>
     </form>

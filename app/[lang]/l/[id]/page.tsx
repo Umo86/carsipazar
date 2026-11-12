@@ -117,6 +117,17 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
             </form>
           )}
 
+          {isPublic && (
+            <p className="mt-3">
+              <Link
+                href={`/${lang}/report?kind=listing&id=${l.id}`}
+                className="text-sm text-soft underline underline-offset-4 hover:text-cobalt"
+              >
+                {t.report.linkItem}
+              </Link>
+            </p>
+          )}
+
           <div className="mt-8 flex gap-4 rounded-2xl bg-sky p-5">
             <Icon name="shield" size={24} className="mt-0.5 shrink-0 text-cobalt" />
             <div>

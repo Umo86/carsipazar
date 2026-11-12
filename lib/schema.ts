@@ -261,4 +261,39 @@ create table if not exists site_details (
   key text primary key,
   value text not null
 );
+-- Blocked accounts: no login, sessions removed. Set and cleared from the admin Users page.
+alter table users add column if not exists blocked_at timestamptz;
+alter table users add column if not exists blocked_reason text;
+
+-- Reports from the public (no account needed) about an item, a review or a shop.
+create table if not exists reports (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null check (kind in ('listing', 'review', 'shop')),
+  target_id uuid not null,
+  reporter_user_id uuid references users(id) on delete set null,
+  reporter_email text,
+  reason text not null check (reason in ('illegal', 'counterfeit', 'unsafe', 'misleading', 'offensive', 'fake_review', 'other')),
+  details text not null default '',
+  status text not null default 'open' check (status in ('open', 'actioned', 'dismissed')),
+  resolution_note text,
+  resolved_by uuid,
+  ip_hash text,
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz
+);
+create index if not exists reports_status_idx on reports(status, created_at);
+create index if not exists reports_target_idx on reports(kind, target_id);
+create index if not exists reports_ip_idx on reports(ip_hash, created_at);
+
+-- Everything an admin changes, newest first on the Activity page.
+create table if not exists admin_log (
+  id uuid primary key default gen_random_uuid(),
+  admin_user_id uuid references users(id) on delete set null,
+  action text not null,
+  target_kind text not null default '',
+  target_id text not null default '',
+  detail text not null default '',
+  created_at timestamptz not null default now()
+);
+create index if not exists admin_log_created_idx on admin_log(created_at desc);
 `;

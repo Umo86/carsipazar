@@ -23,8 +23,8 @@ export async function login(fd: FormData) {
     redirect(`/${lang}/login?error=locked&next=${encodeURIComponent(next)}`);
   }
 
-  const user = await one<{ id: string; password_hash: string }>(
-    "select id, password_hash from users where email = $1",
+  const user = await one<{ id: string; password_hash: string; blocked_at: Date | null }>(
+    "select id, password_hash, blocked_at from users where email = $1",
     [email],
   );
   if (!user || !(await verifyPassword(password, user.password_hash))) {
@@ -32,6 +32,8 @@ export async function login(fd: FormData) {
     redirect(`/${lang}/login?error=invalid&next=${encodeURIComponent(next)}`);
   }
   await q("delete from login_attempts where email = $1 or created_at < now() - interval '1 day'", [email]);
+  // Only someone who knows the password is told the account is blocked.
+  if (user.blocked_at) redirect(`/${lang}/login?error=blocked&next=${encodeURIComponent(next)}`);
   await createSession(user.id);
   redirect(next);
 }

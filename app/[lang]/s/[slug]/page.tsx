@@ -233,6 +233,17 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
                   </div>
                   <p className="mt-1 text-sm text-soft">{r.title}</p>
                   {r.comment && <p className="mt-3">{r.comment}</p>}
+                  {shop.status === "approved" && (
+                    <p className="mt-3">
+                      <Link
+                        href={`/${lang}/report?kind=review&id=${r.id}`}
+                        aria-label={t.report.linkReviewLabel}
+                        className="text-sm text-soft underline underline-offset-4 hover:text-cobalt"
+                      >
+                        {t.report.linkReview}
+                      </Link>
+                    </p>
+                  )}
                   {r.reply && (
                     <div className="mt-4 rounded-xl bg-sand px-4 py-3">
                       <p className="text-sm font-medium">{t.shop.reply}</p>
@@ -244,6 +255,18 @@ export default async function ShopPage({ params, searchParams }: PageProps<"/[la
             </ul>
           )}
         </section>
+
+        {shop.status === "approved" && (
+          <p className="mt-14">
+            <Link
+              href={`/${lang}/report?kind=shop&id=${shop.id}`}
+              className="text-sm text-soft underline underline-offset-4 hover:text-cobalt"
+            >
+              {t.report.linkShop}
+            </Link>
+          </p>
+        )}
+
       </div>
     </>
   );
