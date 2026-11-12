@@ -31,6 +31,7 @@ const en: Dict = {
     openShop: "Open a shop",
     allShops: "All shops",
     demo: "This is a test site. Payments are not real.",
+    credit: "Sample photos and video: Pixabay",
   },
   home: {
     coverLine: "The best of the bazaar, now in instalments.",
@@ -58,6 +59,8 @@ const en: Dict = {
     pickTitle: "Piece of the week",
     featured: "Featured",
     prev: "Previous items",
+    pauseVideo: "Pause video",
+    playVideo: "Play video",
     next: "Next items",
     shopsTitle: "The shops",
     shopsSub: "Every shop has its own page and its own story.",

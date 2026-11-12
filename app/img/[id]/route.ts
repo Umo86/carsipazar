@@ -3,8 +3,9 @@ import { isUuid } from "@/lib/queries";
 
 // Item photos, shop logos and shop covers are stored in the database for this
 // first version and served from here. An image never changes once saved, so
-// it caches forever. Sample photos are the exception: they live on Unsplash
-// and this route forwards the browser to them.
+// it caches forever. Rows from before sample photos were downloaded still
+// hold a remote address; this route forwards the browser to it until
+// /api/setup has replaced them.
 export async function GET(request: Request, ctx: RouteContext<"/img/[id]">) {
   const { id } = await ctx.params;
   if (!isUuid(id)) return new Response("Not found", { status: 404 });

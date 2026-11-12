@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CATEGORIES, isLocale } from "@/lib/config";
+import { q } from "@/lib/db";
 import { getDict, itemCount, pick, reviewCount } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import { approvedShops, categoryCovers, featuredListings, newestListings, spotlightListing } from "@/lib/queries";
@@ -9,18 +10,25 @@ import Carousel from "@/components/Carousel";
 import ShopMark from "@/components/ShopMark";
 import Rating from "@/components/Rating";
 import Icon from "@/components/Icon";
+import HeroVideo from "@/components/HeroVideo";
 
 export default async function Home({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = getDict(lang);
-  const [featured, newest, covers, shops, booked] = await Promise.all([
+  const [featured, newest, covers, shops, booked, media] = await Promise.all([
     featuredListings(10),
     newestListings(8),
     categoryCovers(),
     approvedShops(),
     spotlightListing(),
+    // Key and time only: the bytes are served by /media/[key].
+    q<{ key: string; v: string }>(
+      "select key, (extract(epoch from updated_at) * 1000)::bigint::text as v from site_media where key in ('hero-video', 'hero-poster')",
+    ),
   ]);
+  const video = media.find((m) => m.key === "hero-video");
+  const poster = media.find((m) => m.key === "hero-poster");
   // The banner shows a piece of furniture; the arch beside it shows something else.
   const hero = featured.find((i) => i.category === "furniture" && i.image_id) ?? featured[0];
   // A seller's booked "piece of the week" takes the arch; otherwise we pick one.
@@ -52,19 +60,30 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
               <Link href={`/${lang}/shops`} className="btn btn-ghost">{t.nav.shops}</Link>
             </div>
           </div>
-          {hero?.image_id && (
-            <Link href={`/${lang}/l/${hero.id}`} className="group relative block min-h-72 md:min-h-[27rem]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`/img/${hero.image_id}`}
-                alt={name(hero)}
-                className="absolute inset-0 h-full w-full object-cover"
+          {video ? (
+            <div className="relative min-h-72 md:min-h-[27rem]">
+              <HeroVideo
+                src={`/media/hero-video?v=${video.v}`}
+                poster={poster ? `/media/hero-poster?v=${poster.v}` : undefined}
+                pauseLabel={t.home.pauseVideo}
+                playLabel={t.home.playVideo}
               />
-              <span className="absolute right-4 bottom-4 left-4 flex items-baseline justify-between gap-4 rounded-2xl bg-paper/95 px-4 py-3 text-sm shadow-lift transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none">
-                <span>{name(hero)}</span>
-                <span className="font-medium whitespace-nowrap">{formatGBP(hero.price_pence)}</span>
-              </span>
-            </Link>
+            </div>
+          ) : (
+            hero?.image_id && (
+              <Link href={`/${lang}/l/${hero.id}`} className="group relative block min-h-72 md:min-h-[27rem]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/img/${hero.image_id}`}
+                  alt={name(hero)}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <span className="absolute right-4 bottom-4 left-4 flex items-baseline justify-between gap-4 rounded-2xl bg-paper/95 px-4 py-3 text-sm shadow-lift transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none">
+                  <span>{name(hero)}</span>
+                  <span className="font-medium whitespace-nowrap">{formatGBP(hero.price_pence)}</span>
+                </span>
+              </Link>
+            )
           )}
         </div>
 

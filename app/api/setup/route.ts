@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { runSetup } from "@/lib/seed";
 
+// Setup downloads the sample photos and video, which can take a while.
+export const maxDuration = 60;
+
 // One-off setup: creates tables, the admin login and the demo shops.
 // Guarded by SETUP_TOKEN; remove that variable once the site is set up.
 export async function GET(request: Request) {

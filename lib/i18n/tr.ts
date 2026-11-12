@@ -30,6 +30,7 @@ const tr = {
     openShop: "Dükkân aç",
     allShops: "Tüm dükkânlar",
     demo: "Bu bir test sitesidir. Ödemeler gerçek değildir.",
+    credit: "Örnek fotoğraflar ve video: Pixabay",
   },
   home: {
     coverLine: "Çarşının en güzeli, şimdi taksitle.",
@@ -57,6 +58,8 @@ const tr = {
     pickTitle: "Haftanın parçası",
     featured: "Öne çıkanlar",
     prev: "Önceki ürünler",
+    pauseVideo: "Videoyu durdur",
+    playVideo: "Videoyu oynat",
     next: "Sonraki ürünler",
     shopsTitle: "Dükkânlar",
     shopsSub: "Her dükkânın kendi sayfası ve kendi hikâyesi var.",

@@ -61,6 +61,8 @@ create table if not exists shop_images (
 
 -- A sample image may live on another server; real uploads are stored here.
 alter table shop_images add column if not exists url text;
+-- The Pixabay page a sample file came from, kept as the credit.
+alter table shop_images add column if not exists source text;
 
 create table if not exists listings (
   id uuid primary key default gen_random_uuid(),
@@ -91,6 +93,16 @@ create table if not exists listing_images (
 );
 create index if not exists listing_images_listing_idx on listing_images(listing_id, position);
 alter table listing_images add column if not exists url text;
+alter table listing_images add column if not exists source text;
+
+-- Site-wide media (the home page video and its poster), served by /media/[key].
+create table if not exists site_media (
+  key text primary key,
+  content_type text not null,
+  data bytea not null,
+  source text,
+  updated_at timestamptz not null default now()
+);
 
 create sequence if not exists order_number_seq start 1001;
 

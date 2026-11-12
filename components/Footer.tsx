@@ -39,7 +39,17 @@ export default function Footer({ lang, t }: { lang: Locale; t: Dict }) {
         </div>
       </div>
       {paymentsMode() === "demo" && (
-        <p className="border-t border-line py-4 text-center text-sm text-soft">{t.footer.demo}</p>
+        <p className="border-t border-line py-4 text-center text-sm text-soft">
+          {t.footer.demo}{" "}
+          <a
+            href="https://pixabay.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4 hover:text-ink"
+          >
+            {t.footer.credit}
+          </a>
+        </p>
       )}
     </footer>
   );

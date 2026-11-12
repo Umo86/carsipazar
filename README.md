@@ -43,12 +43,32 @@ Copy `.env.example` to `.env.local` first. Then open
 `http://localhost:3000/api/setup?token=<SETUP_TOKEN>` once to create the tables,
 the admin login and four sample shops.
 
-## Sample photos
+## Sample photos and video
 
-The sample items and shop covers use photos from Unsplash (free licence). The
-database stores only each photo's address and the browser loads it from
-Unsplash. They are stand-ins: real sellers upload their own photos, which are
-stored in the database. Delete the sample shops in Admin before launch.
+The sample items, the shop covers and the home page video come from Pixabay.
+Pixabay does not allow its files to be hot-linked, so the site downloads each
+one once and stores the bytes in its own database. Visitors never load
+anything from Pixabay.
+
+- `lib/sample-media-data.ts` lists which Pixabay file each item uses (the file
+  on `cdn.pixabay.com` and its page on `pixabay.com`, kept as the credit).
+  An empty address means "no photo chosen" and the drawn pattern stays.
+- A new database is seeded with drawn patterns. Then `/api/setup` downloads
+  the photos and swaps them in. The video and its poster go in the
+  `site_media` table and are served from `/media/hero-video` and
+  `/media/hero-poster` (with byte ranges, which Safari needs for video).
+- Running `/api/setup` again on an existing site is safe. It downloads only
+  what is new or changed in the data file, so changing an address and running
+  setup upgrades the site. A photo uploaded by a seller is never replaced.
+- Setup downloads four files at a time. If the first three fail it stops and
+  says so in the log, because the network is probably unreachable. Fix that
+  and run setup again. A failed download leaves the old picture in place.
+- Only `https://cdn.pixabay.com/...` addresses are fetched, and only files
+  that really are JPEG, PNG, WebP or MP4 (photos up to 4 MB, video up to 14 MB).
+- The footer credits Pixabay while payments are in demo mode. Add a proper
+  credit page before launching with real sellers.
+- Real sellers upload their own photos, which are stored in the database.
+  Delete the sample shops in Admin before launch.
 
 ## Environment variables
 
@@ -58,7 +78,8 @@ stored in the database. Delete the sample shops in Admin before launch.
 | `SETUP_TOKEN` | Guards `/api/setup`. Remove it once the site is set up |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | The admin login created by setup |
 | `DEMO_PASSWORD` | Password for the sample buyer and seller logins |
-| `DEMO_IMAGES` | Set to `art` to give the sample items drawn patterns instead of photos (for working offline) |
+| `DEMO_IMAGES` | Set to `art` to keep the drawn patterns and skip the Pixabay downloads (for working offline) |
+| `MEDIA_TEST_ORIGIN` | Testing only, for example `http://127.0.0.1:4010`. Sends the Pixabay downloads to that server instead (same path), so tests run without internet. Leave empty in production |
 | `STRIPE_SECRET_KEY` | Switches payments from demo to Stripe |
 | `STRIPE_WEBHOOK_SECRET` | Verifies Stripe's calls to `/api/stripe/webhook` |
 
