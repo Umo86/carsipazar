@@ -6,7 +6,7 @@ import { one } from "@/lib/db";
 import { fmt, formatDate, getDict, orderExplain, orderStatus, pick } from "@/lib/i18n";
 import { formatGBP } from "@/lib/money";
 import type { Order } from "@/lib/orders";
-import { isUuid } from "@/lib/queries";
+import { isUuidStrict as isUuid } from "@/lib/admin-queries";
 import { confirmReceived, leaveReview } from "@/lib/actions/buy";
 import Rating from "@/components/Rating";
 import SubmitButton from "@/components/SubmitButton";
@@ -50,11 +50,8 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
   const canReview = (o.status === "delivered" || o.status === "released") && !review && o.buyer_id === user.id;
 
   return (
-    <div className="wrap max-w-3xl pt-12">
-      <p className="text-sm text-soft">
-        <Link href={`/${lang}/orders`} className="underline underline-offset-4">{t.orders.title}</Link>
-      </p>
-      <h1 className="mt-2 text-5xl">{fmt(t.orders.order, { n: o.number })}</h1>
+    <div className="max-w-3xl">
+      <h2 className="font-display text-4xl md:text-5xl">{fmt(t.orders.order, { n: o.number })}</h2>
       <p className="mt-2 text-soft">{fmt(t.orders.placed, { date: formatDate(new Date(o.created_at), lang) })}</p>
 
       {/* The order really is a sequence, so it is shown as one. */}
@@ -163,7 +160,7 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
       )}
 
       {canReview && (
-        <section className="mt-10 border-t border-line pt-8">
+        <section id="review" className="mt-10 scroll-mt-28 border-t border-line pt-8">
           <h2 className="text-3xl">{t.orders.reviewTitle}</h2>
           <form action={leaveReview} className="mt-5 grid gap-5">
             <input type="hidden" name="lang" value={lang} />
@@ -187,6 +184,38 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
           </form>
         </section>
       )}
+
+      {o.buyer_id === user.id && ["paid", "dispatched", "delivered", "released", "refunded"].includes(o.status) && (
+        <section className="mt-10 border-t border-line pt-8" data-order-documents>
+          <h2 className="text-3xl">{t.my.ord.documents}</h2>
+          <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+            <li>
+              <Link href={`/${lang}/orders/${o.id}/confirmation`} className="font-medium underline underline-offset-4 hover:text-cobalt">
+                {t.my.ord.confirmation}
+              </Link>
+              <p className="hint mt-1">{t.my.ord.confirmationHint}</p>
+            </li>
+            {o.status !== "refunded" && (
+              <li>
+                <Link href={`/${lang}/orders/${o.id}/cancellation`} className="font-medium underline underline-offset-4 hover:text-cobalt">
+                  {t.my.ord.cancelForm}
+                </Link>
+                <p className="hint mt-1">{t.my.ord.cancelFormHint}</p>
+              </li>
+            )}
+          </ul>
+        </section>
+      )}
+
+      <section className="mt-10 rounded-2xl bg-mist p-6" data-order-problem>
+        <h2 className="text-2xl">{t.my.ord.problemTitle}</h2>
+        <p className="mt-2 text-soft">{t.my.ord.problemBody}</p>
+        <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+          <Link href={`/${lang}/help/returns`} className="underline underline-offset-4 hover:text-cobalt">{t.my.ord.linkReturns}</Link>
+          <Link href={`/${lang}/help/delivery`} className="underline underline-offset-4 hover:text-cobalt">{t.my.ord.linkDelivery}</Link>
+          <Link href={`/${lang}/contact`} className="underline underline-offset-4 hover:text-cobalt">{t.my.ord.linkContact}</Link>
+        </p>
+      </section>
     </div>
   );
 }

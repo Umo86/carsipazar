@@ -17,9 +17,9 @@ export async function updateProfile(fd: FormData) {
   const lang = langOf(fd);
   const user = await me(lang, `/${lang}/account`);
   const name = str(fd, "name");
-  if (name.length < 2 || name.length > 80) redirect(`/${lang}/account?error=name`);
+  if (name.length < 2 || name.length > 80) redirect(`/${lang}/account?error=name#details`);
   await q("update users set name = $2 where id = $1", [user.id, name]);
-  redirect(`/${lang}/account?saved=profile`);
+  redirect(`/${lang}/account?saved=profile#details`);
 }
 
 export async function saveAddress(fd: FormData) {
@@ -30,7 +30,7 @@ export async function saveAddress(fd: FormData) {
     `update users set ship_line1=$2, ship_line2=$3, ship_city=$4, ship_postcode=$5, ship_phone=$6 where id = $1`,
     [user.id, v("line1"), v("line2"), v("city"), v("postcode").toUpperCase(), v("phone")],
   );
-  redirect(`/${lang}/account?saved=address`);
+  redirect(`/${lang}/account?saved=address#details`);
 }
 
 // Changing the password logs every other device out.
@@ -41,7 +41,7 @@ export async function changePassword(fd: FormData) {
   const next = String(fd.get("new") ?? "");
   const row = await one<{ password_hash: string }>("select password_hash from users where id = $1", [user.id]);
   if (!row || next.length < 8 || next.length > 200 || !(await verifyPassword(current, row.password_hash))) {
-    redirect(`/${lang}/account?error=password`);
+    redirect(`/${lang}/account?error=password#details`);
   }
   const hash = await hashPassword(next);
   await tx(async (c) => {
@@ -49,7 +49,7 @@ export async function changePassword(fd: FormData) {
     await c.query("delete from sessions where user_id = $1", [user.id]);
   });
   await createSession(user.id);
-  redirect(`/${lang}/account?saved=password`);
+  redirect(`/${lang}/account?saved=password#details`);
 }
 
 export async function toggleFavourite(fd: FormData) {

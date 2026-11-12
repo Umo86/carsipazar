@@ -21,15 +21,14 @@ export default async function OrdersPage({ params }: PageProps<"/[lang]/orders">
   );
 
   return (
-    <div className="wrap max-w-3xl pt-12">
-      <h1 className="text-5xl">{t.orders.title}</h1>
+    <div className="max-w-3xl">
       {orders.length === 0 ? (
-        <div className="mt-8">
+        <div>
           <p className="text-soft">{t.orders.empty}</p>
           <Link href={`/${lang}`} className="btn mt-5">{t.orders.browse}</Link>
         </div>
       ) : (
-        <ul className="mt-8">
+        <ul>
           {orders.map((o) => (
             <li key={o.id} className="border-t border-line">
               <Link href={`/${lang}/orders/${o.id}`} className="group grid gap-1 py-5 sm:grid-cols-[1fr_auto] sm:gap-6">

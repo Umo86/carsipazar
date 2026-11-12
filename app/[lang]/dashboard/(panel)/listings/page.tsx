@@ -6,17 +6,26 @@ import { formatGBP } from "@/lib/money";
 import { listingsByShop } from "@/lib/queries";
 import { setListingStatus } from "@/lib/actions/shop";
 
-export default async function DashboardListings({ params }: PageProps<"/[lang]/dashboard/listings">) {
+export default async function DashboardListings({ params, searchParams }: PageProps<"/[lang]/dashboard/listings">) {
   const lang = (await params).lang as Locale;
   const t = getDict(lang);
   const { shop } = await requireShop(lang);
-  const items = await listingsByShop(shop.id, true);
+  const sp = await searchParams;
+  const show = sp.show === "low" || sp.show === "paused" ? sp.show : "";
+  const all = await listingsByShop(shop.id, true);
+  const items = show === "low" ? all.filter((l) => l.status === "active" && l.stock <= 2) : show === "paused" ? all.filter((l) => l.status === "paused") : all;
 
   return (
     <div>
       <Link href={`/${lang}/dashboard/listings/new`} className="btn">{t.dash.newListing}</Link>
+      {show && (
+        <p className="mt-6 flex flex-wrap items-center gap-3 text-sm" data-list-filter>
+          <span className="tag">{show === "low" ? t.sellerx.lf.low : t.sellerx.lf.paused}</span>
+          <Link href={`/${lang}/dashboard/listings`} className="underline underline-offset-4 hover:text-cobalt">{t.sellerx.lf.clear}</Link>
+        </p>
+      )}
       {items.length === 0 ? (
-        <p className="mt-8 text-soft">{t.dash.noListings}</p>
+        <p className="mt-8 text-soft">{show ? t.sellerx.of.none : t.dash.noListings}</p>
       ) : (
         <ul className="mt-8">
           {items.map((l) => (

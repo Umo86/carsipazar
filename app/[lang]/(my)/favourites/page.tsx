@@ -15,12 +15,11 @@ export default async function FavouritesPage({ params }: PageProps<"/[lang]/favo
   const items = await favouriteListings(user.id);
 
   return (
-    <div className="wrap pt-10">
-      <h1 className="text-5xl">{t.account.favourites}</h1>
+    <div>
       {items.length === 0 ? (
-        <p className="mt-8 max-w-md text-soft">{t.account.noFavs}</p>
+        <p className="max-w-md text-soft">{t.account.noFavs}</p>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-4 md:gap-x-6">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 md:gap-x-6">
           {items.map((item) => (
             <ListingCard key={item.id} item={item} lang={lang} t={t} />
           ))}
