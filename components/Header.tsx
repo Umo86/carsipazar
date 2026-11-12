@@ -33,7 +33,7 @@ export default function Header({
                 {t.nav.sell}
               </Link>
             )}
-            <LangSwitch lang={lang} label={t.nav.otherLang} />
+            <LangSwitch lang={lang} />
           </div>
         </div>
       </div>

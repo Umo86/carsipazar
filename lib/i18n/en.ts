@@ -12,7 +12,7 @@ const en: Dict = {
     otherLang: "Türkçe",
     tagline: "Furniture, clothing and jewellery from Turkish businesses",
     account: "Account",
-    instalments: "Pay in instalments",
+    instalments: "Items with instalments",
   },
   search: {
     category: "Category",
@@ -436,7 +436,7 @@ const en: Dict = {
     newPassword: "New password",
     changePassword: "Change password",
     saved: "Saved.",
-    passwordChanged: "Your password is changed. You have been logged out on other devices.",
+    passwordChanged: "Your password has been changed. You have been logged out on your other devices.",
     errPassword: "The current password is wrong, or the new one is shorter than 8 characters.",
     errName: "Enter your name.",
     favAdd: "Save to favourites",
@@ -452,7 +452,7 @@ const en: Dict = {
     resetTitle: "Set a new password",
     resetSubmit: "Save password",
     resetInvalid: "This link is not valid or has expired. Ask for a new one.",
-    resetDone: "Your password is changed. You can log in now.",
+    resetDone: "Your password has been changed. You can log in now.",
   },
   status: {
     pending: "Awaiting approval",
@@ -461,6 +461,8 @@ const en: Dict = {
   },
   misc: {
     back: "Back",
+    copy: "Copy",
+    copied: "Copied",
     notFoundTitle: "That page is not on this street.",
     home: "Back to the home page",
   },

@@ -37,7 +37,7 @@ export default async function AdminCustomers({ params, searchParams }: PageProps
       {link && (
         <div className="notice mt-6 max-w-2xl" role="status">
           <p className="mb-3">{t.account.resetReady}</p>
-          <CopyLink url={link} copy={lang === "tr" ? "Kopyala" : "Copy"} copied={lang === "tr" ? "Kopyalandı" : "Copied"} />
+          <CopyLink url={link} copy={t.misc.copy} copied={t.misc.copied} />
         </div>
       )}
       {rows.length === 0 ? (

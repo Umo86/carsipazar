@@ -170,7 +170,7 @@ const SHOPS: {
       },
       {
         category: "clothing", tr: "Zincir desenli ipek eşarp", en: "Silk scarf with chain print",
-        dtr: "90 × 90 cm, el kesimi kenar.", den: "90 × 90 cm with hand-rolled edges.",
+        dtr: "90 × 90 cm, kenarları elde rulo dikilmiş.", den: "90 × 90 cm with hand-rolled edges.",
         price: 45, postage: 3, stock: 20, instalments: false, art: "tulips", palette: "madder",
         photo: "1551028442-ee84b4d3a50a",
       },

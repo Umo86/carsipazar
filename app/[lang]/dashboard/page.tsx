@@ -48,7 +48,7 @@ export default async function DashboardHome({ params }: PageProps<"/[lang]/dashb
         <h2 className="text-3xl">{t.dash.yourLink}</h2>
         <p className="mt-1 text-soft">{t.dash.linkHint}</p>
         <div className="mt-4">
-          <CopyLink url={url} copy={lang === "tr" ? "Kopyala" : "Copy"} copied={lang === "tr" ? "Kopyalandı" : "Copied"} />
+          <CopyLink url={url} copy={t.misc.copy} copied={t.misc.copied} />
         </div>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link href={`/${lang}/s/${shop.slug}`} className="btn btn-ghost btn-sm">{t.dash.viewShop}</Link>
