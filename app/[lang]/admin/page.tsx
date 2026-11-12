@@ -13,12 +13,13 @@ export default async function AdminHome({ params }: PageProps<"/[lang]/admin">) 
   await releaseDueOrders();
 
   // Sales count every order that was paid and not refunded.
-  const s = await one<{ sales: string; commission: string; net: string; held: string; pending: string }>(
+  const s = await one<{ sales: string; commission: string; net: string; held: string; delivery: string; pending: string }>(
     `select
        coalesce(sum(total_pence) filter (where status in ('paid','dispatched','delivered','released')), 0) as sales,
        coalesce(sum(commission_pence) filter (where status in ('paid','dispatched','delivered','released')), 0) as commission,
        coalesce(sum(commission_pence - payment_cost_pence) filter (where status in ('paid','dispatched','delivered','released')), 0) as net,
        coalesce(sum(seller_payout_pence) filter (where status in ('paid','dispatched','delivered')), 0) as held,
+       coalesce(sum(delivery_cost_pence) filter (where status in ('paid','dispatched','delivered','released')), 0) as delivery,
        (select count(*) from shops where status = 'pending') as pending
      from orders`,
   );
@@ -27,10 +28,11 @@ export default async function AdminHome({ params }: PageProps<"/[lang]/admin">) 
     { label: t.admin.commission, value: formatGBP(Number(s!.commission)) },
     { label: t.admin.net, value: formatGBP(Number(s!.net)) },
     { label: t.admin.heldFunds, value: formatGBP(Number(s!.held)) },
+    { label: t.admin.deliveryCollected, value: formatGBP(Number(s!.delivery)) },
     { label: t.admin.pendingSellers, value: s!.pending, href: `/${lang}/admin/sellers` },
   ];
   return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-5">
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3">
       {tiles.map((tile) => (
         <div key={tile.label} className="rounded-2xl bg-mist p-5">
           <dt className="text-sm text-soft">{tile.label}</dt>

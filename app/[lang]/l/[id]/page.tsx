@@ -69,6 +69,8 @@ export default async function ListingPage({ params }: PageProps<"/[lang]/l/[id]"
             {l.postage_pence === 0
               ? t.listing.freePostage
               : fmt(t.listing.postage, { amount: formatGBP(l.postage_pence) })}
+            {" · "}
+            <span data-delivery={l.delivery_method}>{t.delivery.by[l.delivery_method]}</span>
           </p>
 
           {isOwner && <p className="notice mt-6">{t.listing.ownListing}</p>}

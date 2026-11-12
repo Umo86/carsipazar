@@ -131,7 +131,10 @@ export default async function CheckoutPage({ params, searchParams }: PageProps<"
           <dl className="mt-6 grid grid-cols-[1fr_auto] gap-y-2">
             <dt className="text-soft">{t.checkout.item}</dt>
             <dd>{formatGBP(item)}</dd>
-            <dt className="text-soft">{t.checkout.postage}</dt>
+            <dt className="text-soft">
+              {t.checkout.postage}
+              <span className="block text-sm" data-delivery={l.delivery_method}>{t.delivery.by[l.delivery_method]}</span>
+            </dt>
             <dd>{l.postage_pence === 0 ? t.listing.freePostage : formatGBP(l.postage_pence)}</dd>
             <dt className="mt-2 border-t border-line pt-3 font-medium">{t.checkout.total}</dt>
             <dd className="mt-2 border-t border-line pt-3 font-medium">{formatGBP(total)}</dd>

@@ -4,7 +4,7 @@ import { hashPassword } from "./auth";
 import { SCHEMA_SQL } from "./schema";
 import { ART, PALETTES } from "./art";
 import { computeFees } from "./money";
-import { DEFAULT_SETTINGS } from "./config";
+import { DEFAULT_SETTINGS, deliveryPrice, type ParcelSize } from "./config";
 import { importSampleMedia } from "./sample-media";
 
 // Creates the tables, the admin account and a set of clearly-labelled demo
@@ -17,7 +17,8 @@ export type DemoListing = {
   dtr: string;
   den: string;
   price: number; // pounds
-  postage: number;
+  postage?: number; // pounds; not used when `delivery` is set
+  delivery?: ParcelSize; // CarsiPazar delivery in this parcel size; postage is then the setting's price
   stock: number;
   instalments: boolean;
   art: keyof typeof ART;
@@ -163,7 +164,7 @@ export const SHOPS: {
         category: "clothing", tr: "Zincir desenli ipek eşarp", en: "Silk scarf with chain print",
         dtr: "90 × 90 cm, kenarları elde rulo dikilmiş.", den: "90 × 90 cm with hand-rolled edges.",
         was: ["Silk scarf with check print"],
-        price: 45, postage: 3, stock: 20, instalments: false, art: "tulips", palette: "madder",
+        price: 45, delivery: "small", stock: 20, instalments: false, art: "tulips", palette: "madder",
       },
     ],
   },
@@ -186,7 +187,7 @@ export const SHOPS: {
       {
         category: "jewellery", tr: "Mavi taşlı gümüş küpe", en: "Silver earrings with blue stones",
         dtr: "925 ayar gümüş, 3 cm.", den: "925 silver, 3 cm drop.",
-        price: 65, postage: 4, stock: 10, instalments: true, art: "beads", palette: "brass",
+        price: 65, delivery: "small", stock: 10, instalments: true, art: "beads", palette: "brass",
       },
       {
         category: "jewellery", tr: "Tek taş gümüş yüzük", en: "Silver solitaire ring",
@@ -196,7 +197,7 @@ export const SHOPS: {
       {
         category: "jewellery", tr: "Turkuaz boncuklu bileklik", en: "Turquoise bead bracelet",
         dtr: "Gümüş zincir, ayarlanabilir kilit.", den: "A silver chain with an adjustable clasp.",
-        price: 55, postage: 4, stock: 9, instalments: true, art: "beads", palette: "sea",
+        price: 55, delivery: "small", stock: 9, instalments: true, art: "beads", palette: "sea",
       },
       {
         category: "jewellery", tr: "Kolye ve küpe takımı", en: "Necklace and earring set",
@@ -206,6 +207,32 @@ export const SHOPS: {
     ],
   },
 ];
+
+// Postage in pence: the delivery price for a CarsiPazar delivery item, otherwise the seller's own.
+const samplePostage = (l: DemoListing) =>
+  l.delivery ? deliveryPrice(l.delivery, { ...DEFAULT_SETTINGS }) : (l.postage ?? 0) * 100;
+
+// Moves the sample items that use CarsiPazar delivery onto it in a database that
+// already exists. Matched by shop slug and English title; only an item that is
+// still 'seller' is changed, so a seller's own choice is kept and running it
+// again changes nothing.
+export async function upgradeSampleDelivery(): Promise<string[]> {
+  let n = 0;
+  for (const s of SHOPS) {
+    for (const l of s.listings) {
+      if (!l.delivery) continue;
+      const rows = await q(
+        `update listings set delivery_method = 'platform', parcel_size = $3, postage_pence = $4
+          where delivery_method = 'seller' and title_en = $2
+            and shop_id = (select id from shops where slug = $1)
+          returning id`,
+        [s.slug, l.en, l.delivery, samplePostage(l)],
+      );
+      n += rows.length;
+    }
+  }
+  return [`sample items moved to CarsiPazar delivery: ${n}`];
+}
 
 export async function runSetup(opts: {
   adminEmail: string;
@@ -229,7 +256,8 @@ export async function runSetup(opts: {
   const anyShop = await one("select id from shops limit 1");
   if (anyShop) {
     log.push("demo data already present");
-    log.push(...(await importSampleMedia()));
+    log.push(...(await importSampleMedia())); // may rename old sample items, so it runs first
+    log.push(...(await upgradeSampleDelivery()));
     return log;
   }
 
@@ -264,16 +292,17 @@ export async function runSetup(opts: {
     for (const l of s.listings) {
       const row = await one<{ id: string }>(
         `insert into listings (shop_id, category, title_tr, title_en, description_tr, description_en,
-                               price_pence, postage_pence, stock, instalments, featured)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) returning id`,
-        [shop!.id, l.category, l.tr, l.en, l.dtr, l.den, l.price * 100, l.postage * 100, l.stock,
-         l.instalments, Boolean(l.featured)],
+                               price_pence, postage_pence, stock, instalments, featured,
+                               delivery_method, parcel_size)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) returning id`,
+        [shop!.id, l.category, l.tr, l.en, l.dtr, l.den, l.price * 100, samplePostage(l), l.stock,
+         l.instalments, Boolean(l.featured), l.delivery ? "platform" : "seller", l.delivery ?? null],
       );
       await q(
         "insert into listing_images (listing_id, position, content_type, data) values ($1, 0, 'image/svg+xml', $2)",
         [row!.id, Buffer.from(ART[l.art](PALETTES[l.palette]), "utf8")],
       );
-      first ??= { id: row!.id, price: l.price * 100, postage: l.postage * 100, title: l.tr };
+      first ??= { id: row!.id, price: l.price * 100, postage: samplePostage(l), title: l.tr };
     }
 
     // One completed sample order with a review, so ratings are visible.

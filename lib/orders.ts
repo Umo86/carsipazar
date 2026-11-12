@@ -1,5 +1,7 @@
 import "server-only";
+import type { DeliveryMethod, ParcelSize } from "./config";
 import { one, q, tx } from "./db";
+import { createLabel } from "./delivery";
 import { computeFees, instalmentsAllowed, type PaymentMethod } from "./money";
 import { getSettings } from "./settings";
 import { paymentsMode } from "./payments";
@@ -38,6 +40,11 @@ export type Order = {
   ship_phone: string;
   tracking_carrier: string | null;
   tracking_number: string | null;
+  delivery_method: DeliveryMethod;
+  parcel_size: ParcelSize | null;
+  delivery_cost_pence: number;
+  label_ref: string | null;
+  label_created_at: Date | null;
   provider: string;
   provider_ref: string | null;
   created_at: Date;
@@ -81,6 +88,7 @@ export async function createOrder(args: {
   const order = await tx(async (c) => {
     const { rows } = await c.query(
       `select l.id, l.price_pence, l.postage_pence, l.stock, l.instalments, l.status,
+              l.delivery_method, l.parcel_size,
               s.id as shop_id, s.status as shop_status, s.founding, s.owner_id
          from listings l join shops s on s.id = l.shop_id
         where l.id = $1 for update of l`,
@@ -98,20 +106,25 @@ export async function createOrder(args: {
     if (args.method === "klarna" && !instalmentsAllowed(l, total, settings)) {
       throw new OrderError("klarna");
     }
-    const fees = computeFees({ total, method: args.method, founding: l.founding, settings });
+    // On a CarsiPazar delivery order the postage pays for delivery and is kept by the platform.
+    const platform = l.delivery_method === "platform";
+    const deliveryCost = platform ? l.postage_pence : 0;
+    const fees = computeFees({ total, method: args.method, founding: l.founding, settings, deliveryCost });
 
     const ins = await c.query<Order>(
       `insert into orders
          (buyer_id, shop_id, listing_id, title, quantity, item_pence, postage_pence, total_pence,
           payment_method, commission_pence, payment_cost_pence, seller_payout_pence,
-          ship_name, ship_line1, ship_line2, ship_city, ship_postcode, ship_phone, provider)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+          ship_name, ship_line1, ship_line2, ship_city, ship_postcode, ship_phone, provider,
+          delivery_method, parcel_size, delivery_cost_pence)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
        returning *`,
       [
         args.buyer.id, l.shop_id, l.id, args.title, args.quantity, item, l.postage_pence, total,
         args.method, fees.commission, fees.paymentCost, fees.sellerPayout,
         args.shipping.name, args.shipping.line1, args.shipping.line2, args.shipping.city,
         args.shipping.postcode, args.shipping.phone, mode,
+        l.delivery_method, platform ? l.parcel_size : null, fees.deliveryCost,
       ],
     );
     const created = ins.rows[0];
@@ -158,6 +171,32 @@ export async function markPaid(orderId: string, paymentIntentId: string) {
   });
 }
 
+// Creates the delivery label for a paid CarsiPazar delivery order. The row is
+// locked while the label is made, so two clicks cannot buy two labels; a second
+// call returns the order as it is. Returns null when the order is not the shop's,
+// not a CarsiPazar delivery order, or not paid.
+export async function createDeliveryLabel(args: { orderId: string; shopId: string }) {
+  return tx(async (c) => {
+    const { rows } = await c.query<Order>(
+      `select * from orders where id = $1 and shop_id = $2 and delivery_method = 'platform'
+          and status = 'paid' for update`,
+      [args.orderId, args.shopId],
+    );
+    const o = rows[0];
+    if (!o) return null;
+    if (o.label_ref) return o;
+    const label = await createLabel(o);
+    const upd = await c.query<Order>(
+      `update orders set tracking_carrier = $2, tracking_number = $3, label_ref = $4, label_created_at = now()
+        where id = $1 returning *`,
+      [o.id, label.carrier, label.trackingNumber, label.labelRef],
+    );
+    return upd.rows[0];
+  });
+}
+
+// A CarsiPazar delivery order can only be handed over once its label exists, and
+// its carrier and tracking number are the label's: whatever the caller passes is ignored.
 export async function markDispatched(args: {
   orderId: string;
   shopId: string;
@@ -166,8 +205,12 @@ export async function markDispatched(args: {
 }) {
   return one<Order>(
     `update orders
-        set status = 'dispatched', dispatched_at = now(), tracking_carrier = $3, tracking_number = $4
-      where id = $1 and shop_id = $2 and status = 'paid' returning *`,
+        set status = 'dispatched', dispatched_at = now(),
+            tracking_carrier = case when delivery_method = 'platform' then tracking_carrier else $3 end,
+            tracking_number = case when delivery_method = 'platform' then tracking_number else $4 end
+      where id = $1 and shop_id = $2 and status = 'paid'
+        and (delivery_method = 'seller' or label_ref is not null)
+      returning *`,
     [args.orderId, args.shopId, args.carrier || null, args.tracking || null],
   );
 }

@@ -41,6 +41,10 @@ export const DEFAULT_SETTINGS = {
   promo_featured_price: 1500, // price per week, in pence
   promo_spotlight_price: 4000,
   promo_category_price: 1000,
+  delivery_small_price: 395, // what the BUYER pays for CarsiPazar delivery, by parcel size
+  delivery_medium_price: 695,
+  delivery_large_price: 1495,
+  delivery_max_item_price: 7500, // items priced above this cannot use CarsiPazar delivery; 0 = no limit
 } as const;
 
 export type Settings = { -readonly [K in keyof typeof DEFAULT_SETTINGS]: number };
@@ -50,6 +54,25 @@ export const PAYMENT_COST = {
   card: { bps: 150, fixed: 20 },
   klarna: { bps: 499, fixed: 35 },
 } as const;
+
+// Who delivers an item. "seller": the seller posts it and sets the postage.
+// "platform": CarsiPazar delivery, a fixed price by parcel size that the platform keeps.
+export const DELIVERY_METHODS = ["seller", "platform"] as const;
+export type DeliveryMethod = (typeof DELIVERY_METHODS)[number];
+
+// Parcel sizes for CarsiPazar delivery. Anything bigger (sofas, tables) is delivered by the seller.
+export const PARCEL_SIZES = {
+  small: { kg: 2, cm: [45, 35, 16], priceKey: "delivery_small_price" },
+  medium: { kg: 10, cm: [60, 45, 45], priceKey: "delivery_medium_price" },
+  large: { kg: 25, cm: [120, 60, 60], priceKey: "delivery_large_price" },
+} as const;
+export type ParcelSize = keyof typeof PARCEL_SIZES;
+export const PARCEL_SIZE_KEYS = Object.keys(PARCEL_SIZES) as ParcelSize[];
+export const isParcelSize = (v: string | null | undefined): v is ParcelSize =>
+  typeof v === "string" && (PARCEL_SIZE_KEYS as string[]).includes(v);
+
+// What the buyer pays for a parcel of this size, in pence.
+export const deliveryPrice = (size: ParcelSize, s: Settings) => s[PARCEL_SIZES[size].priceKey];
 
 export const MAX_IMAGES = 5;
 

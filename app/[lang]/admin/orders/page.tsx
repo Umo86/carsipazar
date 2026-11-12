@@ -54,6 +54,11 @@ export default async function AdminOrders({ params }: PageProps<"/[lang]/admin/o
                 {o.title} × {o.quantity}
                 <div className="text-soft">{o.shop_name}</div>
                 <div className="text-soft">{o.buyer_email}</div>
+                <div className="text-soft" data-delivery={o.delivery_method}>
+                  {t.delivery.by[o.delivery_method]}
+                  {o.parcel_size && ` (${t.delivery.size[o.parcel_size]})`}
+                  {o.label_ref && ` · ${fmt(t.dash.o.labelRef, { ref: o.label_ref })}`}
+                </div>
               </td>
               <td>
                 {formatGBP(o.total_pence)}

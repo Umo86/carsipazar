@@ -83,6 +83,16 @@ create table if not exists listings (
 create index if not exists listings_shop_idx on listings(shop_id);
 create index if not exists listings_category_idx on listings(category);
 
+-- Who delivers: "seller" (postage typed by the seller) or "platform" (CarsiPazar delivery,
+-- postage_pence is then set by the system from the parcel size's price).
+alter table listings add column if not exists delivery_method text not null default 'seller'
+  check (delivery_method in ('seller', 'platform'));
+alter table listings add column if not exists parcel_size text
+  check (parcel_size in ('small', 'medium', 'large'));
+alter table listings drop constraint if exists listings_platform_needs_size;
+alter table listings add constraint listings_platform_needs_size
+  check (delivery_method <> 'platform' or parcel_size is not null);
+
 create table if not exists listing_images (
   id uuid primary key default gen_random_uuid(),
   listing_id uuid not null references listings(id) on delete cascade,
@@ -140,6 +150,19 @@ create table if not exists orders (
   released_at timestamptz,
   refunded_at timestamptz
 );
+-- Delivery, fixed at purchase. delivery_cost_pence is the part of the total the platform keeps
+-- to pay for delivery (0 when the seller delivers); the seller's payout excludes it.
+alter table orders add column if not exists delivery_method text not null default 'seller'
+  check (delivery_method in ('seller', 'platform'));
+alter table orders add column if not exists parcel_size text
+  check (parcel_size in ('small', 'medium', 'large'));
+alter table orders add column if not exists delivery_cost_pence integer not null default 0
+  check (delivery_cost_pence >= 0);
+alter table orders add column if not exists label_ref text;
+alter table orders add column if not exists label_created_at timestamptz;
+alter table orders drop constraint if exists orders_delivery_consistent;
+alter table orders add constraint orders_delivery_consistent
+  check (delivery_cost_pence <= postage_pence and (delivery_method <> 'platform' or parcel_size is not null));
 create index if not exists orders_buyer_idx on orders(buyer_id);
 create index if not exists orders_shop_idx on orders(shop_id);
 

@@ -1,6 +1,6 @@
 import "server-only";
 import { one, q } from "./db";
-import type { PromoKind } from "./config";
+import type { DeliveryMethod, ParcelSize, PromoKind } from "./config";
 
 export type ListingCard = {
   id: string;
@@ -115,6 +115,8 @@ export type ListingFull = {
   description_en: string;
   price_pence: number;
   postage_pence: number;
+  delivery_method: DeliveryMethod;
+  parcel_size: ParcelSize | null;
   stock: number;
   instalments: boolean;
   status: "active" | "paused" | "removed";

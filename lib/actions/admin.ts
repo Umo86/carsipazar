@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS, type Settings } from "../config";
 import { q } from "../db";
 import { markDelivered, refundOrder, releaseOrder } from "../orders";
 import { isUuid } from "../queries";
-import { saveSetting } from "../settings";
+import { saveSettingsBatch } from "../settings";
 import { langOf, str } from "./util";
 
 async function admin(lang: string) {
@@ -73,9 +73,12 @@ export async function setReviewStatus(fd: FormData) {
 }
 
 // Percentages are typed as "9" or "12.5"; pounds as "30". Stored as integers.
+// Every key ending in _price (promotion and delivery prices, including
+// delivery_max_item_price) is typed in pounds and stored in pence.
 export async function saveSettings(fd: FormData) {
   const lang = langOf(fd);
   await admin(lang);
+  const entries: [keyof Settings, number][] = [];
   for (const key of Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[]) {
     const raw = parseFloat(str(fd, key).replace(",", "."));
     if (!Number.isFinite(raw) || raw < 0) continue;
@@ -85,7 +88,8 @@ export async function saveSettings(fd: FormData) {
       value = Math.round(raw * 100);
     }
     if (key.endsWith("_bps") && value > 5000) continue; // never above 50%
-    await saveSetting(key, value);
+    entries.push([key, value]);
   }
+  await saveSettingsBatch(entries);
   redirect(`/${lang}/admin/settings?saved=1`);
 }

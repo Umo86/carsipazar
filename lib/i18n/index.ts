@@ -1,6 +1,6 @@
 import tr, { type Dict } from "./tr";
 import en from "./en";
-import type { Locale } from "../config";
+import { PARCEL_SIZES, type Locale, type ParcelSize } from "../config";
 
 const dicts: Record<Locale, Dict> = { tr, en };
 
@@ -31,3 +31,9 @@ export const reviewCount = (t: Dict, n: number) =>
   n === 1 ? t.shop.reviewOne : fmt(t.shop.reviews, { n });
 export const itemCount = (t: Dict, n: number) =>
   n === 1 ? t.shop.itemOne : fmt(t.shop.itemsCount, { n });
+
+// "up to 2 kg and 45 × 35 × 16 cm"
+export const parcelLimits = (t: Dict, size: ParcelSize) => {
+  const p = PARCEL_SIZES[size];
+  return fmt(t.delivery.limits, { kg: p.kg, l: p.cm[0], w: p.cm[1], h: p.cm[2] });
+};

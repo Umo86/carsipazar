@@ -3,13 +3,14 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSession, getMyShop, getUser, hashPassword } from "../auth";
-import { isCategory, MAX_IMAGES } from "../config";
+import { deliveryPrice, isCategory, isParcelSize, MAX_IMAGES } from "../config";
 import { one, q, tx } from "../db";
 import { parsePounds } from "../money";
-import { markDispatched } from "../orders";
+import { createDeliveryLabel, markDispatched } from "../orders";
 import { paymentsMode } from "../payments";
 import * as stripe from "../payments/stripe";
 import { isUuid } from "../queries";
+import { getSettings } from "../settings";
 import { langOf, origin, slugify, str } from "./util";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -152,17 +153,35 @@ export async function saveListing(fd: FormData) {
   const { shop } = await myShop(lang);
   const id = str(fd, "id");
   const editing = isUuid(id);
-  const back = () =>
-    redirect(`/${lang}/dashboard/listings/${editing ? id : "new"}?error=fields`);
+  const back = (code = "fields") =>
+    redirect(`/${lang}/dashboard/listings/${editing ? id : "new"}?error=${code}`);
 
   const titleTr = str(fd, "title_tr").slice(0, 120);
   const titleEn = str(fd, "title_en").slice(0, 120);
   const price = parsePounds(str(fd, "price"));
-  const postage = parsePounds(str(fd, "postage") || "0");
   const stock = parseInt(str(fd, "stock") || "1", 10);
   const category = str(fd, "category");
-  if ((!titleTr && !titleEn) || !price || postage === null || !isCategory(category)) back();
-  if (!Number.isInteger(stock) || stock < 0 || stock > 9999) back();
+  if ((!titleTr && !titleEn) || !price || !isCategory(category)) return back();
+  if (!Number.isInteger(stock) || stock < 0 || stock > 9999) return back();
+
+  // Delivery. The radio decides; the group that is not chosen is ignored. With
+  // CarsiPazar delivery the postage is the current price of the parcel size,
+  // whatever was typed in the postage box.
+  const settings = await getSettings();
+  const platform = str(fd, "delivery_method") === "platform";
+  const size = str(fd, "parcel_size");
+  let postage: number;
+  let parcelSize: string | null = null;
+  if (platform) {
+    if (!isParcelSize(size)) return back("parcel");
+    if (settings.delivery_max_item_price > 0 && price > settings.delivery_max_item_price) return back("limit");
+    parcelSize = size;
+    postage = deliveryPrice(size, settings);
+  } else {
+    const typed = parsePounds(str(fd, "postage") || "0");
+    if (typed === null) return back();
+    postage = typed;
+  }
 
   const images: { type: string; data: Buffer }[] = [];
   for (const file of fd.getAll("photos")) {
@@ -177,6 +196,7 @@ export async function saveListing(fd: FormData) {
   const values = [
     category, titleTr, titleEn, str(fd, "description_tr").slice(0, 4000),
     str(fd, "description_en").slice(0, 4000), price, postage, stock, fd.get("instalments") === "on",
+    platform ? "platform" : "seller", parcelSize,
   ];
 
   await tx(async (c) => {
@@ -184,7 +204,8 @@ export async function saveListing(fd: FormData) {
     if (editing) {
       const res = await c.query(
         `update listings set category=$3, title_tr=$4, title_en=$5, description_tr=$6,
-                description_en=$7, price_pence=$8, postage_pence=$9, stock=$10, instalments=$11
+                description_en=$7, price_pence=$8, postage_pence=$9, stock=$10, instalments=$11,
+                delivery_method=$12, parcel_size=$13
           where id = $1 and shop_id = $2 and status <> 'removed'`,
         [id, shop.id, ...values],
       );
@@ -192,8 +213,8 @@ export async function saveListing(fd: FormData) {
     } else {
       const res = await c.query(
         `insert into listings (shop_id, category, title_tr, title_en, description_tr, description_en,
-                               price_pence, postage_pence, stock, instalments)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) returning id`,
+                               price_pence, postage_pence, stock, instalments, delivery_method, parcel_size)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) returning id`,
         [shop.id, ...values],
       );
       listingId = res.rows[0].id;
@@ -226,6 +247,9 @@ export async function setListingStatus(fd: FormData) {
   redirect(`/${lang}/dashboard/listings`);
 }
 
+// The seller's "dispatched" button. A seller-delivery order takes the carrier and
+// tracking number typed in. A CarsiPazar delivery order needs its label first and
+// then only "handed over": its carrier and tracking number come from the label.
 export async function dispatchOrder(fd: FormData) {
   const lang = langOf(fd);
   const { shop } = await myShop(lang);
@@ -234,16 +258,28 @@ export async function dispatchOrder(fd: FormData) {
   const carrier = str(fd, "carrier").slice(0, 40);
   if (!isUuid(orderId)) redirect(`/${lang}/dashboard/orders`);
 
-  // Instalment orders must be tracked: the lender's dispute cover depends on it.
-  const order = await one<{ payment_method: string }>(
-    "select payment_method from orders where id = $1 and shop_id = $2",
+  const order = await one<{ payment_method: string; delivery_method: string; label_ref: string | null }>(
+    "select payment_method, delivery_method, label_ref from orders where id = $1 and shop_id = $2",
     [orderId, shop.id],
   );
-  if (order?.payment_method === "klarna" && !tracking) {
+  if (order?.delivery_method === "platform") {
+    if (!order.label_ref) redirect(`/${lang}/dashboard/orders?error=label#o-${orderId}`);
+  } else if (order?.payment_method === "klarna" && !tracking) {
+    // Instalment orders must be tracked: the lender's dispute cover depends on it.
     redirect(`/${lang}/dashboard/orders?error=tracking#o-${orderId}`);
   }
   await markDispatched({ orderId, shopId: shop.id, carrier, tracking });
   redirect(`/${lang}/dashboard/orders`);
+}
+
+// "Create delivery label" on a paid CarsiPazar delivery order.
+export async function createLabelAction(fd: FormData) {
+  const lang = langOf(fd);
+  const { shop } = await myShop(lang);
+  const orderId = str(fd, "order");
+  if (!isUuid(orderId)) redirect(`/${lang}/dashboard/orders`);
+  await createDeliveryLabel({ orderId, shopId: shop.id });
+  redirect(`/${lang}/dashboard/orders#o-${orderId}`);
 }
 
 export async function replyToReview(fd: FormData) {

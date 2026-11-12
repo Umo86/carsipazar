@@ -89,6 +89,13 @@ export default async function OrderPage({ params }: PageProps<"/[lang]/orders/[i
             {[o.ship_name, o.ship_line1, o.ship_line2, `${o.ship_city} ${o.ship_postcode}`].filter(Boolean).join("\n")}
           </dd>
         </div>
+        <div>
+          <dt className="text-sm text-soft">{t.orders.delivery}</dt>
+          <dd className="mt-1">
+            {t.delivery.by[o.delivery_method]}
+            {o.parcel_size && ` (${fmt(t.delivery.parcel, { size: t.delivery.size[o.parcel_size] })})`}
+          </dd>
+        </div>
         {o.tracking_number && (
           <div>
             <dt className="text-sm text-soft">{t.orders.tracking}</dt>
